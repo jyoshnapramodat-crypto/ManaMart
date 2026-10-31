@@ -1,0 +1,17 @@
+{
+  "name": "manamart-localloop",
+  "version": "1.0.0",
+  "description": "ManaMart - Mana Ooru. Mana Market. Your Entire Neighborhood, Delivered. Hyperlocal commerce platform.",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "npm --prefix server run dev",
+    "client": "npm --prefix client run dev",
+    "install:all": "npm install && npm --prefix server install && npm --prefix client install",
+    "build": "npm --prefix client run build"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "author": "ManaMart Team",
+  "license": "ISC"
+}

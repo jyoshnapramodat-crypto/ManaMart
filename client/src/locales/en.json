@@ -1,0 +1,78 @@
+{
+  "brand": {
+    "name": "ManaMart",
+    "tagline": "Mana Ooru. Mana Market. Your Entire Neighborhood, Delivered.",
+    "subtext": "Connecting you to your trusted neighborhood shops, food, and essentials"
+  },
+  "nav": {
+    "home": "Home",
+    "feed": "Updates & Feed",
+    "recurring": "Monthly Lists",
+    "orders": "My Orders",
+    "parcel": "Parcel Delivery",
+    "services": "Home Services",
+    "tables": "Reservations",
+    "profile": "Profile",
+    "cart": "Cart",
+    "searchPlaceholder": "Search for biryani, groceries, medicine, or shops...",
+    "changeLocation": "Change Location",
+    "role": "Role"
+  },
+  "home": {
+    "storiesTitle": "Updates from Local Shops",
+    "categoriesTitle": "Explore Neighborhood Essentials",
+    "nearbyShopsTitle": "Popular Stores Around You",
+    "fastDelivery": "15-25 Mins Delivery",
+    "trending": "Trending in your Area",
+    "followCTA": "Follow your favorite local businesses for daily specials",
+    "recurringBannerTitle": "Automate Your Monthly Ration 🌾",
+    "recurringBannerSub": "Never run out of rice, oil, or dal. Set once, verify monthly, delivered automatically.",
+    "recurringBannerBtn": "Setup Monthly List"
+  },
+  "store": {
+    "verified": "Verified Local Merchant",
+    "fssai": "FSSAI License",
+    "drugLicense": "Drug License",
+    "openNow": "Open Now",
+    "closed": "Temporarily Closed",
+    "follow": "Follow",
+    "following": "Following",
+    "add": "ADD",
+    "customisable": "Customisable",
+    "vegOnly": "Veg Only",
+    "bookTable": "Book a Table"
+  },
+  "cart": {
+    "title": "Your Neighborhood Basket",
+    "empty": "Your cart is empty",
+    "billDetails": "Bill Details",
+    "itemTotal": "Item Total",
+    "deliveryFee": "Hyperlocal Delivery Fee",
+    "taxes": "Taxes & Platform Fee",
+    "discount": "Special Discount",
+    "toPay": "To Pay",
+    "proceedToPay": "Proceed to Pay",
+    "applyCoupon": "Apply Coupon"
+  },
+  "order": {
+    "tracking": "Live Order Tracking",
+    "otpNotice": "Share this Delivery OTP with your rider upon arrival",
+    "stages": {
+      "placed": "Order Placed",
+      "preparing": "Store Preparing",
+      "picked": "Picked Up",
+      "onTheWay": "Out for Delivery",
+      "delivered": "Delivered"
+    }
+  },
+  "recurring": {
+    "title": "Automated Monthly Shopping Lists",
+    "subtitle": "Your recurring neighborhood provisions with merchant stock check and customer confirmation",
+    "createBtn": "+ Create Monthly Shopping List",
+    "executeBtn": "Execute Monthly Check Now",
+    "status": {
+      "active": "Active Subscription",
+      "paused": "Paused"
+    }
+  }
+}
