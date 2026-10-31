@@ -23,3 +23,4 @@ router.post('/tasks/:id/verify-otp', verifyDeliveryOtp);
 router.get('/earnings', getRiderEarnings);
 
 export default router;
+

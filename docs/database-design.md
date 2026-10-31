@@ -173,3 +173,4 @@ The database uses MongoDB with Mongoose ODM schemas. Geo-spatial features levera
 - `data`: Object (orderId, merchantId, link)
 - `isRead`: Boolean
 - `createdAt`: Date
+

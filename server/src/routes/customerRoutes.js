@@ -11,3 +11,4 @@ router.put('/notifications/:id/read', markNotificationRead);
 router.post('/reviews', submitReview);
 
 export default router;
+

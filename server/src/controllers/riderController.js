@@ -189,3 +189,4 @@ export async function getRiderEarnings(req, res) {
     return res.status(500).json({ success: false, message: error.message });
   }
 }
+

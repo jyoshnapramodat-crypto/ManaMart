@@ -34,3 +34,4 @@ export function calculateDeliveryFee(distanceKm) {
   const extraFare = Math.ceil(extraKm * 10); // ₹10 per additional km
   return baseFare + extraFare;
 }
+

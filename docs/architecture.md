@@ -68,3 +68,4 @@ The architecture comprises:
 | **Database** | MongoDB Atlas, Mongoose ODM with GeoJSON 2dsphere indexing, Dual-mode in-memory repository fallback |
 | **Payment Gateway** | Razorpay (UPI, Credit/Debit cards, Netbanking, COD) with backend verification |
 | **Maps & Location** | Google Maps Platform / Leaflet & OpenStreetMap interactive mock with Haversine formula calculation |
+

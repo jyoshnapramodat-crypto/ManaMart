@@ -120,3 +120,4 @@ All endpoints are prefixed with `/api/v1`. Authentication uses `Bearer <JWT_TOKE
 | POST | `/admin/riders/:id/verify`| Approve or reject rider documents | Yes (Admin) |
 | GET  | `/admin/orders` | Real-time platform-wide order monitor | Yes (Admin) |
 | POST | `/admin/refunds/:id` | Process order dispute / refund | Yes (Admin) |
+

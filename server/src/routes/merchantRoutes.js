@@ -25,3 +25,4 @@ router.post('/documents', uploadDocuments);
 router.get('/reservations', getReservations);
 
 export default router;
+

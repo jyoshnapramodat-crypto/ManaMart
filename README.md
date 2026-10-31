@@ -193,3 +193,4 @@ ManaMart/
 ## 🇮🇳 Telugu Regional Tagline
 > **మన ఊరు. మన మార్కెట్. మీ పరిసరాలు, మీ ఇంటికే.**  
 > *Mana Ooru. Mana Market. Your Entire Neighborhood, Delivered.*
+

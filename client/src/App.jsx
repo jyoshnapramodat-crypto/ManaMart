@@ -19,6 +19,7 @@ import OrdersHistoryPage from './pages/customer/OrdersHistoryPage';
 import ParcelDeliveryPage from './pages/customer/ParcelDeliveryPage';
 import ReservationsPage from './pages/customer/ReservationsPage';
 import ServicesPage from './pages/customer/ServicesPage';
+import LoginPage from './pages/auth/LoginPage';
 
 import MerchantDashboardPage from './pages/merchant/MerchantDashboardPage';
 import RiderDashboardPage from './pages/rider/RiderDashboardPage';
@@ -49,6 +50,7 @@ export default function App() {
                   <Route path="/parcel" element={<ParcelDeliveryPage />} />
                   <Route path="/reservations" element={<ReservationsPage />} />
                   <Route path="/services" element={<ServicesPage />} />
+                  <Route path="/login" element={<LoginPage />} />
 
                   {/* Multi-Role Dashboards */}
                   <Route path="/merchant" element={<MerchantDashboardPage />} />
@@ -70,3 +72,4 @@ export default function App() {
     </BrowserRouter>
   );
 }
+

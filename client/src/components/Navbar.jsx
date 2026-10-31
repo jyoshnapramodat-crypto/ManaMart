@@ -129,6 +129,18 @@ export default function Navbar() {
               <span>{i18n.language === 'en' ? 'తెలుగు' : 'English'}</span>
             </button>
 
+            {/* User Account / Sign In Button */}
+            <Link
+              to="/login"
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl border border-slate-200 hover:border-orange-300 bg-white hover:bg-orange-50/50 text-xs font-bold text-slate-800 transition-all shadow-2xs"
+              title="Account Login / Register"
+            >
+              <User className="w-3.5 h-3.5 text-orange-600" />
+              <span className="max-w-[80px] sm:max-w-[110px] truncate">
+                {user ? user.name.split(' ')[0] : 'Sign In'}
+              </span>
+            </Link>
+
             {/* Cart Trigger Button */}
             <button
               onClick={() => setIsCartOpen(true)}
@@ -172,3 +184,4 @@ export default function Navbar() {
     </header>
   );
 }
+

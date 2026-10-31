@@ -75,7 +75,7 @@ export default function BottomNav() {
           <span className="text-[10px]">{t('nav.orders')}</span>
         </NavLink>
 
-        {role !== 'customer' && (
+        {role !== 'customer' ? (
           <NavLink
             to={dashboard.path}
             className={({ isActive }) =>
@@ -87,8 +87,21 @@ export default function BottomNav() {
             <DashboardIcon className="w-5 h-5 mb-0.5" />
             <span className="text-[10px]">{dashboard.label}</span>
           </NavLink>
+        ) : (
+          <NavLink
+            to="/login"
+            className={({ isActive }) =>
+              `flex flex-col items-center py-1.5 px-3 rounded-2xl transition-all ${
+                isActive ? 'text-orange-600 font-bold' : 'text-slate-500 hover:text-slate-900 font-medium'
+              }`
+            }
+          >
+            <User className="w-5 h-5 mb-0.5" />
+            <span className="text-[10px]">Account</span>
+          </NavLink>
         )}
       </div>
     </nav>
   );
 }
+

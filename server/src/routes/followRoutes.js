@@ -23,3 +23,4 @@ router.get('/my-shops', getMyFollowedShops);
 router.post('/posts', createPost);
 
 export default router;
+

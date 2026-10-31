@@ -10,3 +10,4 @@ router.get('/search', searchAll);
 router.get('/merchants/:id', getMerchantDetails);
 
 export default router;
+

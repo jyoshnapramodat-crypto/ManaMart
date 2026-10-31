@@ -175,3 +175,4 @@ export async function getReservations(req, res) {
     return res.status(500).json({ success: false, message: error.message });
   }
 }
+
