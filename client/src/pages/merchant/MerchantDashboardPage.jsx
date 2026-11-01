@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
+import MerchantBulkImporterModal from '../../components/MerchantBulkImporterModal';
 import {
   Store,
   DollarSign,
@@ -18,6 +19,7 @@ import {
   CalendarDays,
   FileText,
   Utensils,
+  FileSpreadsheet,
 } from 'lucide-react';
 
 export default function MerchantDashboardPage() {
@@ -30,6 +32,7 @@ export default function MerchantDashboardPage() {
   const [reservations, setReservations] = useState([]);
   const [activeTab, setActiveTab] = useState('orders'); // 'orders' | 'products' | 'posts' | 'compliance' | 'reservations'
   const [loading, setLoading] = useState(true);
+  const [isBulkImportOpen, setIsBulkImportOpen] = useState(false);
 
   // New product form state
   const [newProdName, setNewProdName] = useState('');
@@ -411,9 +414,22 @@ export default function MerchantDashboardPage() {
 
           {/* Product Items Table */}
           <div className="bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-soft">
-            <div className="p-4 border-b border-slate-100 flex items-center justify-between">
-              <h3 className="font-bold text-sm text-slate-900">Live Store Inventory ({products.length})</h3>
-              <span className="text-xs text-slate-400">Toggle switch to mark Out-of-Stock</span>
+            <div className="p-4 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h3 className="font-bold text-sm text-slate-900">Live Store Inventory ({products.length})</h3>
+                <p className="text-[11px] text-slate-500">Update pricing, in-stock status, or batch upload items</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsBulkImportOpen(true)}
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#003527] hover:bg-[#064e3b] text-white rounded-xl text-xs font-bold transition-all shadow-xs active:scale-95 cursor-pointer"
+                >
+                  <FileSpreadsheet className="w-3.5 h-3.5 text-[#fe6b00]" />
+                  <span>Bulk Import CSV / Excel</span>
+                </button>
+                <span className="text-xs text-slate-400 hidden md:inline">• Toggle switch for stock status</span>
+              </div>
             </div>
 
             <div className="divide-y divide-slate-100">
@@ -617,6 +633,15 @@ export default function MerchantDashboardPage() {
         </div>
       )}
 
+      {/* Merchant Bulk CSV/Excel Importer Modal */}
+      <MerchantBulkImporterModal
+        isOpen={isBulkImportOpen}
+        onClose={() => setIsBulkImportOpen(false)}
+        currentProducts={products}
+        onImport={(importedProducts) => {
+          setProducts((prev) => [...importedProducts, ...prev]);
+        }}
+      />
     </div>
   );
 }

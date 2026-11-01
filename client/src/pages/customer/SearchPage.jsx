@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useLocation } from '../../context/LocationContext';
 import { useCart } from '../../context/CartContext';
 import api from '../../services/api';
+import VernacularVoiceModal from '../../components/VernacularVoiceModal';
 import {
   Search,
   Mic,
@@ -35,6 +36,7 @@ export default function SearchPage() {
 
   const [query, setQuery] = useState(initialQuery);
   const [isVoiceListening, setIsVoiceListening] = useState(false);
+  const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
   // Filters State
@@ -221,16 +223,12 @@ export default function SearchPage() {
               </button>
             )}
 
-            {/* Voice Search Icon (Module 2) */}
+            {/* Voice Search Vernacular AI (Module 2) */}
             <button
               type="button"
-              onClick={handleVoiceTrigger}
-              className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${
-                isVoiceListening
-                  ? 'bg-red-500 text-white animate-pulse shadow-md'
-                  : 'bg-orange-50 text-orange-600 hover:bg-orange-100'
-              }`}
-              title="Voice Search"
+              onClick={() => setIsVoiceModalOpen(true)}
+              className="w-9 h-9 rounded-xl flex items-center justify-center transition-all bg-orange-50 text-[#fe6b00] hover:bg-orange-100 hover:scale-105 active:scale-95 cursor-pointer shadow-2xs"
+              title="Voice Search in Telugu / English"
             >
               <Mic className="w-4 h-4" />
             </button>
@@ -549,6 +547,11 @@ export default function SearchPage() {
           )}
         </div>
       )}
+      {/* Vernacular Voice AI Ordering Modal (Telugu + English) */}
+      <VernacularVoiceModal
+        isOpen={isVoiceModalOpen}
+        onClose={() => setIsVoiceModalOpen(false)}
+      />
     </div>
   );
 }

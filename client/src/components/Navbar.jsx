@@ -8,10 +8,12 @@ import { socket } from '../services/socket';
 import api from '../services/api';
 import Logo from './Logo';
 import NotificationModal from './NotificationModal';
+import VernacularVoiceModal from './VernacularVoiceModal';
 import soundService from '../services/soundService';
 import {
   MapPin,
   Search,
+  Mic,
   ShoppingBag,
   Repeat,
   Sparkles,
@@ -45,6 +47,7 @@ export default function Navbar() {
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
   const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
+  const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
 
   // Real-Time Notifications State
   const [notifications, setNotifications] = useState([
@@ -205,16 +208,26 @@ export default function Navbar() {
                   <button
                     type="button"
                     onClick={() => setSearchQuery('')}
-                    className="p-1 text-slate-400 hover:text-slate-700 mr-1.5 shrink-0"
+                    className="p-1 text-slate-400 hover:text-slate-700 mr-1 shrink-0 cursor-pointer"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
                 )}
 
+                {/* Vernacular Voice AI Trigger */}
+                <button
+                  type="button"
+                  onClick={() => setIsVoiceModalOpen(true)}
+                  className="p-1.5 text-[#fe6b00] hover:text-[#d45800] hover:bg-orange-50 rounded-full transition-all shrink-0 cursor-pointer active:scale-95"
+                  title="Voice Ordering in Telugu / English (మాట్లాడి ఆర్డర్ చేయండి)"
+                >
+                  <Mic className="w-4 h-4" />
+                </button>
+
                 {/* Sleek, Uncongested Submit Button */}
                 <button
                   type="submit"
-                  className="px-4 py-1.5 bg-[#003527] hover:bg-[#064e3b] text-white rounded-full text-xs font-bold transition-all shrink-0 shadow-2xs active:scale-95 ml-1"
+                  className="px-4 py-1.5 bg-[#003527] hover:bg-[#064e3b] text-white rounded-full text-xs font-bold transition-all shrink-0 shadow-2xs active:scale-95 ml-1 cursor-pointer"
                 >
                   Search
                 </button>
@@ -553,9 +566,18 @@ export default function Navbar() {
                   <X className="w-3.5 h-3.5" />
                 </button>
               )}
+              {/* Vernacular Voice AI Trigger */}
+              <button
+                type="button"
+                onClick={() => setIsVoiceModalOpen(true)}
+                className="p-1.5 text-[#fe6b00] hover:text-[#d45800] rounded-full transition-all shrink-0 cursor-pointer mr-1"
+                title="Voice Search"
+              >
+                <Mic className="w-4 h-4" />
+              </button>
               <button
                 type="submit"
-                className="px-3.5 py-1.5 bg-gradient-to-r from-[#fe6b00] to-[#fd5a05] hover:opacity-95 text-white rounded-xl text-xs font-bold shrink-0 ml-1.5 shadow-xs flex items-center gap-1 active:scale-95"
+                className="px-3.5 py-1.5 bg-gradient-to-r from-[#fe6b00] to-[#fd5a05] hover:opacity-95 text-white rounded-xl text-xs font-bold shrink-0 ml-0.5 shadow-xs flex items-center gap-1 active:scale-95"
               >
                 <Search className="w-3.5 h-3.5" />
                 <span>Search</span>
@@ -590,6 +612,12 @@ export default function Navbar() {
       <NotificationModal
         isOpen={isNotificationModalOpen}
         onClose={() => setIsNotificationModalOpen(false)}
+      />
+
+      {/* Vernacular Voice AI Ordering Modal (Telugu + English) */}
+      <VernacularVoiceModal
+        isOpen={isVoiceModalOpen}
+        onClose={() => setIsVoiceModalOpen(false)}
       />
     </>
   );

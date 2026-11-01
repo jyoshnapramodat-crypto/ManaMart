@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import { socket } from '../../services/socket';
+import LiveGpsRadarMap from '../../components/LiveGpsRadarMap';
 import {
   Clock,
   MapPin,
@@ -144,83 +145,26 @@ export default function OrderTrackingPage() {
           </div>
         )}
 
-        {/* Live Map Visualization Card */}
-        <div className="bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-soft">
-          <div className="relative h-64 sm:h-80 bg-slate-900 overflow-hidden">
-            {/* Map Canvas Background (Simulated Vector Map) */}
-            <div className="absolute inset-0 opacity-40 bg-[radial-gradient(#475569_1px,transparent_1px)] [background-size:16px_16px]"></div>
-            
-            {/* Road path svg */}
-            <svg className="absolute inset-0 w-full h-full pointer-events-none">
-              <path
-                d="M 60 220 Q 180 120 320 180 T 520 80"
-                fill="none"
-                stroke="#FF5E1E"
-                strokeWidth="5"
-                strokeDasharray="8 6"
-                className="animate-pulse"
-              />
-            </svg>
-
-            {/* Merchant Pin */}
-            <div className="absolute left-10 sm:left-14 bottom-10 flex flex-col items-center">
-              <div className="w-10 h-10 rounded-2xl bg-orange-600 text-white flex items-center justify-center shadow-lg border-2 border-white">
-                <Store className="w-5 h-5" />
-              </div>
-              <span className="text-[10px] font-extrabold text-white bg-black/70 backdrop-blur-md px-2 py-0.5 rounded-md mt-1">
-                {order.merchantName ? order.merchantName.split(' ')[0] : 'Store'}
-              </span>
-            </div>
-
-            {/* Animated Moving Rider Pin */}
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center animate-bounce duration-1000">
-              <div className="w-12 h-12 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-xl border-3 border-white ring-4 ring-emerald-400/40">
-                <Bike className="w-6 h-6" />
-              </div>
-              <span className="text-[10px] font-black text-emerald-950 bg-emerald-300 px-2 py-0.5 rounded-md mt-1 shadow-sm">
-                Rider {order.riderName?.split(' ')[0] || 'Partner'}
-              </span>
-            </div>
-
-            {/* Customer Drop Pin */}
-            <div className="absolute right-10 sm:right-16 top-12 flex flex-col items-center">
-              <div className="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-lg border-2 border-white">
-                <MapPin className="w-5 h-5" />
-              </div>
-              <span className="text-[10px] font-extrabold text-white bg-black/70 backdrop-blur-md px-2 py-0.5 rounded-md mt-1">
-                Your Doorstep
-              </span>
-            </div>
-
-            {/* Live Status Overlay Pill */}
-            <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-md px-3.5 py-1.5 rounded-2xl shadow-md border border-slate-100 flex items-center space-x-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
-              <span className="text-xs font-bold text-slate-800">
-                {isDelivered ? 'Delivered' : 'Arriving in ~12 mins'}
-              </span>
-            </div>
+        {/* Live Interactive GPS Radar Map Component */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between px-1">
+            <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+              Live Turn-by-Turn GPS Radar
+            </span>
+            <span className="text-[11px] font-mono text-slate-500">
+              Hyperlocal Telemetry SLA &lt; 140ms
+            </span>
           </div>
-
-          {/* Rider Details Bar */}
-          <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold">
-                <Bike className="w-5 h-5" />
-              </div>
-              <div>
-                <h4 className="text-xs font-bold text-slate-900">{order.riderName || 'Suresh Varma'}</h4>
-                <p className="text-[11px] text-slate-500">Verified ManaMart Delivery Partner (Hero Splendor)</p>
-              </div>
-            </div>
-
-            <a
-              href={`tel:${order.riderPhone || '9123456780'}`}
-              className="p-2.5 rounded-2xl bg-white border border-slate-200 text-slate-700 hover:text-emerald-600 hover:border-emerald-300 shadow-2xs transition-colors flex items-center space-x-1 text-xs font-bold"
-            >
-              <Phone className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Call Rider</span>
-            </a>
-          </div>
+          <LiveGpsRadarMap
+            order={{
+              orderId: order.orderId || id,
+              merchantName: order.merchantName,
+              riderName: order.riderName,
+              riderPhone: order.riderPhone,
+              deliveryAddress: order.address?.street || 'Flat 402, Sai Residency',
+            }}
+          />
         </div>
 
         {/* Stages Timeline */}
