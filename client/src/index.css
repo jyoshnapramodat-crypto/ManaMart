@@ -3,16 +3,27 @@
 @tailwind utilities;
 
 @layer base {
+  html, body {
+    margin: 0;
+    padding: 0;
+  }
   body {
-    @apply bg-[#F8F9FA] text-slate-900 antialiased font-sans;
+    @apply bg-surface text-on-surface antialiased font-sans;
     -webkit-tap-highlight-color: transparent;
+    overscroll-behavior: none;
+  }
+  main > :first-child {
+    margin-top: 0 !important;
+  }
+  main > :last-child {
+    margin-bottom: 0 !important;
   }
 }
 
-/* Custom modern scrollbar */
+/* Custom subtle scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -20,18 +31,20 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #CBD5E1;
+  background: #d9d2c7;
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94A3B8;
+  background: #bfb7aa;
 }
 
-.scrollbar-none::-webkit-scrollbar {
+.scrollbar-none::-webkit-scrollbar,
+.no-scrollbar::-webkit-scrollbar {
   display: none;
 }
-.scrollbar-none {
+.scrollbar-none,
+.no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
@@ -46,31 +59,19 @@
 
 /* Stitch Elevation Levels */
 .shadow-level-1 {
-  box-shadow: 0 2px 6px -1px rgba(5, 92, 36, 0.06), 0 1px 4px -1px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 6px -1px rgba(0, 53, 39, 0.05), 0 1px 4px -1px rgba(0, 0, 0, 0.03);
 }
 .shadow-level-2 {
-  box-shadow: 0 8px 20px -3px rgba(249, 87, 0, 0.12), 0 4px 8px -2px rgba(5, 92, 36, 0.05);
+  box-shadow: 0 8px 20px -3px rgba(254, 107, 0, 0.10), 0 4px 8px -2px rgba(0, 53, 39, 0.04);
 }
 .shadow-level-3 {
-  box-shadow: 0 20px 30px -6px rgba(17, 24, 39, 0.18), 0 10px 15px -4px rgba(0, 0, 0, 0.08);
-}
-.custom-shadow {
-  box-shadow: 0 4px 20px -2px rgba(5, 92, 36, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 20px 30px -6px rgba(30, 27, 21, 0.12), 0 10px 15px -4px rgba(0, 0, 0, 0.05);
 }
 
 @keyframes pulseSoft {
   0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.03); }
+  50% { transform: scale(1.02); }
 }
 .animate-soft-pulse {
   animation: pulseSoft 3s ease-in-out infinite;
 }
-
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-

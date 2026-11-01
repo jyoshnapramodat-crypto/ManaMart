@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useLocation } from '../../context/LocationContext';
 import ManaAIScout from '../../components/ManaAIScout';
+import TableReservationModal from '../../components/TableReservationModal';
 
 export default function LandingPage() {
   const { isLoggedIn, role, user } = useAuth();
@@ -10,7 +11,201 @@ export default function LandingPage() {
   const navigate = useNavigate();
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedFilter, setSelectedFilter] = useState('all');
+  const [activeReservationModal, setActiveReservationModal] = useState(false);
+  const [selectedRestaurantForBooking, setSelectedRestaurantForBooking] = useState(null);
+  const [appPhone, setAppPhone] = useState('');
+  const [appLinkSent, setAppLinkSent] = useState(false);
+
+  // Sample Featured Stores
+  const featuredStores = [
+    {
+      id: 'm-2',
+      name: 'Sri Venkateswara Supermarket',
+      category: 'Staples, Daily Ghee, Mandi Spices',
+      rating: 4.8,
+      distance: '1.2 km',
+      eta: '⚡ 20 MINS',
+      badge: '₹50 OFF on ₹199',
+      isRestaurant: false,
+      image: 'https://images.unsplash.com/photo-1578916171728-46686eac8d58?w=600&auto=format&fit=crop&q=80',
+    },
+    {
+      id: 'm-1',
+      name: 'Bhimavaram Ruchulu & Tiffins',
+      category: 'Ghee Pesarattu, Avakaya, Special Biryani',
+      rating: 4.9,
+      distance: '0.9 km',
+      eta: '⚡ 15 MINS',
+      badge: 'Ooru Authentic',
+      isRestaurant: true,
+      hasTableBooking: true,
+      image: 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=600&auto=format&fit=crop&q=80',
+    },
+    {
+      id: 'm-11',
+      name: 'MedPlus & Local Health Care',
+      category: 'Prescription Drugs, Baby Care, Diagnostics',
+      rating: 4.7,
+      distance: '1.5 km',
+      eta: 'Rx Verified',
+      badge: 'Flat 15% OFF',
+      isRestaurant: false,
+      image: 'https://images.unsplash.com/photo-1576602976047-174e57a47881?w=600&auto=format&fit=crop&q=80',
+    },
+    {
+      id: 'm-9',
+      name: 'Karachi Bakery & Niloufer Cafe',
+      category: 'Osmania Biscuits, Kaju Katli, Fruit Loaf',
+      rating: 4.8,
+      distance: '2.1 km',
+      eta: '⚡ 25 MINS',
+      badge: 'Fresh Baked Today',
+      isRestaurant: true,
+      hasTableBooking: true,
+      image: 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=600&auto=format&fit=crop&q=80',
+    },
+  ];
+
+  // 10 Neighborhood Categories with Bilingual Telugu labels
+  const categories = [
+    {
+      id: 'groceries',
+      title: 'Kirana & Groceries',
+      telugu: 'కిరాణా దుకాణాలు',
+      count: '68+ shops',
+      icon: 'local_grocery_store',
+      color: 'text-primary',
+    },
+    {
+      id: 'food',
+      title: 'Tiffins & Biryani',
+      telugu: 'హోటళ్ళు & టిఫిన్లు',
+      count: '42+ shops',
+      icon: 'restaurant',
+      color: 'text-secondary-container',
+    },
+    {
+      id: 'groceries',
+      title: 'Supermarkets',
+      telugu: 'సూపర్ మార్కెట్',
+      count: '15+ stores',
+      icon: 'shopping_cart',
+      color: 'text-primary',
+    },
+    {
+      id: 'pharmacy',
+      title: 'Pharmacy & Health',
+      telugu: 'మందుల షాపులు',
+      count: '24+ stores',
+      icon: 'local_pharmacy',
+      color: 'text-primary-container',
+    },
+    {
+      id: 'food',
+      title: 'Bakeries & Sweets',
+      telugu: 'స్వీట్లు & బేకరీ',
+      count: '18+ shops',
+      icon: 'bakery_dining',
+      color: 'text-secondary-container',
+    },
+    {
+      id: 'flowers',
+      title: 'Puja & Fresh Flowers',
+      telugu: 'పూజా సామాగ్రి',
+      count: '12+ shops',
+      icon: 'spa',
+      color: 'text-primary',
+    },
+    {
+      id: 'fashion',
+      title: 'Handlooms & Clothes',
+      telugu: 'చేనేత వస్త్రాలు',
+      count: '29+ shops',
+      icon: 'checkroom',
+      color: 'text-secondary-container',
+    },
+    {
+      id: 'electronics',
+      title: 'Mobile & Electronics',
+      telugu: 'మొబైల్ రిపేర్',
+      count: '16+ shops',
+      icon: 'phonelink_setup',
+      color: 'text-primary',
+    },
+    {
+      id: 'stationery',
+      title: 'Stationery & Xerox',
+      telugu: 'జెరాక్స్ & బుక్స్',
+      count: '14+ shops',
+      icon: 'print',
+      color: 'text-primary',
+    },
+    {
+      id: 'services',
+      title: 'Home Services',
+      telugu: 'ఇంటి మరమ్మత్తులు',
+      count: '35+ providers',
+      icon: 'home_repair_service',
+      color: 'text-secondary-container',
+    },
+  ];
+
+  // Social Feed Posts from Followed Shops
+  const [feedPosts, setFeedPosts] = useState([
+    {
+      id: 'f1',
+      merchantName: 'Sri Sai Fresh Fruits Mandi',
+      initials: 'SF',
+      locality: 'Kothapet Mandi • 18m ago',
+      image: 'https://images.unsplash.com/photo-1550989460-0adf9ea622e2?w=600&auto=format&fit=crop&q=80',
+      text: 'Fresh Banginapalli & Alphonso Mangoes direct harvest arrived today! 🥭 Sweet aroma, chemical-free. Limited 40 crates only at ₹320/dozen.',
+      likes: 84,
+      isLiked: false,
+      isFollowed: false,
+    },
+    {
+      id: 'f2',
+      merchantName: 'Vani Matha Flowers & Pooja Stores',
+      initials: 'VM',
+      locality: 'Temple Street • 42m ago',
+      image: 'https://images.unsplash.com/photo-1596704017254-9b121068fb31?w=600&auto=format&fit=crop&q=80',
+      text: 'Friday Special: Fresh Madurai Malli (Jasmine) & Marigold Malas freshly strung. Morning puja dispatch available immediately! 🌸',
+      likes: 112,
+      isLiked: false,
+      isFollowed: true,
+    },
+    {
+      id: 'f3',
+      merchantName: 'Royal Bakers & Cafe',
+      initials: 'RB',
+      locality: 'Gandhi Road • 1h ago',
+      image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&auto=format&fit=crop&q=80',
+      text: 'Evening tea batch is out! Fresh Egg & Paneer Puffs hot from the oven. Pair with hot Irani Chai flask for just ₹60 combo.',
+      likes: 96,
+      isLiked: false,
+      isFollowed: false,
+    },
+  ]);
+
+  const toggleFollow = (id) => {
+    setFeedPosts((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, isFollowed: !p.isFollowed } : p))
+    );
+  };
+
+  const toggleLike = (id) => {
+    setFeedPosts((prev) =>
+      prev.map((p) =>
+        p.id === id
+          ? {
+              ...p,
+              isLiked: !p.isLiked,
+              likes: p.isLiked ? p.likes - 1 : p.likes + 1,
+            }
+          : p
+      )
+    );
+  };
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -21,773 +216,964 @@ export default function LandingPage() {
     }
   };
 
-  const sampleStores = [
-    {
-      id: 'm-2',
-      name: 'Sri Lakshmi Kirana & General Store',
-      partnerId: 'HYD-8942',
-      rating: 4.8,
-      tag: 'Flat ₹50 OFF',
-      tagColor: 'bg-secondary-container text-on-secondary',
-      eta: '15 mins',
-      distance: '1.2 km away',
-      deliveryInfo: 'Free Delivery > ₹199',
-      category: 'Basmati rice, dals, pure desi ghee, spices & household',
-      badge: 'Verified Kirana',
-      image: 'https://images.unsplash.com/photo-1578916171728-46686eac8d58?w=600&auto=format&fit=crop&q=80',
-    },
-    {
-      id: 'm-12',
-      name: 'Balaji Fresh Farm Produce',
-      partnerId: 'Direct Farm Partner',
-      rating: 4.9,
-      tag: 'Organic Certified',
-      tagColor: 'bg-primary-container text-on-primary-container',
-      eta: '20 mins',
-      distance: '0.8 km away',
-      deliveryInfo: 'Morning Pick',
-      category: 'Hyd Hydroponic greens, local fruits, roots & coconut water',
-      badge: 'Fresh Harvest',
-      image: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=600&auto=format&fit=crop&q=80',
-    },
-    {
-      id: 'm-11',
-      name: 'Apollo Pharmacy Super Store',
-      partnerId: 'Licensed Dispenser',
-      rating: 4.7,
-      tag: 'Medicines 15% OFF',
-      tagColor: 'bg-secondary-container text-on-secondary',
-      eta: '12 mins',
-      distance: '0.5 km away',
-      deliveryInfo: '24/7 Available',
-      category: 'Prescription drugs, baby food, ayurveda & health monitors',
-      badge: 'Certified Drug Store',
-      image: 'https://images.unsplash.com/photo-1576602976047-174e57a47881?w=600&auto=format&fit=crop&q=80',
-    },
-    {
-      id: 'm-9',
-      name: 'Venkateshwara Sweets & Niloufer Cafe',
-      partnerId: 'Heritage Since 1994',
-      rating: 4.9,
-      tag: 'Fresh Hot Jalebis',
-      tagColor: 'bg-secondary-container text-on-secondary',
-      eta: '25 mins',
-      distance: '2.1 km away',
-      deliveryInfo: 'Bestseller Treat',
-      category: 'Pure ghee sweets, Osmania biscuits, samosas & Irani chai',
-      badge: 'Authentic Heritage',
-      image: 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=600&auto=format&fit=crop&q=80',
-    },
-  ];
+  const openTableBooking = (restaurant) => {
+    setSelectedRestaurantForBooking(restaurant);
+    setActiveReservationModal(true);
+  };
 
-  const categories = [
-    { title: 'Groceries & Kirana', count: '180+ Stores', icon: 'shopping_basket', bg: 'bg-primary/10', text: 'text-primary', cat: 'groceries' },
-    { title: 'Restaurants & Food', count: '95+ Eateries', icon: 'restaurant', bg: 'bg-secondary/10', text: 'text-secondary', cat: 'food' },
-    { title: 'Supermarkets', count: '24 Marts', icon: 'store', bg: 'bg-primary-container/10', text: 'text-primary-container', cat: 'groceries' },
-    { title: '24x7 Pharmacy', count: 'Emergency Ready', icon: 'medical_services', bg: 'bg-error/10', text: 'text-error', cat: 'pharmacy' },
-    { title: 'Bakery & Sweets', count: 'Authentic Taste', icon: 'cake', bg: 'bg-secondary-container/10', text: 'text-secondary-container', cat: 'food' },
-    { title: 'Puja & Fresh Flowers', count: 'Morning Fresh', icon: 'yard', bg: 'bg-primary/10', text: 'text-primary', cat: 'general' },
-    { title: 'Local Dairy', count: 'Milk, Curd & Ghee', icon: 'water_bottle', bg: 'bg-tertiary-container/10', text: 'text-tertiary-container', cat: 'dairy' },
-    { title: 'Local Fashion', count: 'Cotton & Sarees', icon: 'apparel', bg: 'bg-secondary/10', text: 'text-secondary', cat: 'general' },
-    { title: 'Electronics & Repairs', count: 'Home Technicians', icon: 'build', bg: 'bg-primary/10', text: 'text-primary', cat: 'services' },
-    { title: 'Stationery & Xerox', count: 'Print & Office', icon: 'print', bg: 'bg-outline/10', text: 'text-on-surface', cat: 'general' },
-    { title: 'Home Essentials', count: 'Cookware & Tools', icon: 'home_repair_service', bg: 'bg-primary-container/10', text: 'text-primary-container', cat: 'general' },
-    { title: 'Community Offers', count: 'Up to 40% OFF', icon: 'loyalty', bg: 'bg-secondary-container/10', text: 'text-secondary-container', cat: 'deals' },
-  ];
-
-  const filteredStores = sampleStores.filter((store) => {
-    if (selectedFilter === 'fastest') return parseInt(store.eta) <= 15;
-    if (selectedFilter === 'offers') return store.tag.includes('OFF');
-    return true;
-  });
+  const handleSendAppLink = (e) => {
+    e.preventDefault();
+    if (appPhone.length >= 10) {
+      setAppLinkSent(true);
+      setTimeout(() => setAppLinkSent(false), 4000);
+      setAppPhone('');
+    }
+  };
 
   return (
-    <div className="bg-surface font-sans text-on-surface min-h-screen selection:bg-primary-fixed selection:text-on-primary-fixed">
-      {/* Announcement Bar (Live Neighborhood Alerts) */}
-      <div className="bg-primary text-on-primary py-2 px-space-md text-center text-label-sm font-label-sm flex items-center justify-center gap-2">
-        <span className="material-symbols-outlined text-base text-secondary-fixed">bolt</span>
-        <span>
-          <strong>FRESH ARRIVALS:</strong> Daily farm vegetables and Hyderabad traditional sweets are now in stock in your area. Use coupon <strong>MANA50</strong> for ₹50 off!
-        </span>
-      </div>
-
-      {/* Sticky Top Navigation Bar */}
-      <header className="sticky top-0 z-40 bg-surface-container-lowest shadow-sm border-b border-outline-variant/30">
-        <div className="max-w-7xl mx-auto px-space-md md:px-margin-desktop py-space-sm flex flex-col md:flex-row md:items-center justify-between gap-space-sm">
-          {/* Brand Logo & Location */}
-          <div className="flex items-center justify-between gap-space-md shrink-0">
+    <div className="bg-surface font-sans text-on-surface min-h-screen selection:bg-secondary-container selection:text-on-primary">
+      {/* HEADER / NAVIGATION BAR */}
+      <header className="sticky top-0 z-50 bg-surface/95 backdrop-blur-md shadow-[0_1px_8px_rgba(0,0,0,0.04)] border-b border-surface-container-high/60">
+        <div className="h-16 sm:h-20 w-full px-4 sm:px-6 lg:px-8 mx-auto max-w-[1280px] flex items-center justify-between gap-3 sm:gap-4">
+          {/* Logo & Location Pill */}
+          <div className="flex items-center gap-3 sm:gap-4 shrink-0">
             <Link to="/" className="flex items-center">
               <img
                 src="/logo.png"
-                alt="ManaMart"
-                className="h-10 md:h-12 w-auto object-contain"
+                alt="ManaMart - Mana Ooru. Mana Market."
+                className="h-10 sm:h-12 w-auto object-contain"
               />
             </Link>
 
-            {/* Location Dropdown Pill */}
+            {/* Location Selector Pill */}
             <button
               onClick={() => setIsModalOpen(true)}
-              className="flex items-center gap-1.5 px-space-sm py-1.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface transition-colors duration-150 border border-outline-variant/40 text-left"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high transition-colors text-left"
+              type="button"
             >
-              <span
-                className="material-symbols-outlined text-secondary"
-                style={{ fontVariationSettings: "'FILL' 1" }}
-              >
+              <span className="material-symbols-outlined text-secondary-container text-[18px]">
                 location_on
               </span>
-              <div className="flex flex-col text-left leading-tight">
-                <span className="text-label-sm font-label-sm text-outline">Deliver to</span>
-                <span className="text-label-md font-label-md font-bold text-primary flex items-center gap-0.5">
-                  {selectedLocality || 'Madhapur'}, {currentCity || 'Hyderabad'}
-                  <span className="material-symbols-outlined text-sm">expand_more</span>
+              <div className="flex flex-col text-left">
+                <span className="font-label-sm text-[10px] text-on-surface-variant leading-none">
+                  Deliver to
+                </span>
+                <span className="font-label-md text-xs sm:text-sm text-on-surface font-semibold max-w-[130px] sm:max-w-[170px] truncate">
+                  {selectedLocality || 'Indiranagar'}, {currentCity || 'HYD'}
                 </span>
               </div>
+              <span className="material-symbols-outlined text-on-surface-variant text-[16px]">
+                keyboard_arrow_down
+              </span>
             </button>
           </div>
 
-          {/* Center Search Bar */}
-          <div className="flex-1 max-w-xl mx-0 md:mx-space-md w-full">
-            <form onSubmit={handleSearch} className="relative flex items-center">
-              <span className="material-symbols-outlined absolute left-3 text-outline text-xl">
+          {/* Search Bar */}
+          <div className="hidden md:flex flex-1 max-w-xl mx-2">
+            <form
+              onSubmit={handleSearch}
+              className="w-full flex items-center bg-surface-container-lowest rounded-lg shadow-sm border border-outline-variant/30 px-3 py-1.5"
+            >
+              <span className="material-symbols-outlined text-outline text-[18px] mr-2">
                 search
               </span>
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search fresh vegetables, sweets, medicines, or local kirana..."
-                className="w-full pl-10 pr-24 py-2 bg-surface rounded-xl border border-outline-variant text-body-md font-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 placeholder:text-outline text-ellipsis"
+                placeholder="Search organic mandi veggies, biryani, medicines, daily kirana..."
+                className="w-full bg-transparent font-body-md text-xs sm:text-sm text-on-surface placeholder:text-outline focus:outline-none"
               />
               <button
                 type="submit"
-                className="absolute right-2 px-3 py-1 bg-primary text-on-primary rounded-lg text-label-sm font-label-sm hover:bg-primary-container transition-colors font-bold"
+                className="px-2.5 py-1 bg-primary text-on-primary rounded text-xs font-semibold hover:bg-primary-container transition-colors shrink-0 ml-1"
               >
                 Search
               </button>
             </form>
           </div>
 
-          {/* Trailing Action Buttons & Nav Links */}
-          <div className="flex items-center justify-between md:justify-end gap-space-md shrink-0">
-            {/* Quick Portal Links */}
-            <Link
-              to="/merchant/apply"
-              className="text-label-md font-label-md text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1"
-            >
-              <span className="material-symbols-outlined text-lg">storefront</span>
-              <span className="hidden sm:inline">Partner With Us</span>
-            </Link>
-
-            {/* Cart Button */}
+          {/* Quick Nav Links & Actions */}
+          <nav className="hidden lg:flex items-center gap-4 text-xs font-semibold shrink-0">
             <Link
               to="/app"
-              className="flex items-center gap-space-xs bg-secondary-container hover:bg-secondary text-on-secondary px-space-md py-2 rounded-lg font-label-md text-label-md shadow-level-1 transition-all duration-150 active:scale-95"
+              className="text-on-surface-variant hover:text-primary transition-colors"
             >
-              <span
-                className="material-symbols-outlined text-lg"
-                style={{ fontVariationSettings: "'FILL' 1" }}
-              >
-                shopping_bag
-              </span>
-              <span>Explore Mart</span>
+              Explore Stores
+            </Link>
+            <Link
+              to="/reservations"
+              className="text-secondary font-bold hover:text-secondary-container transition-colors flex items-center gap-1"
+            >
+              <span className="material-symbols-outlined text-base">restaurant</span>
+              Dine-In Booking
+            </Link>
+            <Link
+              to="/feed"
+              className="text-on-surface-variant hover:text-primary transition-colors"
+            >
+              Live Feed
+            </Link>
+          </nav>
+
+          {/* Right Action Buttons */}
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            {/* Table Booking Quick Icon on Mobile */}
+            <Link
+              to="/reservations"
+              className="lg:hidden p-2 rounded-full bg-surface-container text-secondary hover:bg-surface-container-high transition-colors"
+              title="Table Booking"
+            >
+              <span className="material-symbols-outlined text-[20px]">restaurant</span>
             </Link>
 
-            {/* Account / Login */}
-            <div className="flex items-center gap-2 border-l border-outline-variant/50 pl-space-md">
-              {isLoggedIn ? (
-                <Link
-                  to={role === 'merchant' ? '/merchant' : role === 'rider' ? '/rider' : role === 'admin' ? '/admin' : '/app'}
-                  className="flex items-center gap-1.5 px-space-md py-2 rounded-lg bg-primary text-on-primary font-label-md text-label-md shadow-level-1 hover:bg-primary-container transition-colors"
-                >
-                  <span className="material-symbols-outlined text-lg">dashboard</span>
-                  <span>Dashboard ({user?.name ? user.name.split(' ')[0] : 'User'})</span>
-                </Link>
-              ) : (
-                <div className="flex items-center gap-1.5">
-                  <Link
-                    to="/login"
-                    className="flex items-center gap-1 px-3 py-2 rounded-lg border border-primary text-primary hover:bg-surface-container-low font-label-md text-label-md transition-colors"
-                  >
-                    <span className="material-symbols-outlined text-lg">account_circle</span>
-                    <span>Sign In</span>
-                  </Link>
-                  <Link
-                    to="/signup"
-                    className="hidden sm:inline-flex items-center px-3.5 py-2 rounded-lg bg-primary text-on-primary hover:bg-primary-container font-label-md text-label-md shadow-level-1 transition-colors"
-                  >
-                    Register
-                  </Link>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+            {/* Cart Link */}
+            <Link
+              to="/app"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary-container text-on-primary hover:bg-primary transition-colors shadow-sm text-xs font-semibold"
+            >
+              <span className="material-symbols-outlined text-[18px]">shopping_bag</span>
+              <span className="hidden sm:inline">Explore Mart</span>
+            </Link>
 
-        {/* Sub-Navbar: Navigation Categories */}
-        <div className="border-t border-outline-variant/30 bg-surface-container-lowest">
-          <div className="max-w-7xl mx-auto px-space-md md:px-margin-desktop flex items-center justify-between overflow-x-auto no-scrollbar py-2">
-            <nav className="flex items-center space-x-space-lg text-label-md font-label-md whitespace-nowrap">
-              <Link to="/app" className="text-primary font-bold border-b-2 border-primary pb-1 flex items-center gap-1">
-                <span className="material-symbols-outlined text-base">home</span>
-                Kirana & Staples
+            {/* Auth Buttons */}
+            {isLoggedIn ? (
+              <Link
+                to={
+                  role === 'merchant'
+                    ? '/merchant'
+                    : role === 'rider'
+                    ? '/rider'
+                    : role === 'admin'
+                    ? '/admin'
+                    : '/app'
+                }
+                className="px-3 py-1.5 rounded-lg bg-primary text-on-primary font-label-md text-xs font-semibold hover:bg-primary-container transition-colors flex items-center gap-1 shadow-sm"
+              >
+                <span className="material-symbols-outlined text-[16px]">dashboard</span>
+                <span>Dashboard</span>
               </Link>
-              <Link to="/app?category=produce" className="text-on-surface-variant hover:text-primary pb-1 flex items-center gap-1">
-                <span className="material-symbols-outlined text-base text-primary">eco</span>
-                Fresh Produce
-              </Link>
-              <Link to="/app?category=food" className="text-on-surface-variant hover:text-primary pb-1 flex items-center gap-1">
-                <span className="material-symbols-outlined text-base text-secondary">bakery_dining</span>
-                Dairy & Sweets
-              </Link>
-              <Link to="/app?category=pharmacy" className="text-on-surface-variant hover:text-primary pb-1 flex items-center gap-1">
-                <span className="material-symbols-outlined text-base text-error">local_hospital</span>
-                Pharma
-              </Link>
-              <Link to="/app?category=deals" className="text-on-surface-variant hover:text-primary pb-1 flex items-center gap-1">
-                <span className="material-symbols-outlined text-base text-secondary-container">local_offer</span>
-                Local Deals
-              </Link>
-            </nav>
-            <div className="hidden sm:flex items-center gap-4 text-label-sm font-label-sm text-outline">
-              <span className="flex items-center gap-1">
-                <span className="material-symbols-outlined text-sm text-primary">speed</span> 15-30 Min Delivery
-              </span>
-              <span className="flex items-center gap-1">
-                <span className="material-symbols-outlined text-sm text-secondary">verified</span> 100% Genuine Stores
-              </span>
-            </div>
+            ) : (
+              <div className="flex items-center gap-1 sm:gap-2">
+                <Link
+                  to="/login"
+                  className="px-2.5 sm:px-3 py-1.5 rounded-lg font-label-md text-xs sm:text-sm text-primary hover:bg-surface-container transition-colors font-semibold"
+                >
+                  Login
+                </Link>
+                <Link
+                  to="/signup"
+                  className="px-3 py-1.5 rounded-lg bg-secondary-container text-on-primary font-label-md text-xs sm:text-sm hover:bg-secondary transition-all font-semibold shadow-sm"
+                >
+                  Get Started
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-surface-container-low via-surface to-surface-bright py-space-xl md:py-16">
-        <div className="max-w-7xl mx-auto px-space-md md:px-margin-desktop grid grid-cols-1 lg:grid-cols-12 gap-space-xl items-center">
-          {/* Left Column: Copy & CTAs */}
-          <div className="lg:col-span-7 flex flex-col space-y-space-md">
-            {/* Live Guarantee Tag */}
-            <div className="inline-flex items-center gap-2 self-start bg-surface-container-lowest px-3 py-1.5 rounded-full shadow-level-1 border border-outline-variant/40">
-              <span className="w-2.5 h-2.5 rounded-full bg-secondary-container animate-ping"></span>
-              <span className="text-label-md font-label-md text-primary font-bold">500+ Verified Kiranas & Stores in your pincode</span>
-              <span className="text-label-sm font-label-sm text-secondary font-semibold border-l border-outline-variant/40 pl-2">₹0 Delivery on first 3 orders</span>
+      {/* MAIN CONTENT AREA */}
+      <main className="w-full">
+        {/* HERO SECTION */}
+        <section className="relative w-full overflow-hidden bg-gradient-to-b from-surface via-surface-container-low to-surface pt-6 sm:pt-10 pb-8 sm:pb-12">
+          <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-10 items-center">
+              
+              {/* Left Column: Value Prop & CTAs */}
+              <div className="lg:col-span-7 flex flex-col gap-4 sm:gap-5">
+                {/* Micro Pill */}
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-high w-fit shadow-xs border border-outline-variant/30">
+                  <span className="w-2 h-2 rounded-full bg-secondary-container animate-ping"></span>
+                  <span className="font-label-sm text-xs text-secondary uppercase tracking-widest font-bold">
+                    Mana Ooru • Mana Market
+                  </span>
+                  <span className="text-on-surface-variant font-label-sm text-xs">
+                    • Fast 20-30m drop
+                  </span>
+                </div>
+
+                {/* Main Heading (Proportional 40px display font - not oversized) */}
+                <div className="flex flex-col gap-1.5">
+                  <h1 className="font-display-lg text-3xl sm:text-4xl lg:text-[40px] lg:leading-[48px] text-primary tracking-tight font-extrabold">
+                    Your Neighborhood.<br />
+                    <span className="text-secondary-container">Your Marketplace.</span>
+                  </h1>
+                  <p className="font-body-lg text-sm sm:text-base text-on-surface-variant max-w-xl leading-relaxed">
+                    Fresh groceries, authentic local food, medicines & daily essentials from trusted neighborhood shops in your town. Delivered in under 30 minutes. Mana Ooru. Mana Market.
+                  </p>
+                </div>
+
+                {/* CTAs: Explore + Dine-in Booking */}
+                <div className="flex flex-wrap items-center gap-3 pt-1">
+                  <Link
+                    to="/app"
+                    className="px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl bg-secondary-container text-on-primary font-label-lg text-xs sm:text-sm font-bold hover:bg-secondary transition-all shadow-md hover:shadow-lg flex items-center gap-1.5"
+                  >
+                    <span>Explore Nearby Stores</span>
+                    <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+                  </Link>
+
+                  <Link
+                    to="/reservations"
+                    className="px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl bg-primary text-on-primary font-label-lg text-xs sm:text-sm font-bold hover:bg-primary-container transition-all shadow-sm flex items-center gap-1.5"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">restaurant</span>
+                    <span>Book Restaurant Table</span>
+                  </Link>
+
+                  <Link
+                    to="/merchant/apply"
+                    className="px-4 py-2.5 rounded-xl border border-primary text-primary hover:bg-surface-container font-label-lg text-xs sm:text-sm font-semibold transition-colors"
+                  >
+                    Partner As Merchant
+                  </Link>
+                </div>
+
+                {/* Trust Badges */}
+                <div className="grid grid-cols-3 gap-2.5 sm:gap-3 pt-2">
+                  <div className="p-3 rounded-xl bg-surface-container flex flex-col border border-outline-variant/20">
+                    <span className="font-headline-sm text-sm sm:text-base text-primary font-bold">
+                      10,000+
+                    </span>
+                    <span className="font-body-sm text-xs text-on-surface-variant">
+                      Verified Kiranas
+                    </span>
+                  </div>
+                  <div className="p-3 rounded-xl bg-surface-container flex flex-col border border-outline-variant/20">
+                    <span className="font-headline-sm text-sm sm:text-base text-secondary-container font-bold">
+                      Instant UPI
+                    </span>
+                    <span className="font-body-sm text-xs text-on-surface-variant">
+                      & Cash On Delivery
+                    </span>
+                  </div>
+                  <div className="p-3 rounded-xl bg-surface-container flex flex-col border border-outline-variant/20">
+                    <span className="font-headline-sm text-sm sm:text-base text-primary font-bold">
+                      100% Local
+                    </span>
+                    <span className="font-body-sm text-xs text-on-surface-variant">
+                      Direct Mandi Sourcing
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column: Visual Bento Showcase */}
+              <div className="lg:col-span-5 relative mt-4 lg:mt-0">
+                {/* Ambient Soft Glow */}
+                <div className="absolute -top-8 -right-8 w-60 h-60 bg-secondary-container/10 rounded-full blur-3xl pointer-events-none"></div>
+                <div className="absolute -bottom-6 -left-6 w-60 h-60 bg-primary/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                <div className="relative flex flex-col gap-3">
+                  {/* Store Hero Card 1 */}
+                  <div className="bg-surface-container-lowest rounded-xl p-3.5 shadow-sm border border-outline-variant/30 flex items-center gap-3 hover:shadow-md transition-shadow">
+                    <img
+                      className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg object-cover shrink-0"
+                      src="https://images.unsplash.com/photo-1578916171728-46686eac8d58?w=300&auto=format&fit=crop&q=80"
+                      alt="Sri Lakshmi Kirana"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-1">
+                        <span className="font-headline-sm text-xs sm:text-sm text-primary font-bold truncate">
+                          Sri Lakshmi Kirana
+                        </span>
+                        <span className="px-2 py-0.5 rounded-full bg-secondary-container text-on-primary text-[10px] font-bold shrink-0">
+                          ⚡ 12 mins
+                        </span>
+                      </div>
+                      <p className="font-body-sm text-xs text-on-surface-variant truncate mt-0.5">
+                        Sona Masoori, Toor Dal, Fresh Spices
+                      </p>
+                      <div className="flex items-center gap-1.5 mt-1 text-[11px]">
+                        <span className="material-symbols-outlined text-secondary text-[14px]">
+                          verified
+                        </span>
+                        <span className="text-primary font-semibold">
+                          {selectedLocality || 'Madhapur'}
+                        </span>
+                        <span className="text-on-surface-variant">• 4.9 ★ (1.4k)</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Store Hero Card 2 */}
+                  <div className="bg-surface-container-lowest rounded-xl p-3.5 shadow-sm border border-outline-variant/30 flex items-center gap-3 -ml-1 lg:-ml-4 hover:shadow-md transition-shadow">
+                    <img
+                      className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg object-cover shrink-0"
+                      src="https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=300&auto=format&fit=crop&q=80"
+                      alt="Annapurna Sweets"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-1">
+                        <span className="font-headline-sm text-xs sm:text-sm text-primary font-bold truncate">
+                          Annapurna Sweets & Bakery
+                        </span>
+                        <span className="px-1.5 py-0.5 rounded-full bg-primary-container text-on-primary text-[10px] font-bold shrink-0">
+                          4.9 ★
+                        </span>
+                      </div>
+                      <p className="font-body-sm text-xs text-on-surface-variant truncate mt-0.5">
+                        Hot Ghee Jalebi, Badam Milk, Karampodi
+                      </p>
+                      <div className="flex items-center gap-1.5 mt-1 text-[11px]">
+                        <span className="text-secondary font-bold">₹50 OFF on ₹199</span>
+                        <span className="text-on-surface-variant">• 0.8 km</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Live Tracking Pill Card */}
+                  <div className="bg-primary text-on-primary rounded-xl p-3.5 shadow-md flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-9 h-9 rounded-full bg-surface-container-lowest/15 flex items-center justify-center shrink-0">
+                        <span className="material-symbols-outlined text-secondary-fixed text-[20px]">
+                          two_wheeler
+                        </span>
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                          <span className="font-label-md text-xs text-tertiary-fixed font-bold">
+                            Rider en-route
+                          </span>
+                        </div>
+                        <span className="font-body-sm text-[11px] text-on-primary-container">
+                          Arriving in 8 mins to your flat
+                        </span>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <span className="font-price-md text-sm sm:text-base font-bold text-secondary-fixed">
+                        ₹340
+                      </span>
+                      <span className="block font-label-sm text-[10px] text-outline-variant">
+                        3 Items
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
             </div>
+          </div>
+        </section>
 
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-on-surface tracking-tight leading-tight">
-              Your Neighborhood. <br className="hidden sm:inline" />
-              <span className="text-primary underline decoration-secondary-container decoration-4">Your Marketplace.</span>
-            </h1>
+        {/* MANAAI HYPERLOCAL SCOUT INTEGRATION */}
+        <section className="w-full py-6 sm:py-8 bg-surface-container-low/70 border-y border-outline-variant/30">
+          <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
+            <ManaAIScout />
+          </div>
+        </section>
 
-            <p className="text-base sm:text-lg text-on-surface-variant max-w-xl">
-              Discover your favorite local stores, order authentic neighborhood essentials, and get everything delivered right to your doorstep in 15–30 minutes.
-            </p>
-
-            {/* Dual Primary CTAs */}
-            <div className="flex flex-wrap items-center gap-space-md pt-space-xs">
+        {/* CATEGORIES MODULE (Veedhi Angadi) */}
+        <section className="w-full py-8 sm:py-12 bg-surface">
+          <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-2 mb-6">
+              <div>
+                <span className="font-label-sm text-xs uppercase tracking-wider text-secondary font-bold">
+                  Veedhi Angadi
+                </span>
+                <h2 className="font-headline-xl text-xl sm:text-2xl lg:text-[28px] text-primary font-bold tracking-tight mt-0.5">
+                  Shop by Neighborhood Category
+                </h2>
+                <p className="font-body-md text-xs sm:text-sm text-on-surface-variant">
+                  Handpicked local merchants fulfilling daily cravings, pooja needs, and urgent supplies.
+                </p>
+              </div>
               <Link
                 to="/app"
-                className="bg-secondary-container hover:bg-secondary text-on-secondary px-space-xl py-3.5 rounded-lg text-title-md font-title-md font-bold shadow-level-2 transition-all duration-200 active:scale-95 flex items-center gap-2 group"
+                className="font-label-lg text-xs sm:text-sm text-secondary-container hover:text-secondary flex items-center gap-1 font-semibold self-start md:self-auto"
               >
-                <span>Explore Nearby Stores</span>
-                <span className="material-symbols-outlined text-xl group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                <span>View All 18 Categories</span>
+                <span className="material-symbols-outlined text-[16px]">chevron_right</span>
               </Link>
-              <a
-                href="#how-it-works"
-                className="border-2 border-primary text-primary hover:bg-primary hover:text-on-primary px-space-lg py-3 rounded-lg text-title-md font-title-md font-semibold transition-all duration-200 active:scale-95 flex items-center gap-2"
-              >
-                <span className="material-symbols-outlined text-xl">play_circle</span>
-                <span>How it Works</span>
-              </a>
             </div>
 
-            {/* Live Trust Pillars */}
-            <div className="grid grid-cols-3 gap-space-sm pt-space-md border-t border-outline-variant/30">
-              <div className="flex items-center gap-2">
-                <span
-                  className="material-symbols-outlined text-primary text-2xl"
-                  style={{ fontVariationSettings: "'FILL' 1" }}
+            {/* 10 Clean Category Cards with Bilingual Telugu Subtext */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
+              {categories.map((cat, idx) => (
+                <Link
+                  key={idx}
+                  to={`/app?category=${cat.id}`}
+                  className="group p-3.5 sm:p-4 rounded-xl bg-surface-container-lowest hover:bg-surface-container-high transition-all shadow-xs hover:shadow-md border border-outline-variant/20 flex flex-col justify-between h-36"
                 >
-                  electric_moped
-                </span>
-                <div>
-                  <p className="text-headline-sm font-headline-sm font-bold text-on-surface leading-tight">18 Mins</p>
-                  <p className="text-label-sm font-label-sm text-outline">Average Delivery</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <span
-                  className="material-symbols-outlined text-secondary text-2xl"
-                  style={{ fontVariationSettings: "'FILL' 1" }}
-                >
-                  storefront
-                </span>
-                <div>
-                  <p className="text-headline-sm font-headline-sm font-bold text-on-surface leading-tight">100%</p>
-                  <p className="text-label-sm font-label-sm text-outline">Local Merchants</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <span
-                  className="material-symbols-outlined text-primary text-2xl"
-                  style={{ fontVariationSettings: "'FILL' 1" }}
-                >
-                  currency_rupee
-                </span>
-                <div>
-                  <p className="text-headline-sm font-headline-sm font-bold text-on-surface leading-tight">Fair MRP</p>
-                  <p className="text-label-sm font-label-sm text-outline">No Surge Spikes</p>
-                </div>
-              </div>
+                  <div
+                    className={`w-9 h-9 rounded-lg bg-surface-container flex items-center justify-center ${cat.color} group-hover:scale-110 transition-transform`}
+                  >
+                    <span className="material-symbols-outlined text-[22px]">{cat.icon}</span>
+                  </div>
+                  <div>
+                    <span className="font-headline-sm text-xs sm:text-sm text-primary block leading-tight font-bold">
+                      {cat.title}
+                    </span>
+                    <span className="font-body-sm text-[11px] text-secondary font-bold block mt-0.5">
+                      {cat.telugu}
+                    </span>
+                    <span className="block font-label-sm text-[10px] text-on-surface-variant mt-0.5">
+                      {cat.count}
+                    </span>
+                  </div>
+                </Link>
+              ))}
             </div>
           </div>
+        </section>
 
-          {/* Right Column: Visual Bento Grid */}
-          <div className="lg:col-span-5 grid grid-cols-2 gap-space-md">
-            {/* Bento Card 1: Kirana & Staples */}
-            <div className="bg-surface-container-lowest p-space-md rounded-xl shadow-level-1 border border-outline-variant/40 flex flex-col justify-between hover:shadow-level-2 transition-shadow">
-              <div className="h-32 rounded-lg overflow-hidden mb-space-sm relative">
-                <img
-                  className="w-full h-full object-cover"
-                  src="https://images.unsplash.com/photo-1578916171728-46686eac8d58?w=600&auto=format&fit=crop&q=80"
-                  alt="Local Kirana Store"
-                />
-                <span className="absolute top-2 left-2 bg-primary text-on-primary text-[10px] font-bold px-2 py-0.5 rounded">Kirana Staples</span>
-              </div>
+        {/* FEATURED LOCAL STORES (Order Online & Dine-in Reservation) */}
+        <section className="w-full py-8 sm:py-12 bg-surface-container-low">
+          <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between mb-6">
               <div>
-                <h4 className="text-title-md font-title-md text-on-surface font-bold">Local Kiranas</h4>
-                <p className="text-body-sm font-body-sm text-on-surface-variant">Rice, dals, oils & dry spices at authentic local wholesale prices.</p>
+                <span className="font-label-sm text-xs uppercase tracking-wider text-secondary font-bold">
+                  Trusted Neighborhood Icons
+                </span>
+                <h2 className="font-headline-xl text-xl sm:text-2xl lg:text-[28px] text-primary font-bold tracking-tight mt-0.5">
+                  Featured Stores Near You
+                </h2>
               </div>
-            </div>
-
-            {/* Bento Card 2: Fresh Farm Greens */}
-            <div className="bg-surface-container-lowest p-space-md rounded-xl shadow-level-1 border border-outline-variant/40 flex flex-col justify-between hover:shadow-level-2 transition-shadow">
-              <div className="h-32 rounded-lg overflow-hidden mb-space-sm relative">
-                <img
-                  className="w-full h-full object-cover"
-                  src="https://images.unsplash.com/photo-1540420773420-3366772f4999?w=600&auto=format&fit=crop&q=80"
-                  alt="Organic Vegetables"
-                />
-                <span className="absolute top-2 left-2 bg-primary-container text-on-primary-container text-[10px] font-bold px-2 py-0.5 rounded">Organic Morning</span>
-              </div>
-              <div>
-                <h4 className="text-title-md font-title-md text-on-surface font-bold">Farm Vegetables</h4>
-                <p className="text-body-sm font-body-sm text-on-surface-variant">Harvested fresh daily from nearby Telangana peri-urban farms.</p>
-              </div>
-            </div>
-
-            {/* Bento Card 3: Hyderabad Traditional Bakery & Sweets */}
-            <div className="bg-surface-container-lowest p-space-md rounded-xl shadow-level-1 border border-outline-variant/40 flex flex-col justify-between hover:shadow-level-2 transition-shadow">
-              <div className="h-32 rounded-lg overflow-hidden mb-space-sm relative">
-                <img
-                  className="w-full h-full object-cover"
-                  src="https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=600&auto=format&fit=crop&q=80"
-                  alt="Traditional Sweets & Bakeries"
-                />
-                <span className="absolute top-2 left-2 bg-secondary text-on-secondary text-[10px] font-bold px-2 py-0.5 rounded">Fresh Daily</span>
-              </div>
-              <div>
-                <h4 className="text-title-md font-title-md text-on-surface font-bold">Sweets & Bakeries</h4>
-                <p className="text-body-sm font-body-sm text-on-surface-variant">Warm jalebis, Osmania biscuits, and ghee laddu from iconic makers.</p>
-              </div>
-            </div>
-
-            {/* Bento Card 4: Quick 15-Min Delivery Partner */}
-            <div className="bg-surface-container-lowest p-space-md rounded-xl shadow-level-1 border border-outline-variant/40 flex flex-col justify-between hover:shadow-level-2 transition-shadow">
-              <div className="h-32 rounded-lg overflow-hidden mb-space-sm relative">
-                <img
-                  className="w-full h-full object-cover"
-                  src="https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?w=600&auto=format&fit=crop&q=80"
-                  alt="Hyperlocal Delivery Rider"
-                />
-                <span className="absolute top-2 left-2 bg-tertiary-container text-on-tertiary text-[10px] font-bold px-2 py-0.5 rounded">EV Express</span>
-              </div>
-              <div>
-                <h4 className="text-title-md font-title-md text-on-surface font-bold">15-30m Doorstep</h4>
-                <p className="text-body-sm font-body-sm text-on-surface-variant">Trained local delivery partners who know every lane in your area.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ManaAI Hyperlocal Scout & Live Map Section */}
-      <section className="py-space-xl bg-surface-container-low/60 border-t border-outline-variant/30">
-        <div className="max-w-7xl mx-auto px-space-md md:px-margin-desktop">
-          <ManaAIScout />
-        </div>
-      </section>
-
-      {/* Shop by Category */}
-      <section className="py-space-xl bg-surface-container-lowest border-y border-outline-variant/30">
-        <div className="max-w-7xl mx-auto px-space-md md:px-margin-desktop">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-space-lg">
-            <div>
-              <span className="text-label-md font-label-md text-secondary font-bold tracking-wider">HYPERLOCAL CATALOG</span>
-              <h2 className="text-2xl sm:text-3xl font-bold text-on-surface mt-1">
-                Shop Everything in Your Neighborhood
-              </h2>
-            </div>
-            <Link
-              to="/app"
-              className="text-label-md font-label-md text-primary hover:text-primary-container font-bold flex items-center gap-1 mt-2 md:mt-0"
-            >
-              <span>View all 24 categories</span>
-              <span className="material-symbols-outlined text-base">arrow_forward</span>
-            </Link>
-          </div>
-
-          {/* Categories Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-space-sm md:gap-space-md">
-            {categories.map((cat, idx) => (
               <Link
-                key={idx}
-                to={`/app?category=${cat.cat}`}
-                className="group p-space-md bg-surface-container-low hover:bg-surface-bright rounded-xl border border-outline-variant/30 transition-all duration-200 flex flex-col items-center text-center hover:shadow-level-1 cursor-pointer"
+                to="/app"
+                className="font-label-md text-xs sm:text-sm text-secondary-container hover:text-secondary font-bold flex items-center gap-1"
               >
-                <div className={`w-14 h-14 rounded-full ${cat.bg} flex items-center justify-center ${cat.text} group-hover:scale-110 transition-transform mb-space-xs`}>
-                  <span className="material-symbols-outlined text-3xl">{cat.icon}</span>
-                </div>
-                <h3 className="text-label-md font-label-md text-on-surface font-bold group-hover:text-primary">
-                  {cat.title}
-                </h3>
-                <span className="text-body-sm font-body-sm text-outline">{cat.count}</span>
+                <span>See All Stores</span>
+                <span className="material-symbols-outlined text-[16px]">chevron_right</span>
               </Link>
-            ))}
-          </div>
-        </div>
-      </section>
+            </div>
 
-      {/* Featured Local Stores */}
-      <section className="py-space-xl bg-surface">
-        <div className="max-w-7xl mx-auto px-space-md md:px-margin-desktop">
-          {/* Section Header */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-space-lg">
-            <div>
-              <div className="flex items-center gap-2">
-                <span
-                  className="material-symbols-outlined text-secondary text-xl"
-                  style={{ fontVariationSettings: "'FILL' 1" }}
+            {/* Stores 4-Column Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+              {featuredStores.map((store) => (
+                <div
+                  key={store.id}
+                  className="group bg-surface-container-lowest rounded-xl overflow-hidden shadow-xs hover:shadow-lg border border-outline-variant/30 transition-all flex flex-col"
                 >
-                  star
-                </span>
-                <span className="text-label-md font-label-md text-secondary font-bold">COMMUNITY FAVORITES</span>
-              </div>
-              <h2 className="text-2xl sm:text-3xl font-bold text-on-surface mt-1">
-                Top Rated Stores Around {selectedLocality || 'Madhapur'}
-              </h2>
-              <p className="text-body-md font-body-md text-on-surface-variant">
-                Order directly from merchants you know and trust for generations.
-              </p>
-            </div>
-
-            {/* Filter Chips */}
-            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pt-3 md:pt-0">
-              <button
-                onClick={() => setSelectedFilter('all')}
-                className={`px-3 py-1.5 rounded-full text-label-sm font-label-sm font-semibold flex items-center gap-1 transition-all ${
-                  selectedFilter === 'all'
-                    ? 'bg-primary text-on-primary shadow-sm'
-                    : 'bg-surface-container-lowest text-on-surface-variant hover:text-primary border border-outline-variant'
-                }`}
-              >
-                <span className="material-symbols-outlined text-xs">check</span> All Stores
-              </button>
-              <button
-                onClick={() => setSelectedFilter('fastest')}
-                className={`px-3 py-1.5 rounded-full text-label-sm font-label-sm transition-all ${
-                  selectedFilter === 'fastest'
-                    ? 'bg-primary text-on-primary shadow-sm'
-                    : 'bg-surface-container-lowest text-on-surface-variant hover:text-primary border border-outline-variant'
-                }`}
-              >
-                Fastest Delivery
-              </button>
-              <button
-                onClick={() => setSelectedFilter('offers')}
-                className={`px-3 py-1.5 rounded-full text-label-sm font-label-sm transition-all ${
-                  selectedFilter === 'offers'
-                    ? 'bg-primary text-on-primary shadow-sm'
-                    : 'bg-surface-container-lowest text-on-surface-variant hover:text-primary border border-outline-variant'
-                }`}
-              >
-                Offers & Discounts
-              </button>
-            </div>
-          </div>
-
-          {/* Merchant Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-space-md">
-            {filteredStores.map((store) => (
-              <div
-                key={store.id}
-                className="bg-surface-container-lowest rounded-xl border border-outline-variant/40 shadow-level-1 overflow-hidden hover:shadow-level-2 transition-all duration-200 flex flex-col justify-between group"
-              >
-                <div>
-                  {/* Store Image Banner */}
-                  <div className="h-44 relative overflow-hidden bg-surface-container-low">
+                  {/* Store Banner */}
+                  <div className="relative h-40 w-full overflow-hidden bg-surface-container">
                     <img
                       src={store.image}
                       alt={store.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
-                    <span className={`absolute top-3 left-3 ${store.tagColor} text-label-sm font-label-sm font-bold px-2 py-0.5 rounded shadow`}>
-                      {store.tag}
+                    <span className="absolute top-2 left-2 bg-secondary-container text-on-primary font-label-sm text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+                      {store.eta}
                     </span>
-                    <span className="absolute bottom-3 right-3 bg-surface-container-lowest/90 backdrop-blur-sm text-primary text-label-sm font-label-sm font-bold px-2 py-1 rounded flex items-center gap-1">
-                      <span className="material-symbols-outlined text-sm">schedule</span> {store.eta}
+                    <span className="absolute bottom-2 left-2 bg-primary/80 backdrop-blur-md text-on-primary font-label-sm text-[10px] px-2 py-0.5 rounded">
+                      {store.badge}
                     </span>
                   </div>
 
-                  {/* Content Details */}
-                  <div className="p-space-md">
-                    <div className="flex items-center justify-between gap-1 mb-1">
-                      <span className="text-label-sm font-label-sm text-primary font-bold flex items-center gap-0.5">
-                        <span
-                          className="material-symbols-outlined text-sm text-primary"
-                          style={{ fontVariationSettings: "'FILL' 1" }}
-                        >
-                          verified
+                  {/* Card Content */}
+                  <div className="p-3.5 flex flex-col flex-1 justify-between gap-3">
+                    <div>
+                      <div className="flex items-center justify-between gap-1">
+                        <h3 className="font-headline-sm text-xs sm:text-sm text-primary truncate font-bold">
+                          {store.name}
+                        </h3>
+                        <span className="flex items-center gap-0.5 font-label-sm text-[11px] text-secondary font-bold shrink-0">
+                          <span
+                            className="material-symbols-outlined text-[13px]"
+                            style={{ fontVariationSettings: "'FILL' 1" }}
+                          >
+                            star
+                          </span>
+                          {store.rating}
                         </span>
-                        {store.partnerId}
-                      </span>
-                      <span className="inline-flex items-center gap-0.5 bg-primary/10 text-primary px-1.5 py-0.5 rounded text-label-sm font-bold">
-                        {store.rating}{' '}
-                        <span
-                          className="material-symbols-outlined text-xs"
-                          style={{ fontVariationSettings: "'FILL' 1" }}
-                        >
-                          star
-                        </span>
-                      </span>
+                      </div>
+                      <p className="font-body-sm text-xs text-on-surface-variant mt-1 line-clamp-1">
+                        {store.category}
+                      </p>
                     </div>
 
-                    <h3 className="text-title-md font-title-md font-bold text-on-surface group-hover:text-primary transition-colors">
-                      {store.name}
-                    </h3>
-                    <p className="text-body-sm font-body-sm text-on-surface-variant line-clamp-1 mb-2">
-                      {store.category}
-                    </p>
+                    {/* Metadata & Actions */}
+                    <div className="space-y-2 pt-1 border-t border-outline-variant/20">
+                      <div className="flex items-center justify-between text-xs text-on-surface-variant">
+                        <span className="flex items-center gap-1 text-[11px]">
+                          <span className="material-symbols-outlined text-[14px] text-outline">
+                            near_me
+                          </span>
+                          {store.distance}
+                        </span>
+                        <Link
+                          to={`/store/${store.id}`}
+                          className="font-label-sm text-xs text-secondary-container font-bold hover:underline"
+                        >
+                          Visit Store →
+                        </Link>
+                      </div>
 
-                    <div className="flex items-center text-label-sm font-label-sm text-outline gap-3 border-t border-outline-variant/30 pt-2">
-                      <span className="flex items-center gap-0.5">
-                        <span className="material-symbols-outlined text-sm text-secondary">pin_drop</span> {store.distance}
-                      </span>
-                      <span>•</span>
-                      <span className="text-primary font-medium">{store.deliveryInfo}</span>
+                      {/* Dual Action: If restaurant, offer Book Table button */}
+                      {store.hasTableBooking ? (
+                        <div className="grid grid-cols-2 gap-1.5 pt-1">
+                          <Link
+                            to={`/store/${store.id}`}
+                            className="py-1.5 px-2 rounded-lg bg-surface-container hover:bg-surface-container-high text-primary font-label-sm text-xs font-bold text-center transition-colors"
+                          >
+                            Order Food
+                          </Link>
+                          <button
+                            onClick={() =>
+                              openTableBooking({
+                                id: store.id,
+                                businessName: store.name,
+                                rating: store.rating,
+                                address: { locality: selectedLocality || 'Indiranagar' },
+                              })
+                            }
+                            className="py-1.5 px-2 rounded-lg bg-secondary-container hover:bg-secondary text-on-primary font-label-sm text-xs font-bold text-center transition-colors flex items-center justify-center gap-1 shadow-xs"
+                          >
+                            <span className="material-symbols-outlined text-[14px]">table_restaurant</span>
+                            <span>Book Table</span>
+                          </button>
+                        </div>
+                      ) : (
+                        <Link
+                          to={`/store/${store.id}`}
+                          className="w-full block py-1.5 rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-sm text-xs font-bold text-center transition-colors"
+                        >
+                          Shop Store Catalog
+                        </Link>
+                      )}
                     </div>
                   </div>
                 </div>
+              ))}
+            </div>
+          </div>
+        </section>
 
-                <div className="p-space-md pt-0">
+        {/* HIGH-IMPACT EMPOWERMENT BANNER */}
+        <section className="w-full py-6 sm:py-8 bg-surface">
+          <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="rounded-xl bg-gradient-to-r from-primary to-primary-container p-5 sm:p-8 text-on-primary relative overflow-hidden shadow-md">
+              <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-5">
+                <div className="flex flex-col gap-1 max-w-2xl text-center md:text-left">
+                  <span className="font-label-sm text-[11px] text-secondary-fixed font-bold uppercase tracking-widest">
+                    Our Pledge To Small Businesses
+                  </span>
+                  <h2 className="font-headline-xl text-xl sm:text-2xl text-on-primary font-bold">
+                    Support Local. Shop ManaMart.
+                  </h2>
+                  <p className="font-body-md text-xs sm:text-sm text-tertiary-fixed-dim leading-relaxed">
+                    Every order placed through ManaMart directly funds your local neighborhood retailers, family-run kirana aunties and uncles, and verified street artisans. 100% of store profits stay within your community.
+                  </p>
+                </div>
+                <div className="flex flex-wrap items-center justify-center gap-2.5 shrink-0">
                   <Link
-                    to={`/store/${store.id}`}
-                    className="w-full bg-primary hover:bg-primary-container text-on-primary py-2.5 rounded-lg text-label-md font-label-md font-bold transition-all duration-150 active:scale-95 flex items-center justify-center gap-1 shadow-sm"
+                    to="/merchant/apply"
+                    className="px-4 py-2 rounded-lg bg-secondary-container text-on-primary font-label-md text-xs sm:text-sm font-bold hover:bg-secondary transition-colors shadow-sm"
                   >
-                    <span>View Store</span>
-                    <span className="material-symbols-outlined text-base">arrow_forward</span>
+                    Join as a Merchant
+                  </Link>
+                  <Link
+                    to="/rider/apply"
+                    className="px-4 py-2 rounded-lg bg-surface-container-lowest/15 hover:bg-surface-container-lowest/25 text-on-primary font-label-md text-xs sm:text-sm font-semibold transition-colors"
+                  >
+                    Delivery Partner
                   </Link>
                 </div>
               </div>
-            ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Promotional Hero Banner & How ManaMart Works */}
-      <section id="how-it-works" className="py-space-xl bg-surface-container-lowest">
-        <div className="max-w-7xl mx-auto px-space-md md:px-margin-desktop">
-          {/* Big Community Pride Banner */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary via-primary-container to-tertiary text-on-primary p-space-lg md:p-space-xl shadow-level-2 mb-space-xl">
-            <div className="relative z-10 max-w-2xl">
-              <span className="inline-flex items-center gap-1 bg-surface-container-lowest/15 backdrop-blur-md px-3 py-1 rounded-full text-label-sm font-label-sm mb-space-sm">
-                <span className="material-symbols-outlined text-secondary-fixed text-sm">handshake</span>
-                Empowering Neighborhood Commerce
+        {/* HOW MANAMART WORKS (Simple 3 Steps) */}
+        <section className="w-full py-8 sm:py-12 bg-surface-container-low">
+          <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center max-w-xl mx-auto mb-6 sm:mb-8">
+              <span className="font-label-sm text-xs text-secondary font-bold uppercase tracking-wider">
+                Super Simple Flow
               </span>
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-space-xs text-white">
-                Support Local. Shop ManaMart.
+              <h2 className="font-headline-xl text-xl sm:text-2xl lg:text-[28px] text-primary tracking-tight font-bold mt-0.5">
+                How ManaMart Delivers in Minutes
               </h2>
-              <p className="text-base sm:text-lg text-primary-fixed mb-space-lg">
-                Keeping your neighborhood economy thriving. Every order goes directly to verified local merchants and local delivery riders right inside your community.
+              <p className="font-body-md text-xs sm:text-sm text-on-surface-variant">
+                Bridging the warmth of local shop conversations with ultra-fast hyperlocal delivery logistics.
               </p>
-              <div className="flex flex-wrap items-center gap-space-md">
-                <Link
-                  to="/merchant/apply"
-                  className="bg-secondary-container hover:bg-secondary text-on-secondary px-space-lg py-3 rounded-lg text-label-md font-label-md font-bold shadow-level-1 transition-all"
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+              {/* Step 1 */}
+              <div className="bg-surface-container-lowest p-5 rounded-xl shadow-xs border border-outline-variant/30 flex flex-col gap-3">
+                <div className="w-10 h-10 rounded-lg bg-secondary-fixed text-on-secondary-fixed flex items-center justify-center font-display-lg text-sm font-bold">
+                  1
+                </div>
+                <div className="flex flex-col gap-1">
+                  <h3 className="font-headline-sm text-sm sm:text-base font-bold text-primary">
+                    Discover Local Stores
+                  </h3>
+                  <p className="font-body-md text-xs text-on-surface-variant leading-relaxed">
+                    Enter your street address or pin code. Browse verified kiranas, medical shops, mandis, and tiffin centers operating right within your neighborhood perimeter.
+                  </p>
+                </div>
+                <div className="pt-2 mt-auto flex items-center gap-1.5 text-primary font-label-sm text-[11px] font-semibold border-t border-outline-variant/20">
+                  <span className="material-symbols-outlined text-[16px]">verified</span>
+                  Real-time store inventory sync
+                </div>
+              </div>
+
+              {/* Step 2 */}
+              <div className="bg-surface-container-lowest p-5 rounded-xl shadow-xs border border-outline-variant/30 flex flex-col gap-3">
+                <div className="w-10 h-10 rounded-lg bg-primary-fixed text-on-primary-fixed flex items-center justify-center font-display-lg text-sm font-bold">
+                  2
+                </div>
+                <div className="flex flex-col gap-1">
+                  <h3 className="font-headline-sm text-sm sm:text-base font-bold text-primary">
+                    Shop, Order & Reserve
+                  </h3>
+                  <p className="font-body-md text-xs text-on-surface-variant leading-relaxed">
+                    Pick exact items, specify cut or ripeness directly with merchant notes, or book your favorite table in the AC Hall or Rooftop with live seat choice.
+                  </p>
+                </div>
+                <div className="pt-2 mt-auto flex items-center gap-1.5 text-secondary-container font-label-sm text-[11px] font-semibold border-t border-outline-variant/20">
+                  <span className="material-symbols-outlined text-[16px]">restaurant</span>
+                  Dual Food Delivery & Dine-In Booking
+                </div>
+              </div>
+
+              {/* Step 3 */}
+              <div className="bg-surface-container-lowest p-5 rounded-xl shadow-xs border border-outline-variant/30 flex flex-col gap-3">
+                <div className="w-10 h-10 rounded-lg bg-tertiary-fixed text-on-tertiary-fixed flex items-center justify-center font-display-lg text-sm font-bold">
+                  3
+                </div>
+                <div className="flex flex-col gap-1">
+                  <h3 className="font-headline-sm text-sm sm:text-base font-bold text-primary">
+                    Fast Hyperlocal Delivery
+                  </h3>
+                  <p className="font-body-md text-xs text-on-surface-variant leading-relaxed">
+                    Our dedicated neighborhood riders pick up from the counter and reach your door in under 30 minutes. Pay seamlessly via GooglePay, PhonePe, or Cash on Delivery.
+                  </p>
+                </div>
+                <div className="pt-2 mt-auto flex items-center gap-1.5 text-primary font-label-sm text-[11px] font-semibold border-t border-outline-variant/20">
+                  <span className="material-symbols-outlined text-[16px]">electric_moped</span>
+                  100% Zero plastic waste pledge
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* SOCIAL FEED PREVIEW (Follow Your Local Shops) */}
+        <section className="w-full py-8 sm:py-12 bg-surface">
+          <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-2 mb-6">
+              <div>
+                <span className="font-label-sm text-xs uppercase tracking-wider text-secondary font-bold">
+                  Live Neighborhood Pulse
+                </span>
+                <h2 className="font-headline-xl text-xl sm:text-2xl lg:text-[28px] text-primary tracking-tight font-bold mt-0.5">
+                  Follow Your Favorite Shops
+                </h2>
+                <p className="font-body-md text-xs sm:text-sm text-on-surface-variant">
+                  Catch morning fresh arrivals, exclusive evening discounts, and festive specials directly from store owners.
+                </p>
+              </div>
+              <Link
+                to="/feed"
+                className="px-3 py-1 rounded-full bg-surface-container text-on-surface font-label-md text-xs font-semibold hover:bg-surface-container-high transition-colors self-start md:self-auto"
+              >
+                Open Full Social Feed →
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+              {feedPosts.map((post) => (
+                <div
+                  key={post.id}
+                  className="bg-surface-container-lowest rounded-xl overflow-hidden shadow-xs hover:shadow-md border border-outline-variant/30 transition-shadow flex flex-col"
                 >
-                  Become a ManaMart Merchant
-                </Link>
-                <span className="text-label-md font-label-md text-surface-variant flex items-center gap-1">
-                  <span className="material-symbols-outlined text-secondary-fixed">format_image_left</span>
-                  0% Commission on first 30 days
+                  <div className="p-3.5 flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-9 h-9 rounded-full bg-secondary-fixed flex items-center justify-center font-bold text-on-secondary-fixed text-xs">
+                        {post.initials}
+                      </div>
+                      <div>
+                        <span className="font-label-lg text-xs sm:text-sm text-primary block leading-tight font-bold">
+                          {post.merchantName}
+                        </span>
+                        <span className="font-body-sm text-[11px] text-on-surface-variant">
+                          {post.locality}
+                        </span>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => toggleFollow(post.id)}
+                      className={`px-2.5 py-1 rounded-full font-label-sm text-xs font-semibold transition-colors ${
+                        post.isFollowed
+                          ? 'bg-primary text-on-primary'
+                          : 'bg-surface-container text-primary hover:bg-surface-container-high'
+                      }`}
+                    >
+                      {post.isFollowed ? 'Following' : 'Follow'}
+                    </button>
+                  </div>
+
+                  <div className="relative h-44 w-full bg-surface-container">
+                    <img
+                      src={post.image}
+                      alt={post.merchantName}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+
+                  <div className="p-3.5 flex flex-col flex-1 justify-between gap-3">
+                    <p className="font-body-md text-xs text-on-surface leading-relaxed">
+                      {post.text}
+                    </p>
+                    <div className="flex items-center justify-between pt-1 border-t border-outline-variant/20">
+                      <div className="flex items-center gap-3 text-on-surface-variant text-xs">
+                        <button
+                          onClick={() => toggleLike(post.id)}
+                          className={`flex items-center gap-1 transition-colors ${
+                            post.isLiked ? 'text-secondary-container' : 'hover:text-secondary-container'
+                          }`}
+                        >
+                          <span
+                            className="material-symbols-outlined text-[16px]"
+                            style={{ fontVariationSettings: post.isLiked ? "'FILL' 1" : "'FILL' 0" }}
+                          >
+                            favorite
+                          </span>
+                          <span className="font-label-sm text-xs">{post.likes}</span>
+                        </button>
+                        <button
+                          onClick={() => alert('Saved post to your favorites!')}
+                          className="flex items-center gap-1 hover:text-primary transition-colors"
+                        >
+                          <span className="material-symbols-outlined text-[16px]">bookmark</span>
+                          <span className="font-label-sm text-xs">Save</span>
+                        </button>
+                      </div>
+                      <Link
+                        to="/app"
+                        className="px-3 py-1 rounded-lg bg-secondary-container text-on-primary font-label-md text-xs font-semibold hover:bg-secondary transition-colors"
+                      >
+                        Order Now
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ROLE ONBOARDING QUICK BANNERS */}
+        <section className="w-full py-8 sm:py-12 bg-surface-container-low">
+          <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+              {/* Merchant Onboarding */}
+              <div className="rounded-xl bg-surface-container-lowest p-5 sm:p-6 shadow-xs border border-outline-variant/30 hover:shadow-md transition-shadow flex flex-col justify-between">
+                <div className="flex items-start justify-between gap-4 mb-4">
+                  <div className="flex flex-col gap-1">
+                    <span className="font-label-sm text-xs text-secondary font-bold uppercase tracking-wider">
+                      For Retailers & Kiranas
+                    </span>
+                    <h3 className="font-headline-lg text-base sm:text-lg text-primary font-bold">
+                      Own a Shop? Sell on ManaMart
+                    </h3>
+                    <p className="font-body-md text-xs sm:text-sm text-on-surface-variant">
+                      Enjoy <strong className="text-primary">0% Commission for your first 30 days</strong>. Reach 5,000+ local families instantly without changing your daily counter routine.
+                    </p>
+                  </div>
+                  <div className="w-11 h-11 rounded-xl bg-surface-container flex items-center justify-center text-primary shrink-0">
+                    <span className="material-symbols-outlined text-[26px]">store</span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between pt-2 border-t border-outline-variant/20">
+                  <div className="flex items-center gap-1 font-label-sm text-xs text-on-surface-variant">
+                    <span className="material-symbols-outlined text-[15px] text-primary">done_all</span>
+                    Instant 5-min Onboarding
+                  </div>
+                  <Link
+                    to="/merchant/apply"
+                    className="px-3.5 py-1.5 rounded-lg bg-primary text-on-primary font-label-lg text-xs font-bold hover:bg-primary-container transition-colors"
+                  >
+                    Register Shop
+                  </Link>
+                </div>
+              </div>
+
+              {/* Delivery Partner Onboarding */}
+              <div className="rounded-xl bg-surface-container-lowest p-5 sm:p-6 shadow-xs border border-outline-variant/30 hover:shadow-md transition-shadow flex flex-col justify-between">
+                <div className="flex items-start justify-between gap-4 mb-4">
+                  <div className="flex flex-col gap-1">
+                    <span className="font-label-sm text-xs text-secondary font-bold uppercase tracking-wider">
+                      For Delivery Partners
+                    </span>
+                    <h3 className="font-headline-lg text-base sm:text-lg text-primary font-bold">
+                      Have a Bike? Earn ₹25,000+/mo
+                    </h3>
+                    <p className="font-body-md text-xs sm:text-sm text-on-surface-variant">
+                      Flexible neighborhood shifts in your own area. Instant daily payouts, free vehicle insurance, and ₹2,000 joining bonus for first 50 trips.
+                    </p>
+                  </div>
+                  <div className="w-11 h-11 rounded-xl bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed shrink-0">
+                    <span className="material-symbols-outlined text-[26px]">two_wheeler</span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between pt-2 border-t border-outline-variant/20">
+                  <div className="flex items-center gap-1 font-label-sm text-xs text-on-surface-variant">
+                    <span className="material-symbols-outlined text-[15px] text-secondary">payments</span>
+                    Daily UPI Payouts
+                  </div>
+                  <Link
+                    to="/rider/apply"
+                    className="px-3.5 py-1.5 rounded-lg bg-secondary-container text-on-primary font-label-lg text-xs font-bold hover:bg-secondary transition-colors"
+                  >
+                    Join as Hero
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* LIVE APP INSTALLATION BAR */}
+        <section className="w-full py-6 sm:py-8 bg-surface">
+          <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="rounded-xl bg-surface-container p-4 sm:p-5 flex flex-col md:flex-row items-center justify-between gap-4 border border-outline-variant/30">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-primary text-on-primary flex items-center justify-center font-display-lg text-base font-bold shrink-0">
+                  M
+                </div>
+                <div>
+                  <span className="font-headline-sm text-xs sm:text-sm text-primary font-bold block">
+                    Get the ManaMart Mobile App
+                  </span>
+                  <p className="font-body-sm text-[11px] text-on-surface-variant">
+                    Scan QR or receive download link on SMS for fastest 1-click re-orders.
+                  </p>
+                </div>
+              </div>
+              <form onSubmit={handleSendAppLink} className="flex items-center gap-2 w-full md:w-auto">
+                <input
+                  type="tel"
+                  value={appPhone}
+                  onChange={(e) => setAppPhone(e.target.value)}
+                  placeholder="Enter 10-digit mobile number"
+                  className="bg-surface-container-lowest px-3 py-1.5 rounded-lg text-on-surface placeholder:text-outline font-body-md text-xs focus:outline-none flex-1 md:w-56 border border-outline-variant/30"
+                />
+                <button
+                  type="submit"
+                  className="px-3.5 py-1.5 rounded-lg bg-primary text-on-primary font-label-lg text-xs font-bold hover:bg-primary-container transition-colors shrink-0"
+                >
+                  {appLinkSent ? 'Link Sent ✓' : 'Send Link'}
+                </button>
+              </form>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      {/* COMPREHENSIVE FOOTER */}
+      <footer className="w-full bg-surface-container-low mt-8 border-t border-outline-variant/30">
+        <div className="w-full px-4 sm:px-6 lg:px-8 mx-auto max-w-[1280px] py-8 sm:py-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 sm:gap-8 mb-8">
+            {/* Logo & About */}
+            <div className="lg:col-span-2 flex flex-col gap-3">
+              <div className="flex items-center">
+                <img
+                  src="/logo.png"
+                  alt="ManaMart - Mana Ooru. Mana Market."
+                  className="h-10 sm:h-12 w-auto object-contain"
+                />
+              </div>
+              <p className="font-body-md text-xs sm:text-sm text-on-surface-variant max-w-sm leading-relaxed">
+                Hyperlocal neighborhood commerce powered by your trusted local kiranas, mandis, and artisans. Lightning fast deliveries right to your doorstep.
+              </p>
+              <div className="flex items-center gap-2">
+                <span className="font-label-sm text-[11px] px-2.5 py-1 rounded-full bg-surface-container-high text-primary font-semibold">
+                  ⚡ 10-15 MINS
+                </span>
+                <span className="font-label-sm text-[11px] px-2.5 py-1 rounded-full bg-primary-container text-on-primary font-semibold">
+                  Ooru Special
                 </span>
               </div>
             </div>
-            <div className="absolute -right-10 -bottom-10 opacity-10 pointer-events-none">
-              <span className="material-symbols-outlined text-[240px]">storefront</span>
+
+            {/* Quick Links */}
+            <div className="flex flex-col gap-2">
+              <span className="font-headline-sm text-xs sm:text-sm text-primary font-bold mb-1">
+                Quick Links
+              </span>
+              <Link to="/app" className="font-body-md text-xs text-on-surface-variant hover:text-secondary transition-colors">
+                Explore Local Shops
+              </Link>
+              <Link to="/reservations" className="font-body-md text-xs text-secondary font-semibold hover:underline transition-colors flex items-center gap-1">
+                <span className="material-symbols-outlined text-[14px]">restaurant</span>
+                Restaurant Reservations
+              </Link>
+              <Link to="/parcel" className="font-body-md text-xs text-on-surface-variant hover:text-secondary transition-colors">
+                Send Parcel
+              </Link>
+              <Link to="/recurring" className="font-body-md text-xs text-on-surface-variant hover:text-secondary transition-colors">
+                Auto-Monthly Lists
+              </Link>
+            </div>
+
+            {/* Partnerships */}
+            <div className="flex flex-col gap-2">
+              <span className="font-headline-sm text-xs sm:text-sm text-primary font-bold mb-1">
+                Partnerships
+              </span>
+              <Link to="/merchant/apply" className="font-body-md text-xs text-on-surface-variant hover:text-secondary transition-colors">
+                Become a Merchant
+              </Link>
+              <Link to="/rider/apply" className="font-body-md text-xs text-on-surface-variant hover:text-secondary transition-colors">
+                Join as Delivery Partner
+              </Link>
+              <a href="#" className="font-body-md text-xs text-on-surface-variant hover:text-secondary transition-colors">
+                Terms of Service
+              </a>
+              <a href="#" className="font-body-md text-xs text-on-surface-variant hover:text-secondary transition-colors">
+                Privacy Policy
+              </a>
+            </div>
+
+            {/* Support */}
+            <div className="flex flex-col gap-2">
+              <span className="font-headline-sm text-xs sm:text-sm text-primary font-bold mb-1">
+                Support
+              </span>
+              <div className="p-3 rounded-xl bg-surface-container flex flex-col gap-1 border border-outline-variant/20">
+                <span className="font-label-md text-xs text-primary font-semibold flex items-center gap-1">
+                  <span className="material-symbols-outlined text-[16px]">support_agent</span>
+                  24x7 Help Desk
+                </span>
+                <span className="font-body-sm text-[11px] text-on-surface-variant">
+                  Assistance in Telugu, Hindi & English
+                </span>
+                <span className="font-label-md text-xs text-secondary font-bold mt-1">
+                  1800-MANA-MART
+                </span>
+              </div>
             </div>
           </div>
 
-          {/* How ManaMart Works: 3 Steps */}
-          <div className="text-center max-w-xl mx-auto mb-space-lg">
-            <span className="text-label-md font-label-md text-secondary font-bold tracking-wider">SIMPLE & TRANSPARENT</span>
-            <h3 className="text-2xl sm:text-3xl font-bold text-on-surface mt-1">
-              How ManaMart Works
-            </h3>
-            <p className="text-body-md font-body-md text-on-surface-variant">
-              Three seamless steps connecting you to your authentic local community.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-space-lg">
-            {/* Step 1 */}
-            <div className="bg-surface-container-low p-space-lg rounded-xl border border-outline-variant/30 flex flex-col items-center text-center relative">
-              <div className="w-16 h-16 rounded-2xl bg-primary text-on-primary flex items-center justify-center font-bold text-headline-sm mb-space-md shadow-level-1">
-                <span className="material-symbols-outlined text-3xl">map</span>
-              </div>
-              <span className="text-label-sm font-label-sm text-secondary font-bold mb-1">STEP 01</span>
-              <h4 className="text-title-md font-title-md text-on-surface font-bold mb-2">Discover Neighborhood Stores</h4>
-              <p className="text-body-md font-body-md text-on-surface-variant">
-                Enter your colony or pincode to immediately see local kiranas, bakeries, medical stores, and bazaars within 3 km.
-              </p>
-            </div>
-
-            {/* Step 2 */}
-            <div className="bg-surface-container-low p-space-lg rounded-xl border border-outline-variant/30 flex flex-col items-center text-center relative">
-              <div className="w-16 h-16 rounded-2xl bg-secondary-container text-on-secondary flex items-center justify-center font-bold text-headline-sm mb-space-md shadow-level-1">
-                <span className="material-symbols-outlined text-3xl">chat</span>
-              </div>
-              <span className="text-label-sm font-label-sm text-secondary font-bold mb-1">STEP 02</span>
-              <h4 className="text-title-md font-title-md text-on-surface font-bold mb-2">Real-Time Order & Merchant Chat</h4>
-              <p className="text-body-md font-body-md text-on-surface-variant">
-                Pick items, request custom cuts or specific brand substitutions directly through instant chat with the shopkeeper.
-              </p>
-            </div>
-
-            {/* Step 3 */}
-            <div className="bg-surface-container-low p-space-lg rounded-xl border border-outline-variant/30 flex flex-col items-center text-center relative">
-              <div className="w-16 h-16 rounded-2xl bg-tertiary-container text-on-tertiary flex items-center justify-center font-bold text-headline-sm mb-space-md shadow-level-1">
-                <span className="material-symbols-outlined text-3xl">electric_scooter</span>
-              </div>
-              <span className="text-label-sm font-label-sm text-secondary font-bold mb-1">STEP 03</span>
-              <h4 className="text-title-md font-title-md text-on-surface font-bold mb-2">Fast 20-Min Doorstep Delivery</h4>
-              <p className="text-body-md font-body-md text-on-surface-variant">
-                A neighbor fleet partner picks it fresh from the store counter and delivers directly to your door in eco-friendly packaging.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Daily Offers & Followed Shop Updates Ticker */}
-      <section className="py-space-md bg-surface-container border-y border-outline-variant/30">
-        <div className="max-w-7xl mx-auto px-space-md md:px-margin-desktop flex flex-col md:flex-row items-center justify-between gap-space-sm">
-          <div className="flex items-center gap-2">
-            <span className="px-2 py-1 bg-secondary text-on-secondary rounded text-label-sm font-label-sm font-bold flex items-center gap-1">
-              <span className="material-symbols-outlined text-xs">campaign</span> TODAY'S BUZZ
+          {/* Bottom Copyright Ribbon */}
+          <div className="pt-4 flex flex-col md:flex-row items-center justify-between gap-2 border-t border-outline-variant/30 text-xs text-on-surface-variant">
+            <span className="font-headline-sm text-xs sm:text-sm text-primary font-bold">
+              Mana Ooru. Mana Market.
             </span>
-            <span className="text-label-md font-label-md text-on-surface">Live from your followed merchants:</span>
-          </div>
-          <div className="flex items-center gap-4 overflow-x-auto no-scrollbar py-1">
-            <div className="flex items-center gap-2 bg-surface-container-lowest px-3 py-1 rounded-full border border-outline-variant/40 shrink-0">
-              <span className="w-2 h-2 rounded-full bg-primary"></span>
-              <span className="text-label-sm font-label-sm text-on-surface">
-                <strong>Sri Lakshmi:</strong> Fresh Sona Masoori Rice 25kg at ₹1,290
-              </span>
-            </div>
-            <div className="flex items-center gap-2 bg-surface-container-lowest px-3 py-1 rounded-full border border-outline-variant/40 shrink-0">
-              <span className="w-2 h-2 rounded-full bg-secondary"></span>
-              <span className="text-label-sm font-label-sm text-on-surface">
-                <strong>Venkateshwara:</strong> Hot Badam Milk batches ready at 5:00 PM
-              </span>
-            </div>
-            <div className="flex items-center gap-2 bg-surface-container-lowest px-3 py-1 rounded-full border border-outline-variant/40 shrink-0">
-              <span className="w-2 h-2 rounded-full bg-primary-container"></span>
-              <span className="text-label-sm font-label-sm text-on-surface">
-                <strong>Balaji Farm:</strong> Palak & Methi bunches 3 for ₹40
-              </span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Comprehensive Footer */}
-      <footer className="bg-surface-container-lowest border-t border-outline-variant/50 pt-space-xl pb-space-lg">
-        <div className="max-w-7xl mx-auto px-space-md md:px-margin-desktop grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-space-xl mb-space-xl">
-          {/* Brand & Mission Column */}
-          <div className="lg:col-span-2 flex flex-col space-y-space-sm">
-            <Link to="/" className="inline-block mb-1">
-              <img
-                src="/logo.png"
-                alt="ManaMart"
-                className="h-10 w-auto object-contain"
-              />
-            </Link>
-            <p className="text-title-md font-title-md text-primary font-bold">Mana Ooru. Mana Market.</p>
-            <p className="text-body-sm font-body-sm text-on-surface-variant max-w-sm">
-              ManaMart Hyperlocal Technologies empowers traditional Indian neighborhood retailers with instant commerce infrastructure, transparent pricing, and trusted doorstep fulfillment.
-            </p>
-            <div className="flex items-center space-x-3 pt-space-xs text-primary">
-              <span className="p-2 bg-surface-container-low rounded-lg" title="Locality">
-                <span className="material-symbols-outlined text-lg">location_city</span>
-              </span>
-              <span className="p-2 bg-surface-container-low rounded-lg" title="Safety">
-                <span className="material-symbols-outlined text-lg">verified_user</span>
-              </span>
-              <span className="p-2 bg-surface-container-low rounded-lg" title="Support">
-                <span className="material-symbols-outlined text-lg">support_agent</span>
-              </span>
-            </div>
-          </div>
-
-          {/* Footer Nav Links Column 1 */}
-          <div>
-            <h4 className="text-title-md font-title-md font-bold text-on-surface mb-space-sm">Explore ManaMart</h4>
-            <ul className="space-y-2 text-body-sm font-body-sm text-on-surface-variant">
-              <li><Link to="/app" className="hover:text-primary transition-colors">Marketplace Catalog</Link></li>
-              <li><Link to="/reservations" className="hover:text-primary transition-colors font-semibold text-secondary">Restaurant Table Booking</Link></li>
-              <li><Link to="/merchant/apply" className="hover:text-primary transition-colors">Partner With Us</Link></li>
-              <li><Link to="/rider/apply" className="hover:text-primary transition-colors">Delivery Fleet</Link></li>
-              <li><Link to="/parcel" className="hover:text-primary transition-colors">Neighborhood Courier</Link></li>
-              <li><Link to="/recurring" className="hover:text-primary transition-colors">Monthly Auto-Shopping</Link></li>
-            </ul>
-          </div>
-
-          {/* Footer Nav Links Column 2 */}
-          <div>
-            <h4 className="text-title-md font-title-md font-bold text-on-surface mb-space-sm">Categories</h4>
-            <ul className="space-y-2 text-body-sm font-body-sm text-on-surface-variant">
-              <li><Link to="/app?category=groceries" className="hover:text-primary transition-colors">Kirana & Staples</Link></li>
-              <li><Link to="/app?category=produce" className="hover:text-primary transition-colors">Fresh Produce</Link></li>
-              <li><Link to="/app?category=food" className="hover:text-primary transition-colors">Dairy & Sweets</Link></li>
-              <li><Link to="/app?category=pharmacy" className="hover:text-primary transition-colors">Pharma 24x7</Link></li>
-              <li><Link to="/app?category=deals" className="hover:text-primary transition-colors">Local Deals</Link></li>
-            </ul>
-          </div>
-
-          {/* Footer Policy & Grievance Column */}
-          <div>
-            <h4 className="text-title-md font-title-md font-bold text-on-surface mb-space-sm">Legal & Trust</h4>
-            <ul className="space-y-2 text-body-sm font-body-sm text-on-surface-variant">
-              <li><a href="#" className="hover:text-primary transition-colors">Privacy Policy</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">Terms of Service</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">Merchant Grievance</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">Consumer Rights Notice</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">FSSAI Compliance</a></li>
-            </ul>
-          </div>
-        </div>
-
-        {/* Bottom Copyright Ribbon */}
-        <div className="border-t border-outline-variant/30 pt-space-md">
-          <div className="max-w-7xl mx-auto px-space-md md:px-margin-desktop flex flex-col md:flex-row justify-between items-center gap-space-sm text-label-sm font-label-sm text-on-surface-variant">
-            <p>© 2025 ManaMart Hyperlocal Technologies Pvt Ltd. Mana Ooru. Mana Market.</p>
-            <div className="flex items-center space-x-space-md">
-              <span>Registered in Telangana, India</span>
-              <span>•</span>
-              <span>Made with pride for Local Indian Commerce</span>
-            </div>
+            <span className="font-body-sm text-[11px]">
+              © 2025 ManaMart Technologies Private Limited. All rights reserved.
+            </span>
           </div>
         </div>
       </footer>
+
+      {/* BookMyShow-style Interactive Restaurant Table Reservation Modal */}
+      {selectedRestaurantForBooking && (
+        <TableReservationModal
+          isOpen={activeReservationModal}
+          onClose={() => {
+            setActiveReservationModal(false);
+            setSelectedRestaurantForBooking(null);
+          }}
+          restaurant={selectedRestaurantForBooking}
+        />
+      )}
     </div>
   );
 }

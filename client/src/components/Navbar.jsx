@@ -140,28 +140,28 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 bg-surface-container-lowest/95 backdrop-blur-md border-b border-outline-variant/30 shadow-level-1">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 sm:h-20 gap-4">
+      <header className="sticky top-0 z-40 bg-surface/95 backdrop-blur-md border-b border-surface-container-high/60 shadow-xs">
+        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16 sm:h-20 gap-3 sm:gap-4">
             
             {/* Brand Logo & Location Pill */}
-            <div className="flex items-center space-x-3 sm:space-x-5 flex-shrink-0">
+            <div className="flex items-center space-x-3 sm:space-x-4 flex-shrink-0">
               <Logo size="md" to="/" />
 
               {/* Location Selector Pill */}
               <button
                 onClick={() => setIsModalOpen(true)}
-                className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full bg-slate-50 hover:bg-orange-50 border border-slate-200 hover:border-orange-200 transition-all text-left"
+                className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 transition-all text-left"
               >
-                <div className="w-5 h-5 rounded-full bg-orange-500/10 text-[#FF5A00] flex items-center justify-center flex-shrink-0">
-                  <MapPin className="w-3.5 h-3.5 text-[#FF5A00]" />
+                <div className="w-5 h-5 rounded-full bg-secondary-container/15 text-secondary-container flex items-center justify-center flex-shrink-0">
+                  <MapPin className="w-3.5 h-3.5 text-secondary-container" />
                 </div>
                 <div className="flex flex-col">
                   <div className="flex items-center space-x-1">
-                    <span className="text-xs font-bold text-slate-800 line-clamp-1">{selectedLocality}</span>
-                    <ChevronDown className="w-3 h-3 text-slate-400" />
+                    <span className="text-xs font-bold text-on-surface line-clamp-1">{selectedLocality}</span>
+                    <ChevronDown className="w-3 h-3 text-on-surface-variant" />
                   </div>
-                  <span className="text-[10px] text-slate-400 line-clamp-1">{currentCity}</span>
+                  <span className="text-[10px] text-on-surface-variant line-clamp-1">{currentCity}</span>
                 </div>
               </button>
             </div>
@@ -177,9 +177,9 @@ export default function Navbar() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={t('nav.searchPlaceholder') || 'Search Biryani, Milk, Medicine, Store...'}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-slate-100/80 hover:bg-slate-100 focus:bg-white text-xs sm:text-sm border border-transparent focus:border-orange-500 focus:ring-4 focus:ring-orange-100 outline-none transition-all placeholder:text-slate-400"
+                  className="w-full pl-9 pr-4 py-2 rounded-xl bg-surface-container-lowest hover:bg-surface-container-low focus:bg-white text-xs sm:text-sm border border-outline-variant/30 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all placeholder:text-outline text-on-surface"
                 />
-                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <Search className="w-4 h-4 text-outline absolute left-3 top-1/2 -translate-y-1/2" />
               </div>
             </form>
 
@@ -187,21 +187,21 @@ export default function Navbar() {
             <div className="flex items-center space-x-2 sm:space-x-3">
               
               {/* Quick Links on Large Screens */}
-              <div className="hidden lg:flex items-center space-x-3 text-xs font-semibold text-slate-600">
-                <Link to="/reservations" className="flex items-center space-x-1 hover:text-amber-600 transition-colors">
-                  <CalendarDays className="w-3.5 h-3.5 text-amber-600" />
+              <div className="hidden lg:flex items-center space-x-3 text-xs font-semibold text-on-surface-variant">
+                <Link to="/reservations" className="flex items-center space-x-1 text-secondary font-bold hover:text-secondary-container transition-colors">
+                  <CalendarDays className="w-3.5 h-3.5 text-secondary-container" />
                   <span>Dine-In Booking</span>
                 </Link>
-                <Link to="/feed" className="flex items-center space-x-1 hover:text-[#FF5A00] transition-colors">
-                  <Sparkles className="w-3.5 h-3.5 text-purple-600" />
+                <Link to="/feed" className="flex items-center space-x-1 hover:text-primary transition-colors">
+                  <Sparkles className="w-3.5 h-3.5 text-secondary" />
                   <span>{t('nav.feed')}</span>
                 </Link>
-                <Link to="/recurring" className="flex items-center space-x-1 hover:text-[#006837] transition-colors">
-                  <Repeat className="w-3.5 h-3.5 text-[#006837]" />
+                <Link to="/recurring" className="flex items-center space-x-1 hover:text-primary transition-colors">
+                  <Repeat className="w-3.5 h-3.5 text-primary" />
                   <span>{t('nav.recurring')}</span>
                 </Link>
-                <Link to="/parcel" className="flex items-center space-x-1 hover:text-[#FF5A00] transition-colors">
-                  <Package className="w-3.5 h-3.5 text-[#FF5A00]" />
+                <Link to="/parcel" className="flex items-center space-x-1 hover:text-primary transition-colors">
+                  <Package className="w-3.5 h-3.5 text-primary" />
                   <span>{t('nav.parcel')}</span>
                 </Link>
               </div>
@@ -209,10 +209,10 @@ export default function Navbar() {
               {/* Language Switcher Pill */}
               <button
                 onClick={toggleLanguage}
-                className="flex items-center space-x-1 px-2.5 py-1.5 rounded-xl border border-slate-200 hover:border-orange-300 text-xs font-bold text-slate-700 bg-white hover:bg-orange-50/50 transition-all shadow-2xs"
+                className="flex items-center space-x-1 px-2.5 py-1.5 rounded-xl border border-outline-variant/30 hover:border-primary text-xs font-bold text-on-surface bg-surface-container hover:bg-surface-container-high transition-all"
                 title="Toggle English / తెలుగు"
               >
-                <Globe className="w-3.5 h-3.5 text-[#FF5A00]" />
+                <Globe className="w-3.5 h-3.5 text-secondary-container" />
                 <span>{i18n.language === 'en' ? 'తెలుగు' : 'English'}</span>
               </button>
 
@@ -223,12 +223,12 @@ export default function Navbar() {
                     setNotifDropdownOpen(!notifDropdownOpen);
                     setUserDropdownOpen(false);
                   }}
-                  className="relative p-2 rounded-xl border border-slate-200 hover:border-orange-300 bg-white text-slate-700 hover:text-[#FF5A00] transition-all shadow-2xs"
+                  className="relative p-2 rounded-xl border border-outline-variant/30 hover:border-secondary-container bg-surface-container text-on-surface hover:text-secondary-container transition-all"
                   title="Notifications & Updates from Followed Shops"
                 >
                   <Bell className="w-4 h-4" />
                   {unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-[#FF5A00] text-white text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center border-2 border-white animate-pulse">
+                    <span className="absolute -top-1 -right-1 bg-secondary-container text-white text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center border-2 border-surface animate-pulse">
                       {unreadCount}
                     </span>
                   )}
@@ -399,14 +399,14 @@ export default function Navbar() {
                 <div className="flex items-center space-x-1.5">
                   <Link
                     to="/login"
-                    className="flex items-center space-x-1 px-3 py-1.5 rounded-xl border border-slate-200 hover:border-orange-300 bg-white hover:bg-orange-50/50 text-xs font-bold text-slate-800 transition-all shadow-2xs"
+                    className="flex items-center space-x-1 px-3 py-1.5 rounded-lg border border-primary/40 hover:border-primary bg-surface-container-lowest text-xs font-bold text-primary transition-all"
                   >
-                    <User className="w-3.5 h-3.5 text-[#FF5A00]" />
+                    <User className="w-3.5 h-3.5 text-primary" />
                     <span>Sign In</span>
                   </Link>
                   <Link
                     to="/signup"
-                    className="hidden sm:inline-flex items-center space-x-1 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-[#FF5A00] to-[#E65100] hover:from-orange-600 hover:to-orange-700 text-white text-xs font-bold shadow-2xs transition-all"
+                    className="hidden sm:inline-flex items-center space-x-1 px-3.5 py-1.5 rounded-lg bg-primary hover:bg-primary-container text-on-primary text-xs font-bold shadow-xs transition-all"
                   >
                     <span>Register</span>
                   </Link>
@@ -416,21 +416,21 @@ export default function Navbar() {
               {/* Cart Trigger Button */}
               <button
                 onClick={() => setIsCartOpen(true)}
-                className="relative flex items-center space-x-2 bg-gradient-to-r from-[#FF5A00] to-[#E65100] hover:from-orange-600 hover:to-orange-700 text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-2xl shadow-md hover:shadow-lg transition-all"
+                className="relative flex items-center space-x-1.5 bg-secondary-container hover:bg-secondary text-on-primary px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl shadow-xs transition-all"
               >
-                <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5" />
+                <ShoppingBag className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
                 <div className="flex flex-col text-left">
                   <span className="text-[11px] sm:text-xs font-bold leading-tight">
                     {totalItemCount > 0 ? `${totalItemCount} Items` : t('nav.cart')}
                   </span>
                   {totalItemCount > 0 && (
-                    <span className="text-[10px] font-semibold text-orange-100 leading-none">
+                    <span className="text-[10px] font-semibold text-secondary-fixed leading-none">
                       ₹{total}
                     </span>
                   )}
                 </div>
                 {totalItemCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-white text-[#FF5A00] text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-[#FF5A00] shadow-sm animate-pulse">
+                  <span className="absolute -top-1 -right-1 bg-surface-container-lowest text-secondary text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center border border-secondary shadow-xs animate-pulse">
                     {totalItemCount}
                   </span>
                 )}

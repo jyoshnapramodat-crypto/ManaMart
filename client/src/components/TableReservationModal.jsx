@@ -646,3 +646,4 @@ export default function TableReservationModal({ isOpen, onClose, restaurant }) {
     </div>
   );
 }
+
