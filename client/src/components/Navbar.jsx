@@ -184,10 +184,10 @@ export default function Navbar() {
             </div>
 
             {/* Desktop Centered & Spacious Search Bar */}
-            <div className="hidden md:flex flex-1 min-w-[220px] max-w-xl mx-2 lg:mx-4 items-center">
+            <div className="hidden md:flex flex-1 min-w-[280px] max-w-2xl mx-2 lg:mx-4 items-center">
               <form
                 onSubmit={handleSearchSubmit}
-                className="w-full flex items-center bg-white rounded-full shadow-xs border border-slate-200/90 hover:border-slate-300 focus-within:border-[#003527] focus-within:ring-2 focus-within:ring-[#003527]/10 px-3.5 py-1.5 transition-all"
+                className="w-full flex items-center bg-white rounded-full shadow-xs border border-slate-200 hover:border-slate-300 focus-within:border-[#003527] focus-within:ring-2 focus-within:ring-[#003527]/10 px-3.5 py-1.5 transition-all"
               >
                 {/* Single Search Icon on Left */}
                 <span className="material-symbols-outlined text-slate-400 text-lg mr-2 shrink-0">
@@ -199,8 +199,8 @@ export default function Navbar() {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder={t('nav.searchPlaceholder') || 'Search Biryani, Milk, Medicine, Store...'}
-                  className="w-full bg-transparent text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none py-0.5"
+                  placeholder={t('nav.searchPlaceholder') || 'Search Biryani, Milk, Groceries, Store...'}
+                  className="w-full min-w-0 flex-1 bg-transparent text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none py-0.5 truncate"
                 />
 
                 {/* Clear button if query present */}
@@ -235,14 +235,21 @@ export default function Navbar() {
             </div>
 
             {/* Right Action Icons & Utilities */}
-            <div className="flex items-center space-x-2 sm:space-x-3">
+            <div className="flex items-center space-x-2 sm:space-x-2.5 shrink-0">
               
-              {/* Quick Links on Large Screens */}
-              <div className="hidden lg:flex items-center space-x-3 text-xs font-semibold text-on-surface-variant">
-                <Link to="/reservations" className="flex items-center space-x-1 text-secondary font-bold hover:text-secondary-container transition-colors">
-                  <CalendarDays className="w-3.5 h-3.5 text-secondary-container" />
-                  <span>Dine-In Booking</span>
-                </Link>
+              {/* Dine-In Quick Pill */}
+              <Link
+                to={isLoggedIn ? "/reservations" : "/login"}
+                state={{ from: { pathname: "/reservations" }, message: "Please sign in or select a demo role to book a dining table." }}
+                className="hidden xl:flex items-center space-x-1.5 px-3 py-1.5 rounded-full bg-secondary-container/10 hover:bg-secondary-container/20 text-secondary-container font-bold text-xs transition-colors shrink-0"
+                title="Book Restaurant Table"
+              >
+                <CalendarDays className="w-3.5 h-3.5" />
+                <span>Dine-In Booking</span>
+              </Link>
+
+              {/* Extended Services on Extra-Wide Displays */}
+              <div className="hidden 2xl:flex items-center space-x-3 text-xs font-semibold text-on-surface-variant">
                 <Link to="/feed" className="flex items-center space-x-1 hover:text-primary transition-colors">
                   <Sparkles className="w-3.5 h-3.5 text-secondary" />
                   <span>{t('nav.feed')}</span>
@@ -555,7 +562,7 @@ export default function Navbar() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t('nav.searchPlaceholder') || 'Search Biryani, Groceries, Medicines...'}
-                className="w-full bg-transparent text-xs text-on-surface placeholder:text-outline focus:outline-none"
+                className="w-full min-w-0 flex-1 bg-transparent text-xs text-on-surface placeholder:text-outline focus:outline-none truncate"
               />
               {searchQuery && (
                 <button

@@ -508,8 +508,16 @@ export default function LandingPage() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => navigate('/reservations')}
-                      className="px-2 py-0.5 rounded-full bg-secondary-fixed/40 text-secondary font-semibold hover:bg-secondary-fixed transition-colors"
+                      onClick={() => {
+                        if (!isLoggedIn) {
+                          navigate('/login', {
+                            state: { from: { pathname: '/reservations' }, message: 'Please sign in or select a demo role to book restaurant dining tables.' },
+                          });
+                        } else {
+                          navigate('/reservations');
+                        }
+                      }}
+                      className="px-2 py-0.5 rounded-full bg-secondary-fixed/40 text-secondary font-semibold hover:bg-secondary-fixed transition-colors cursor-pointer"
                     >
                       🍽️ Dine-In Booking
                     </button>
@@ -526,13 +534,22 @@ export default function LandingPage() {
                     <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
                   </Link>
 
-                  <Link
-                    to="/reservations"
-                    className="px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl bg-primary text-on-primary font-label-lg text-xs sm:text-sm font-bold hover:bg-primary-container transition-all shadow-sm flex items-center gap-1.5"
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!isLoggedIn) {
+                        navigate('/login', {
+                          state: { from: { pathname: '/reservations' }, message: 'Please sign in or select a demo role to book restaurant dining tables.' },
+                        });
+                      } else {
+                        navigate('/reservations');
+                      }
+                    }}
+                    className="px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl bg-primary text-on-primary font-label-lg text-xs sm:text-sm font-bold hover:bg-primary-container transition-all shadow-sm flex items-center gap-1.5 cursor-pointer active:scale-95"
                   >
                     <span className="material-symbols-outlined text-[18px]">restaurant</span>
                     <span>Book Restaurant Table</span>
-                  </Link>
+                  </button>
 
                   <Link
                     to="/merchant/apply"

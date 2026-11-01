@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import { useLocation } from '../../context/LocationContext';
 import { useCart } from '../../context/CartContext';
+import { useAuth } from '../../context/AuthContext';
 import ManaAIScout from '../../components/ManaAIScout';
 import TableReservationModal from '../../components/TableReservationModal';
 import {
@@ -30,6 +31,7 @@ export default function HomePage() {
   const { t, i18n } = useTranslation();
   const { currentCity, selectedLocality, coordinates } = useLocation();
   const { addItem } = useCart();
+  const { isLoggedIn } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const searchQuery = searchParams.get('q') || '';
@@ -149,10 +151,15 @@ export default function HomePage() {
               <button
                 type="button"
                 onClick={() => {
-                  setSelectedRestaurant(null);
-                  setBookingModalOpen(true);
+                  if (!isLoggedIn) {
+                    navigate('/login', {
+                      state: { from: { pathname: '/reservations' }, message: 'Please sign in or select a demo role to book restaurant dining tables.' },
+                    });
+                    return;
+                  }
+                  navigate('/reservations');
                 }}
-                className="inline-flex items-center space-x-1.5 bg-secondary-container hover:bg-secondary text-on-primary px-3.5 py-2 rounded-xl font-bold text-xs shadow-xs transition-all cursor-pointer"
+                className="inline-flex items-center space-x-1.5 bg-secondary-container hover:bg-secondary text-on-primary px-3.5 py-2 rounded-xl font-bold text-xs shadow-xs transition-all cursor-pointer active:scale-95"
               >
                 <Utensils className="w-3.5 h-3.5" />
                 <span>Book Restaurant Table</span>

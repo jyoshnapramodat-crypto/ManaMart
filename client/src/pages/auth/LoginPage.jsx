@@ -99,7 +99,8 @@ export default function LoginPage() {
     setError(null);
     try {
       await quickSwitchRole(acc.role);
-      navigate(acc.actionPath);
+      const destination = location.state?.from?.pathname || location.state?.from || acc.actionPath;
+      navigate(destination, { replace: true });
     } catch (err) {
       setError('Quick login failed. Please try form login.');
     } finally {
@@ -239,6 +240,17 @@ export default function LoginPage() {
             Test any role immediately below without entering your personal information, or use your registered credentials.
           </p>
         </div>
+
+        {/* Redirect Notice Banner if arriving from a protected feature like Dine-In Booking */}
+        {location.state?.message && (
+          <div className="max-w-xl mx-auto mb-6 p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 flex items-center gap-3 text-xs shadow-xs animate-fadeIn">
+            <span className="material-symbols-outlined text-amber-600 text-xl shrink-0">lock</span>
+            <div className="flex-1">
+              <span className="font-bold block">Authentication Required</span>
+              <span>{location.state.message}</span>
+            </div>
+          </div>
+        )}
 
         {/* 🌟 SAMPLE DEMO ACCOUNTS: 1-CLICK INSTANT LOGIN FOR EVERY ROLE */}
         <section className="mb-8">

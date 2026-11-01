@@ -91,7 +91,14 @@ function AppLayout() {
           <Route path="/feed" element={<SocialFeedPage />} />
 
           {/* Table Reservations & Dining Booking */}
-          <Route path="/reservations" element={<ReservationsPage />} />
+          <Route
+            path="/reservations"
+            element={
+              <ProtectedRoute allowedRoles={['customer', 'merchant', 'rider', 'admin']}>
+                <ReservationsPage />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Neighborhood Services (Maids, Plumbers, Electricians) */}
           <Route path="/services" element={<ServicesPage />} />

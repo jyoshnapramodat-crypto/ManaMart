@@ -386,9 +386,9 @@ export default function ReservationsPage() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {myReservations.map((pass) => (
+                {myReservations.map((pass, idx) => (
                   <div
-                    key={pass.id}
+                    key={pass.bookingId || pass.bookingCode || pass.id || `res-${idx}`}
                     className="bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-3xl p-6 shadow-xl border border-slate-700 relative overflow-hidden space-y-4 text-left"
                   >
                     {/* Top Notch with Pass Code */}

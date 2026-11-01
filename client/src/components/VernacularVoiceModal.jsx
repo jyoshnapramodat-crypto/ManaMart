@@ -645,3 +645,4 @@ export default function VernacularVoiceModal({ isOpen, onClose }) {
     </div>
   );
 }
+

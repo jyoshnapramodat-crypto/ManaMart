@@ -56,3 +56,4 @@ storeSchema.index({ 'address.location': '2dsphere' });
 
 export const Store = mongoose.models.Store || mongoose.model('Store', storeSchema);
 export default Store;
+

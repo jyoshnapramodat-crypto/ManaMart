@@ -18,8 +18,11 @@ export function initializeSockets(io) {
       io.to(`order:${orderId}`).emit('order:status_changed', { status, note, timestamp: Date.now() });
     });
 
-    socket.on('disconnect', () => {
-      console.log(`Socket disconnected: ${socket.id}`);
+    socket.on('disconnect', (reason) => {
+      // Clean disconnect log
+      if (process.env.NODE_ENV === 'development' && reason !== 'transport close') {
+        console.log(`Socket disconnected: ${socket.id} (${reason})`);
+      }
     });
   });
 }

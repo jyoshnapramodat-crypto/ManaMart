@@ -251,7 +251,7 @@ export default function TableReservationModal({ isOpen, onClose, restaurant }) {
     setOtpError(null);
 
     const context = {
-      restaurantName: activeRestaurant.businessName || activeRestaurant.name,
+      restaurantName: activeRestaurant?.businessName || activeRestaurant?.name || 'Swagath Grand Kitchen',
       guestName: guestName.trim(),
       date: selectedDate,
       time: selectedTime,
@@ -271,7 +271,7 @@ export default function TableReservationModal({ isOpen, onClose, restaurant }) {
   // Resend OTP
   const handleResendOtp = () => {
     const context = {
-      restaurantName: activeRestaurant.businessName || activeRestaurant.name,
+      restaurantName: activeRestaurant?.businessName || activeRestaurant?.name || 'Swagath Grand Kitchen',
       guestName: guestName.trim(),
       date: selectedDate,
       time: selectedTime,
@@ -312,8 +312,8 @@ export default function TableReservationModal({ isOpen, onClose, restaurant }) {
     const bookingPayload = {
       bookingId,
       bookingCode: bookingId,
-      merchantId: activeRestaurant.id || 'm-1',
-      merchantName: activeRestaurant.businessName || activeRestaurant.name,
+      merchantId: activeRestaurant?.id || 'm-1',
+      merchantName: activeRestaurant?.businessName || activeRestaurant?.name || 'Swagath Grand Kitchen',
       customerName: guestName.trim(),
       guestName: guestName.trim(),
       phone: guestPhone.trim(),
@@ -458,7 +458,7 @@ export default function TableReservationModal({ isOpen, onClose, restaurant }) {
                 </label>
 
                 <select
-                  value={activeRestaurant.id}
+                  value={activeRestaurant?.id || AVAILABLE_RESTAURANTS[0].id}
                   onChange={(e) => {
                     const found = AVAILABLE_RESTAURANTS.find((r) => r.id === e.target.value);
                     if (found) setActiveRestaurant(found);
@@ -467,13 +467,13 @@ export default function TableReservationModal({ isOpen, onClose, restaurant }) {
                 >
                   {AVAILABLE_RESTAURANTS.map((rest) => (
                     <option key={rest.id} value={rest.id}>
-                      {rest.businessName} ({rest.locality}) — {rest.cuisine}
+                      {rest.businessName || rest.name} ({rest.locality}) — {rest.cuisine}
                     </option>
                   ))}
                 </select>
 
                 <p className="text-[11px] text-slate-500 mt-1">
-                  📍 {activeRestaurant.address || 'Hitec City Main Road, Hyderabad'} • {activeRestaurant.priceForTwo || '₹600 for two'}
+                  📍 {activeRestaurant?.address || 'Hitec City Main Road, Hyderabad'} • {activeRestaurant?.priceForTwo || '₹600 for two'}
                 </p>
               </div>
 
