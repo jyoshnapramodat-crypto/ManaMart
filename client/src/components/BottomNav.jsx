@@ -89,7 +89,7 @@ export default function BottomNav() {
           </NavLink>
         ) : (
           <NavLink
-            to="/login"
+            to={isLoggedIn ? "/orders" : "/login"}
             className={({ isActive }) =>
               `flex flex-col items-center py-1.5 px-3 rounded-2xl transition-all ${
                 isActive ? 'text-orange-600 font-bold' : 'text-slate-500 hover:text-slate-900 font-medium'
@@ -97,7 +97,7 @@ export default function BottomNav() {
             }
           >
             <User className="w-5 h-5 mb-0.5" />
-            <span className="text-[10px]">Account</span>
+            <span className="text-[10px]">{isLoggedIn ? "Account" : "Sign In"}</span>
           </NavLink>
         )}
       </div>

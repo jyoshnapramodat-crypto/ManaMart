@@ -374,7 +374,7 @@ export default function ManaAIScout({ onStoreSelect }) {
                 </div>
 
                 <Link
-                  to={`/merchant/${selectedPin.id}`}
+                  to={`/store/${selectedPin.id}`}
                   className="inline-flex items-center space-x-1 bg-[#FF5A00] hover:bg-orange-600 text-white font-bold text-xs px-3.5 py-2.5 rounded-xl shadow-xs transition-all flex-shrink-0"
                 >
                   <span>Order</span>
@@ -497,3 +497,4 @@ export default function ManaAIScout({ onStoreSelect }) {
     </div>
   );
 }
+

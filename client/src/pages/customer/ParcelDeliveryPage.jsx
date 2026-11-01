@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import api from '../../services/api';
 import { useLocation } from '../../context/LocationContext';
+import { useAuth } from '../../context/AuthContext';
 import {
   Package,
   MapPin,
@@ -11,30 +12,56 @@ import {
   Clock,
   CheckCircle2,
   AlertCircle,
+  User,
+  Phone,
 } from 'lucide-react';
 
 export default function ParcelDeliveryPage() {
   const navigate = useNavigate();
   const { selectedLocality, currentCity } = useLocation();
+  const { user, isLoggedIn } = useAuth();
 
-  const [senderName, setSenderName] = useState('Ravi Kumar');
-  const [senderPhone, setSenderPhone] = useState('9876543210');
-  const [pickupAddress, setPickupAddress] = useState(`Flat 402, Sri Sai Towers, ${selectedLocality}`);
-  
-  const [recipientName, setRecipientName] = useState('Praveen Varma');
-  const [recipientPhone, setRecipientPhone] = useState('9848011223');
-  const [dropAddress, setDropAddress] = useState(`Cyber Gateway, Hitech City, ${currentCity}`);
-  
+  // Initialize with logged in user's real credentials, or empty if visitor
+  const [senderName, setSenderName] = useState(user?.name || '');
+  const [senderPhone, setSenderPhone] = useState(user?.phone || '');
+  const [pickupAddress, setPickupAddress] = useState(
+    user?.addresses?.[0]?.street
+      ? `${user.addresses[0].street}, ${selectedLocality}`
+      : ''
+  );
+
+  const [recipientName, setRecipientName] = useState('');
+  const [recipientPhone, setRecipientPhone] = useState('');
+  const [dropAddress, setDropAddress] = useState('');
+
   const [packageType, setPackageType] = useState('Documents & Keys');
   const [weightKg, setWeightKg] = useState('1');
   const [instructions, setInstructions] = useState('');
 
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const estimatedFee = Number(weightKg) > 3 ? 75 : 45;
 
   const handleBookParcel = async (e) => {
     e.preventDefault();
+    setError(null);
+
+    if (!isLoggedIn) {
+      navigate('/login', { state: { from: { pathname: '/parcel' } } });
+      return;
+    }
+
+    if (!senderName.trim() || !senderPhone.trim() || !pickupAddress.trim()) {
+      setError('Please provide complete sender pickup details.');
+      return;
+    }
+
+    if (!recipientName.trim() || !recipientPhone.trim() || !dropAddress.trim()) {
+      setError('Please provide complete recipient delivery details.');
+      return;
+    }
+
     setLoading(true);
     try {
       const payload = {
@@ -55,7 +82,7 @@ export default function ParcelDeliveryPage() {
       }
     } catch (err) {
       console.error('Parcel booking error:', err);
-      alert('Failed to register parcel delivery request.');
+      setError(err.response?.data?.message || 'Failed to register parcel delivery request.');
     } finally {
       setLoading(false);
     }
@@ -79,6 +106,14 @@ export default function ParcelDeliveryPage() {
         </p>
       </div>
 
+      {/* Error Alert */}
+      {error && (
+        <div className="p-3.5 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold flex items-start space-x-2">
+          <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
+          <span>{error}</span>
+        </div>
+      )}
+
       {/* Form */}
       <form onSubmit={handleBookParcel} className="bg-white rounded-3xl p-5 sm:p-7 border border-slate-100 shadow-soft space-y-5">
         
@@ -96,6 +131,7 @@ export default function ParcelDeliveryPage() {
                 type="text"
                 value={senderName}
                 onChange={(e) => setSenderName(e.target.value)}
+                placeholder="Your Full Name"
                 className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 focus:outline-none focus:border-orange-500"
                 required
               />
@@ -106,6 +142,7 @@ export default function ParcelDeliveryPage() {
                 type="tel"
                 value={senderPhone}
                 onChange={(e) => setSenderPhone(e.target.value)}
+                placeholder="10-digit mobile number"
                 className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 focus:outline-none focus:border-orange-500"
                 required
               />
@@ -118,6 +155,7 @@ export default function ParcelDeliveryPage() {
               type="text"
               value={pickupAddress}
               onChange={(e) => setPickupAddress(e.target.value)}
+              placeholder="e.g. Flat 201, Green Meadows, Kavuri Hills"
               className="w-full text-xs px-3 py-2 rounded-xl bg-white border border-slate-200 focus:outline-none focus:border-orange-500"
               required
             />
@@ -138,6 +176,7 @@ export default function ParcelDeliveryPage() {
                 type="text"
                 value={recipientName}
                 onChange={(e) => setRecipientName(e.target.value)}
+                placeholder="Receiver's Full Name"
                 className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 focus:outline-none focus:border-blue-500"
                 required
               />
@@ -148,6 +187,7 @@ export default function ParcelDeliveryPage() {
                 type="tel"
                 value={recipientPhone}
                 onChange={(e) => setRecipientPhone(e.target.value)}
+                placeholder="Receiver's mobile number"
                 className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 focus:outline-none focus:border-blue-500"
                 required
               />
@@ -160,6 +200,7 @@ export default function ParcelDeliveryPage() {
               type="text"
               value={dropAddress}
               onChange={(e) => setDropAddress(e.target.value)}
+              placeholder="e.g. Plot 15, Hitech City Road, Cyber Gateway"
               className="w-full text-xs px-3 py-2 rounded-xl bg-white border border-slate-200 focus:outline-none focus:border-blue-500"
               required
             />

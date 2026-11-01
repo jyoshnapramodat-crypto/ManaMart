@@ -336,7 +336,7 @@ export default function HomePage() {
             {filteredMerchants.map((merchant) => (
               <div
                 key={merchant.id}
-                onClick={() => navigate(`/merchant/${merchant.id}`)}
+                onClick={() => navigate(`/store/${merchant.id}`)}
                 className="group bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-soft hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col"
               >
                 {/* Store Banner Image */}

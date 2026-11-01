@@ -28,7 +28,15 @@ export default function ProtectedRoute({
 
   // 2. Role Check
   if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
-    // If user's role is not allowed, guide them to their respective portal
+    // If a customer tries to access the merchant owner dashboard
+    if (user.role === 'customer' && location.pathname === '/merchant') {
+      return <Navigate to="/merchant/apply" state={{ message: 'Please register your store or restaurant first to access the merchant dashboard.' }} replace />;
+    }
+    // If a customer tries to access the rider courier dashboard
+    if (user.role === 'customer' && location.pathname === '/rider') {
+      return <Navigate to="/rider/apply" state={{ message: 'Please register as a delivery partner first to access the rider dashboard.' }} replace />;
+    }
+    // If merchant or rider tries to access something outside their scope
     if (user.role === 'merchant') return <Navigate to="/merchant" replace />;
     if (user.role === 'rider') return <Navigate to="/rider" replace />;
     if (user.role === 'admin') return <Navigate to="/admin" replace />;

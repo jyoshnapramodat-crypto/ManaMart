@@ -364,7 +364,7 @@ export default function LandingPage() {
           {sampleStores.map((store) => (
             <Link
               key={store.id}
-              to={`/merchant/${store.id}`}
+              to={`/store/${store.id}`}
               className="group bg-white rounded-3xl p-4 sm:p-5 border border-slate-200/80 hover:border-orange-300 shadow-2xs hover:shadow-xl transition-all flex flex-col justify-between space-y-4 hover:-translate-y-1"
             >
               <div className="space-y-3">

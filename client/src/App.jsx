@@ -70,9 +70,25 @@ function AppLayout() {
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
           {/* Customer Marketplace Catalog (Hyperlocal Discovery) */}
-          <Route path="/app" element={<HomePage />} />
+          <Route
+            path="/app"
+            element={
+              <ProtectedRoute allowedRoles={['customer', 'merchant', 'rider', 'admin']}>
+                <HomePage />
+              </ProtectedRoute>
+            }
+          />
+          {/* Canonical Store Profile & Backward-Compatible Merchant Link */}
+          <Route path="/store/:id" element={<MerchantDetailsPage />} />
           <Route path="/merchant/:id" element={<MerchantDetailsPage />} />
-          <Route path="/feed" element={<SocialFeedPage />} />
+          <Route
+            path="/feed"
+            element={
+              <ProtectedRoute allowedRoles={['customer', 'merchant', 'rider', 'admin']}>
+                <SocialFeedPage />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/recurring"
             element={
@@ -97,9 +113,30 @@ function AppLayout() {
               </ProtectedRoute>
             }
           />
-          <Route path="/parcel" element={<ParcelDeliveryPage />} />
-          <Route path="/reservations" element={<ReservationsPage />} />
-          <Route path="/services" element={<ServicesPage />} />
+          <Route
+            path="/parcel"
+            element={
+              <ProtectedRoute allowedRoles={['customer', 'merchant', 'rider', 'admin']}>
+                <ParcelDeliveryPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/reservations"
+            element={
+              <ProtectedRoute allowedRoles={['customer', 'merchant', 'rider', 'admin']}>
+                <ReservationsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/services"
+            element={
+              <ProtectedRoute allowedRoles={['customer', 'merchant', 'rider', 'admin']}>
+                <ServicesPage />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Merchant Workflow: Onboarding -> Regulatory Audit -> Verified Store */}
           <Route

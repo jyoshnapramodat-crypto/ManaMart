@@ -29,15 +29,23 @@ export async function followMerchant(req, res) {
     merchant.followersCount = (merchant.followersCount || 0) + 1;
 
     // Add notification
-    mockDb.notifications.push({
+    const followNotif = {
       id: `notif-${uuidv4().slice(0, 8)}`,
       userId,
+      merchantId,
+      merchantName: merchant.businessName,
       title: `Subscribed to ${merchant.businessName} 🔔`,
       message: `You will now receive flash offers and new stock alerts from ${merchant.businessName}.`,
       type: 'post',
       isRead: false,
       createdAt: new Date().toISOString(),
-    });
+    };
+    mockDb.notifications.push(followNotif);
+
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('notification:new', followNotif);
+    }
 
     return res.json({
       success: true,
@@ -166,19 +174,33 @@ export async function createPost(req, res) {
 
     mockDb.merchantPosts.unshift(newPost);
 
-    // Notify all followers
+    const notificationPayload = {
+      id: `notif-${uuidv4().slice(0, 8)}`,
+      merchantId,
+      merchantName: merchant ? merchant.businessName : 'Verified Local Merchant',
+      merchantLogo: merchant ? merchant.logo : '',
+      title: `New update from ${merchant ? merchant.businessName : 'Shop'} 📢`,
+      message: `${title}: ${content}`,
+      type: 'post',
+      discountCode: discountCode || null,
+      isRead: false,
+      createdAt: new Date().toISOString(),
+    };
+
+    // Notify all followers and store in memory
     const followers = mockDb.follows.filter((f) => f.merchantId === merchantId);
     followers.forEach((f) => {
       mockDb.notifications.push({
-        id: `notif-${uuidv4().slice(0, 8)}`,
+        ...notificationPayload,
         userId: f.userId,
-        title: `New update from ${merchant ? merchant.businessName : 'Shop'} 📢`,
-        message: title,
-        type: 'post',
-        isRead: false,
-        createdAt: new Date().toISOString(),
       });
     });
+
+    // Real-time broadcast to all connected clients
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('notification:new', notificationPayload);
+    }
 
     return res.status(201).json({
       success: true,

@@ -16,6 +16,7 @@ const io = new Server(server, {
   },
 });
 
+app.set('io', io);
 initializeSockets(io);
 
 // Start database connection and services
