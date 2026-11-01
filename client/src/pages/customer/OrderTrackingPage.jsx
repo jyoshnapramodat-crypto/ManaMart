@@ -209,7 +209,7 @@ export default function OrderTrackingPage() {
               </div>
               <div>
                 <h4 className="text-xs font-bold text-slate-900">{order.riderName || 'Suresh Varma'}</h4>
-                <p className="text-[11px] text-slate-500">Verified LocalLoop Delivery Partner (Hero Splendor)</p>
+                <p className="text-[11px] text-slate-500">Verified ManaMart Delivery Partner (Hero Splendor)</p>
               </div>
             </div>
 

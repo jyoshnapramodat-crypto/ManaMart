@@ -11,9 +11,9 @@ export const socket = io(SOCKET_URL, {
 });
 
 socket.on('connect', () => {
-  console.log('⚡ Socket connected to LocalLoop real-time engine:', socket.id);
+  console.log('⚡ Socket connected to ManaMart real-time engine:', socket.id);
 });
 
 socket.on('disconnect', () => {
-  console.log('Socket disconnected from LocalLoop');
+  console.log('Socket disconnected from ManaMart');
 });

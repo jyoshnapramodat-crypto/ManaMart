@@ -568,7 +568,7 @@ export default function MerchantDashboardPage() {
           </div>
 
           <p className="text-xs text-slate-500">
-            Per Government & Food Safety regulations, all food businesses on LocalLoop must maintain active FSSAI accreditation, and pharmacies must hold verified Drug Licenses.
+            Per Government & Food Safety regulations, all food businesses on ManaMart must maintain active FSSAI accreditation, and pharmacies must hold verified Drug Licenses.
           </p>
 
           <form onSubmit={handleSubmitCompliance} className="space-y-3.5 text-xs">

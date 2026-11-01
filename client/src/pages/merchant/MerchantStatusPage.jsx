@@ -85,7 +85,7 @@ export default function MerchantStatusPage() {
                 Congratulations! Store Verified
               </h2>
               <p className="text-xs sm:text-sm text-slate-600 max-w-md mx-auto">
-                Your store <strong>{application?.businessName || 'Your Shop'}</strong> has been audited and approved by the LocalLoop Platform Admin. You are now live in your neighborhood!
+                Your store <strong>{application?.businessName || 'Your Shop'}</strong> has been audited and approved by the ManaMart Platform Admin. You are now live in your neighborhood!
               </p>
 
               <div className="pt-2">

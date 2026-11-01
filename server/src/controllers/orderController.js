@@ -228,7 +228,7 @@ export async function createParcelOrder(req, res) {
       instructions,
       createdAt: new Date().toISOString(),
       timeline: [
-        { status: 'Parcel Registered', time: 'Just now', note: 'Searching for nearest LocalLoop partner' },
+        { status: 'Parcel Registered', time: 'Just now', note: 'Searching for nearest ManaMart delivery partner' },
         { status: 'Rider Assigned', time: 'Just now', note: 'Rider Suresh assigned for pickup' },
       ],
     };

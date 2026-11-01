@@ -104,7 +104,7 @@ export default function AdminDashboardPage() {
             <span>Root Governance & Compliance System</span>
           </div>
           <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-            LocalLoop Platform Administration
+            ManaMart Platform Administration
           </h1>
           <p className="text-xs text-slate-500">
             Audit merchant licenses, verify rider driving credentials, track platform GMV & manage zone serviceability

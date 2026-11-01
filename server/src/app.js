@@ -36,7 +36,7 @@ app.get('*', (req, res, next) => {
   res.sendFile(path.join(clientDistPath, 'index.html'), (err) => {
     if (err) {
       res.json({
-        message: 'Welcome to ManaMart (LocalLoop) Hyperlocal Commerce Engine API',
+        message: 'Welcome to ManaMart Hyperlocal Commerce Engine API',
         tagline: 'Mana Ooru. Mana Market. Your Entire Neighborhood, Delivered.',
         apiPrefix: '/api/v1',
       });

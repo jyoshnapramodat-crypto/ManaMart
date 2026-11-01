@@ -95,7 +95,7 @@ export default function ParcelDeliveryPage() {
       <div>
         <div className="inline-flex items-center space-x-1.5 bg-amber-50 text-amber-800 text-xs font-bold px-3 py-1 rounded-full border border-amber-200 mb-2">
           <Bike className="w-3.5 h-3.5 text-amber-600" />
-          <span>LocalLoop Express 30-Minute Courier</span>
+          <span>ManaMart Express 30-Minute Courier</span>
         </div>
         <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight flex items-center space-x-2">
           <span>Hyperlocal Parcel Delivery</span>

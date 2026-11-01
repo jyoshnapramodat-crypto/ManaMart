@@ -268,25 +268,40 @@ export default function LandingPage() {
             </button>
           </div>
 
-          {/* Search Bar */}
-          <div className="hidden md:flex flex-1 max-w-xl mx-2">
+          {/* Centered & Aligned Search Bar (Desktop) */}
+          <div className="hidden md:flex flex-1 max-w-xl mx-2 lg:mx-6 items-center">
             <form
               onSubmit={handleSearch}
-              className="w-full flex items-center bg-surface-container-lowest rounded-lg shadow-sm border border-outline-variant/30 px-3 py-1.5"
+              className="w-full flex items-center bg-surface-container-lowest rounded-xl shadow-xs border border-outline-variant/30 px-3 py-1.5 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/15 transition-all"
             >
-              <span className="material-symbols-outlined text-outline text-[18px] mr-2">
-                search
-              </span>
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search organic mandi veggies, biryani, medicines, daily kirana..."
-                className="w-full bg-transparent font-body-md text-xs sm:text-sm text-on-surface placeholder:text-outline focus:outline-none"
-              />
+              <div className="flex items-center gap-1 pr-2 border-r border-outline-variant/30 text-on-surface-variant text-xs font-semibold shrink-0">
+                <span className="hidden lg:inline">All Stores</span>
+                <span className="material-symbols-outlined text-sm">expand_more</span>
+              </div>
+              <div className="flex items-center flex-1 min-w-0 pl-2">
+                <span className="material-symbols-outlined text-outline text-[18px] mr-2 shrink-0">
+                  search
+                </span>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search organic mandi veggies, biryani, medicines, daily kirana..."
+                  className="w-full bg-transparent font-body-md text-xs sm:text-sm text-on-surface placeholder:text-outline focus:outline-none"
+                />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery('')}
+                    className="p-1 text-outline hover:text-on-surface mr-1"
+                  >
+                    <span className="material-symbols-outlined text-sm">close</span>
+                  </button>
+                )}
+              </div>
               <button
                 type="submit"
-                className="px-2.5 py-1 bg-primary text-on-primary rounded text-xs font-semibold hover:bg-primary-container transition-colors shrink-0 ml-1"
+                className="px-3 py-1 bg-primary text-on-primary rounded-lg text-xs font-bold hover:bg-primary-container transition-colors shrink-0 ml-1 shadow-xs"
               >
                 Search
               </button>
@@ -371,6 +386,40 @@ export default function LandingPage() {
             )}
           </div>
         </div>
+
+        {/* Mobile Search Bar (Cleanly aligned below header on mobile) */}
+        <div className="pb-2.5 pt-0.5 px-4 md:hidden border-t border-surface-container-high/40">
+          <form
+            onSubmit={handleSearch}
+            className="w-full flex items-center bg-surface-container-lowest rounded-xl shadow-xs border border-outline-variant/30 px-3 py-1.5 focus-within:border-primary"
+          >
+            <span className="material-symbols-outlined text-outline text-[18px] mr-2 shrink-0">
+              search
+            </span>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search Biryani, Veggies, Medicines, Kirana..."
+              className="w-full bg-transparent text-xs text-on-surface placeholder:text-outline focus:outline-none"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="p-1 text-outline hover:text-on-surface mr-1"
+              >
+                <span className="material-symbols-outlined text-sm">close</span>
+              </button>
+            )}
+            <button
+              type="submit"
+              className="px-2.5 py-1 bg-primary text-on-primary rounded-lg text-xs font-bold shrink-0"
+            >
+              Go
+            </button>
+          </form>
+        </div>
       </header>
 
       {/* MAIN CONTENT AREA */}
@@ -402,6 +451,67 @@ export default function LandingPage() {
                   <p className="font-body-lg text-sm sm:text-base text-on-surface-variant max-w-xl leading-relaxed">
                     Fresh groceries, authentic local food, medicines & daily essentials from trusted neighborhood shops in your town. Delivered in under 30 minutes. Mana Ooru. Mana Market.
                   </p>
+                </div>
+
+                {/* Hero Aligned Direct Search Bar */}
+                <div className="w-full max-w-xl">
+                  <form
+                    onSubmit={handleSearch}
+                    className="w-full flex items-center bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/40 p-1.5 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all"
+                  >
+                    <div className="flex items-center flex-1 min-w-0 pl-3">
+                      <span className="material-symbols-outlined text-outline text-[20px] mr-2 shrink-0">
+                        search
+                      </span>
+                      <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder={`Search in ${selectedLocality || 'Madhapur'} (Biryani, Veggies, Kirana...)`}
+                        className="w-full bg-transparent text-xs sm:text-sm text-on-surface placeholder:text-outline focus:outline-none"
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      className="px-4 py-2.5 rounded-xl bg-secondary-container hover:bg-secondary text-on-primary font-bold text-xs sm:text-sm transition-colors shadow-xs shrink-0 flex items-center gap-1"
+                    >
+                      <span>Search</span>
+                      <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+                    </button>
+                  </form>
+
+                  {/* Popular Instant Search Chips */}
+                  <div className="flex flex-wrap items-center gap-1.5 mt-2 text-[11px] text-on-surface-variant">
+                    <span className="font-semibold text-outline">Popular:</span>
+                    <button
+                      type="button"
+                      onClick={() => navigate('/app?q=Biryani')}
+                      className="px-2 py-0.5 rounded-full bg-surface-container hover:bg-surface-container-high transition-colors"
+                    >
+                      🍛 Dum Biryani
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => navigate('/app?category=groceries')}
+                      className="px-2 py-0.5 rounded-full bg-surface-container hover:bg-surface-container-high transition-colors"
+                    >
+                      🌾 Sona Masoori Rice
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => navigate('/app?category=produce')}
+                      className="px-2 py-0.5 rounded-full bg-surface-container hover:bg-surface-container-high transition-colors"
+                    >
+                      🥬 Rythu Bazaars
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => navigate('/reservations')}
+                      className="px-2 py-0.5 rounded-full bg-secondary-fixed/40 text-secondary font-semibold hover:bg-secondary-fixed transition-colors"
+                    >
+                      🍽️ Dine-In Booking
+                    </button>
+                  </div>
                 </div>
 
                 {/* CTAs: Explore + Dine-in Booking */}

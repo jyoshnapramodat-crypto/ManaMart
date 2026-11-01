@@ -25,7 +25,7 @@ apiRouter.use('/customers', customerRoutes);
 apiRouter.get('/health', (req, res) => {
   res.json({
     status: 'ok',
-    app: 'ManaMart / LocalLoop API',
+    app: 'ManaMart API',
     version: '1.0.0',
     time: new Date().toISOString(),
   });

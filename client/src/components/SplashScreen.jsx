@@ -14,8 +14,8 @@ export default function SplashScreen({ onComplete }) {
     return !sessionStorage.getItem('manamart_splashed');
   });
 
-  // Countdown timer state (5.0 seconds down to 0)
-  const TOTAL_SECONDS = 5.0;
+  // Countdown timer state (increased to 8.0 seconds for optimal viewing and interaction)
+  const TOTAL_SECONDS = 8.0;
   const [remainingTime, setRemainingTime] = useState(TOTAL_SECONDS);
   const [isPaused, setIsPaused] = useState(false);
   const [isRedirected, setIsRedirected] = useState(false);
@@ -30,7 +30,7 @@ export default function SplashScreen({ onComplete }) {
   );
 
   const audioCtxRef = useRef(null);
-  const lastTickRef = useRef(5);
+  const lastTickRef = useRef(8);
 
   // Initialize Web Audio Engine (synthesizer with zero external assets)
   const initAudio = () => {
@@ -85,7 +85,7 @@ export default function SplashScreen({ onComplete }) {
     } catch (_) {}
   };
 
-  // Telemetry Progress Simulation
+  // Telemetry Progress Simulation (scaled to 8 seconds)
   useEffect(() => {
     if (!show) return;
 
@@ -93,19 +93,19 @@ export default function SplashScreen({ onComplete }) {
       setTelemetryPercent(93);
       setTelemetryStatus('Linking Local Kiranas & Rythu Mandis...');
       setTelemetryDetail('Connected 124 neighborhood stores in Madhapur radius...');
-    }, 1400);
+    }, 2200);
 
     const timer2 = setTimeout(() => {
       setTelemetryPercent(98);
       setTelemetryStatus('Calibrating Fast Delivery Lanes...');
       setTelemetryDetail('Rider dispatch node ready. Optimal route: 15-20 mins.');
-    }, 2800);
+    }, 4800);
 
     const timer3 = setTimeout(() => {
       setTelemetryPercent(100);
       setTelemetryStatus('ManaMart Engine Ready!');
       setTelemetryDetail('Launching verified local stores for instant access.');
-    }, 4200);
+    }, 7200);
 
     return () => {
       clearTimeout(timer1);

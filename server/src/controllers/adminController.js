@@ -65,7 +65,7 @@ export async function verifyMerchant(req, res) {
           businessName: pending.businessName,
           category: pending.category,
           phone: pending.phone,
-          email: pending.email || `${pending.businessName.toLowerCase().replace(/\s+/g, '')}@localloop.in`,
+          email: pending.email || `${pending.businessName.toLowerCase().replace(/\s+/g, '')}@manamart.in`,
           address: pending.address || {
             street: `${pending.locality}, Main Road`,
             locality: pending.locality,

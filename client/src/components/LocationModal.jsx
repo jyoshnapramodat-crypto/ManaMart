@@ -120,7 +120,7 @@ export default function LocationModal() {
             </div>
             <button
               onClick={() => {
-                alert('Thank you! We will notify you as soon as LocalLoop launches in your locality.');
+                alert('Thank you! We will notify you as soon as ManaMart launches in your locality.');
                 setIsModalOpen(false);
               }}
               className="text-xs font-bold text-orange-600 hover:text-orange-700 bg-white border border-orange-200 px-3 py-1.5 rounded-xl shadow-xs"

@@ -106,7 +106,7 @@ export const mockDb = {
     {
       id: 'user-rider-1',
       name: 'Suresh Varma',
-      email: 'suresh.rider@localloop.in',
+      email: 'suresh.rider@manamart.in',
       phone: '9123456780',
       role: 'rider',
       riderId: 'r-1',
@@ -117,7 +117,7 @@ export const mockDb = {
     {
       id: 'user-admin-1',
       name: 'Admin Chief',
-      email: 'admin@localloop.in',
+      email: 'admin@manamart.in',
       phone: '9999999999',
       role: 'admin',
       status: 'active',

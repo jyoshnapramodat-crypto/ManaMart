@@ -134,7 +134,7 @@ export default function RiderStatusPage() {
                   License Verification Underway
                 </h2>
                 <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                  LocalLoop Admin is validating your driving license and vehicle registration.
+                  ManaMart Admin is validating your driving license and vehicle registration.
                 </p>
               </div>
 
