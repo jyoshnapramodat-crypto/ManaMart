@@ -36,3 +36,4 @@ export async function sendSmsOtp(mobileNumber, otp, purpose = 'verification') {
 
   return { success: true, simulated: true };
 }
+

@@ -96,3 +96,4 @@ export async function sendVerificationEmail(recipientEmail, otp, recipientName =
     html,
   });
 }
+

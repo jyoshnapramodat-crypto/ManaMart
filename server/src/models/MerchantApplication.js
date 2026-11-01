@@ -58,3 +58,4 @@ export const MerchantApplication =
   mongoose.models.MerchantApplication ||
   mongoose.model('MerchantApplication', merchantApplicationSchema);
 export default MerchantApplication;
+

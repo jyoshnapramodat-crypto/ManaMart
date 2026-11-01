@@ -46,3 +46,4 @@ export const RiderApplication =
   mongoose.models.RiderApplication ||
   mongoose.model('RiderApplication', riderApplicationSchema);
 export default RiderApplication;
+

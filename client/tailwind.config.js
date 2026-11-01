@@ -8,15 +8,15 @@ export default {
     extend: {
       colors: {
         brand: {
-          orange: '#FF5E1E',
+          orange: '#FF5A00',
           'orange-light': '#FFF0EB',
-          green: '#0C8340',
+          green: '#006837',
           'green-light': '#E8F5E9',
           yellow: '#F59E0B',
           purple: '#6366F1',
           teal: '#0D9488',
           dark: '#0F172A',
-          cream: '#FCFBF8',
+          cream: '#FCFBF7',
         },
       },
       fontFamily: {

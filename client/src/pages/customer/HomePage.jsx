@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import { useLocation } from '../../context/LocationContext';
 import { useCart } from '../../context/CartContext';
+import ManaAIScout from '../../components/ManaAIScout';
 import {
   Sparkles,
   Clock,
@@ -22,6 +23,7 @@ import {
   Wrench,
   ChevronRight,
   Flame,
+  Bot,
 } from 'lucide-react';
 
 export default function HomePage() {
@@ -110,11 +112,11 @@ export default function HomePage() {
   return (
     <div className="min-h-screen pb-24 md:pb-12 space-y-6 sm:space-y-8">
       
-      {/* Hero Welcome Banner */}
+      {/* Hero Welcome Banner with Official ManaMart Colors */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
-        <div className="relative overflow-hidden rounded-3xl sm:rounded-4xl bg-gradient-to-r from-orange-600 via-amber-600 to-orange-700 text-white p-6 sm:p-10 shadow-xl shadow-orange-500/15">
-          <div className="relative z-10 max-w-2xl space-y-3">
-            <div className="inline-flex items-center space-x-2 bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-white border border-white/30">
+        <div className="relative overflow-hidden rounded-3xl sm:rounded-4xl bg-gradient-to-r from-[#006837] via-[#0A7A3E] to-[#FF5A00] text-white p-6 sm:p-10 shadow-xl shadow-orange-500/10 flex flex-col lg:flex-row items-center justify-between gap-6">
+          <div className="relative z-10 max-w-2xl space-y-3 text-center lg:text-left">
+            <div className="inline-flex items-center space-x-2 bg-white/20 backdrop-blur-md px-3.5 py-1.5 rounded-full text-xs font-bold text-white border border-white/30">
               <Sparkles className="w-3.5 h-3.5 text-amber-300" />
               <span>{i18n.language === 'te' ? 'మీ పరిసరాల మార్కెట్' : 'Hyperlocal 15-Minute Neighborhood Network'}</span>
             </div>
@@ -124,21 +126,21 @@ export default function HomePage() {
                 Your Entire Neighborhood, Delivered.
               </span>
             </h1>
-            <p className="text-xs sm:text-sm text-orange-100 max-w-lg font-medium">
+            <p className="text-xs sm:text-sm text-emerald-100 max-w-lg font-medium mx-auto lg:mx-0">
               Order authentic food, daily kirana ration, urgent 24x7 medicines, sweets, fresh flowers & book local services in {selectedLocality}, {currentCity}.
             </p>
 
-            <div className="pt-2 flex flex-wrap gap-2.5">
+            <div className="pt-2 flex flex-wrap justify-center lg:justify-start gap-2.5">
               <Link
                 to="/recurring"
-                className="inline-flex items-center space-x-2 bg-white text-orange-600 hover:bg-orange-50 px-4 py-2.5 rounded-2xl font-bold text-xs shadow-md transition-all"
+                className="inline-flex items-center space-x-2 bg-white text-[#006837] hover:bg-emerald-50 px-4 py-2.5 rounded-2xl font-bold text-xs shadow-md transition-all"
               >
-                <Repeat className="w-4 h-4 text-emerald-600" />
+                <Repeat className="w-4 h-4 text-[#FF5A00]" />
                 <span>{t('home.recurringBannerBtn')}</span>
               </Link>
               <Link
                 to="/parcel"
-                className="inline-flex items-center space-x-2 bg-orange-950/40 hover:bg-orange-950/60 backdrop-blur-md text-white px-4 py-2.5 rounded-2xl font-bold text-xs border border-white/20 transition-all"
+                className="inline-flex items-center space-x-2 bg-slate-900/40 hover:bg-slate-900/60 backdrop-blur-md text-white px-4 py-2.5 rounded-2xl font-bold text-xs border border-white/20 transition-all"
               >
                 <Package className="w-4 h-4 text-amber-300" />
                 <span>Send Hyperlocal Parcel</span>
@@ -146,12 +148,20 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Decorative shapes */}
-          <div className="absolute right-[-40px] bottom-[-40px] w-72 h-72 rounded-full bg-white/10 blur-2xl pointer-events-none"></div>
-          <div className="absolute right-10 top-1/2 -translate-y-1/2 opacity-20 hidden lg:block text-white text-9xl font-black pointer-events-none">
-            మ
+          {/* Official Logo Display Artwork on Hero */}
+          <div className="relative z-10 flex-shrink-0 bg-white/95 backdrop-blur-md p-3.5 sm:p-5 rounded-3xl shadow-xl border border-white/60 hidden sm:block">
+            <img
+              src="/logo.png"
+              alt="ManaMart Logo"
+              className="h-24 sm:h-28 lg:h-32 w-auto object-contain"
+            />
           </div>
         </div>
+      </section>
+
+      {/* Live AI Neighborhood Scout & Interactive GPS Map */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <ManaAIScout />
       </section>
 
       {/* Stories / Local Shop Updates Bar (Instagram / YouTube inspired) */}
