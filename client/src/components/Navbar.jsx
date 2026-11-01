@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext';
 import { socket } from '../services/socket';
 import api from '../services/api';
 import Logo from './Logo';
+import NotificationModal from './NotificationModal';
 import {
   MapPin,
   Search,
@@ -28,6 +29,8 @@ import {
   Tag,
   X,
   Volume2,
+  LifeBuoy,
+  Settings,
 } from 'lucide-react';
 
 export default function Navbar() {
@@ -40,6 +43,7 @@ export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState('');
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
+  const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
 
   // Real-Time Notifications State
   const [notifications, setNotifications] = useState([
@@ -126,9 +130,9 @@ export default function Navbar() {
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      navigate(`/app?q=${encodeURIComponent(searchQuery.trim())}`);
+      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
     } else {
-      navigate('/app');
+      navigate('/search');
     }
   };
 
@@ -269,14 +273,25 @@ export default function Navbar() {
                           Followed Shops & Updates
                         </h4>
                       </div>
-                      {unreadCount > 0 && (
+                      <div className="flex items-center space-x-2">
                         <button
-                          onClick={markAllRead}
-                          className="text-[11px] font-bold text-[#006837] hover:underline"
+                          onClick={() => {
+                            setNotifDropdownOpen(false);
+                            setIsNotificationModalOpen(true);
+                          }}
+                          className="text-[11px] font-bold text-orange-600 hover:underline"
                         >
-                          Mark all read
+                          View All
                         </button>
-                      )}
+                        {unreadCount > 0 && (
+                          <button
+                            onClick={markAllRead}
+                            className="text-[11px] font-bold text-[#006837] hover:underline"
+                          >
+                            Mark read
+                          </button>
+                        )}
+                      </div>
                     </div>
 
                     <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
@@ -402,12 +417,39 @@ export default function Navbar() {
                       )}
 
                       <Link
+                        to="/profile"
+                        onClick={() => setUserDropdownOpen(false)}
+                        className="flex items-center space-x-2 px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-50 transition-colors"
+                      >
+                        <User className="w-4 h-4 text-emerald-600" />
+                        <span>My Profile & Wallet</span>
+                      </Link>
+
+                      <Link
                         to="/orders"
                         onClick={() => setUserDropdownOpen(false)}
                         className="flex items-center space-x-2 px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-50 transition-colors"
                       >
                         <Package className="w-4 h-4 text-slate-500" />
                         <span>My Orders</span>
+                      </Link>
+
+                      <Link
+                        to="/support"
+                        onClick={() => setUserDropdownOpen(false)}
+                        className="flex items-center space-x-2 px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-50 transition-colors"
+                      >
+                        <LifeBuoy className="w-4 h-4 text-purple-600" />
+                        <span>Help & Support</span>
+                      </Link>
+
+                      <Link
+                        to="/settings"
+                        onClick={() => setUserDropdownOpen(false)}
+                        className="flex items-center space-x-2 px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-50 transition-colors"
+                      >
+                        <Settings className="w-4 h-4 text-slate-500" />
+                        <span>Settings</span>
                       </Link>
 
                       <button
@@ -519,6 +561,11 @@ export default function Navbar() {
           </div>
         </div>
       )}
+      {/* Notification Center Modal */}
+      <NotificationModal
+        isOpen={isNotificationModalOpen}
+        onClose={() => setIsNotificationModalOpen(false)}
+      />
     </>
   );
 }

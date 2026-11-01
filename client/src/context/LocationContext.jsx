@@ -4,65 +4,72 @@ import api from '../services/api';
 const LocationContext = createContext(null);
 
 // Preset coordinates for major cities and localities
-const CITY_PRESETS = {
+export const CITY_PRESETS = {
   Hyderabad: {
     lat: 17.3850,
     lng: 78.4867,
+    pincodes: ['500081', '500032', '500034', '500033', '500072', '500003', '500060', '500084', '500090'],
     localities: {
-      Madhapur: { lat: 17.4480, lng: 78.3910 },
-      'Banjara Hills': { lat: 17.4156, lng: 78.4357 },
-      Gachibowli: { lat: 17.4401, lng: 78.3489 },
-      Kukatpally: { lat: 17.4948, lng: 78.3996 },
-      Secunderabad: { lat: 17.4399, lng: 78.4983 },
-      Dilsukhnagar: { lat: 17.3688, lng: 78.5247 },
-      'Jubilee Hills': { lat: 17.4319, lng: 78.4073 },
+      Madhapur: { lat: 17.4480, lng: 78.3910, pincode: '500081' },
+      'Banjara Hills': { lat: 17.4156, lng: 78.4357, pincode: '500034' },
+      Gachibowli: { lat: 17.4401, lng: 78.3489, pincode: '500032' },
+      Kukatpally: { lat: 17.4948, lng: 78.3996, pincode: '500072' },
+      Secunderabad: { lat: 17.4399, lng: 78.4983, pincode: '500003' },
+      Dilsukhnagar: { lat: 17.3688, lng: 78.5247, pincode: '500060' },
+      'Jubilee Hills': { lat: 17.4319, lng: 78.4073, pincode: '500033' },
+      Kondapur: { lat: 17.4699, lng: 78.3578, pincode: '500084' },
+      Miyapur: { lat: 17.4968, lng: 78.3614, pincode: '500049' },
     },
   },
   Vijayawada: {
     lat: 16.5062,
     lng: 80.6480,
+    pincodes: ['520010', '520002', '520001', '520007', '520008'],
     localities: {
-      'Benz Circle': { lat: 16.5003, lng: 80.6515 },
-      'MG Road': { lat: 16.5085, lng: 80.6402 },
-      Governorpet: { lat: 16.5165, lng: 80.6288 },
-      Patamata: { lat: 16.4942, lng: 80.6653 },
-      Kanuru: { lat: 16.4851, lng: 80.6971 },
+      'Benz Circle': { lat: 16.5003, lng: 80.6515, pincode: '520010' },
+      'MG Road': { lat: 16.5085, lng: 80.6402, pincode: '520002' },
+      Governorpet: { lat: 16.5165, lng: 80.6288, pincode: '520001' },
+      Patamata: { lat: 16.4942, lng: 80.6653, pincode: '520007' },
+      Kanuru: { lat: 16.4851, lng: 80.6971, pincode: '520008' },
     },
   },
   Visakhapatnam: {
     lat: 17.6868,
     lng: 83.2185,
+    pincodes: ['530003', '530017', '530002', '530026'],
     localities: {
-      Siripuram: { lat: 17.7212, lng: 83.3155 },
-      'MVP Colony': { lat: 17.7423, lng: 83.3371 },
-      Jagadamba: { lat: 17.7121, lng: 83.3005 },
-      Gajuwaka: { lat: 17.6896, lng: 83.2084 },
+      Siripuram: { lat: 17.7212, lng: 83.3155, pincode: '530003' },
+      'MVP Colony': { lat: 17.7423, lng: 83.3371, pincode: '530017' },
+      Jagadamba: { lat: 17.7121, lng: 83.3005, pincode: '530002' },
+      Gajuwaka: { lat: 17.6896, lng: 83.2084, pincode: '530026' },
     },
   },
   Warangal: {
     lat: 17.9689,
     lng: 79.5941,
+    pincodes: ['506001', '506004', '506002'],
     localities: {
-      Hanamkonda: { lat: 18.0135, lng: 79.5603 },
-      Kazipet: { lat: 17.9818, lng: 79.5218 },
-      Subedari: { lat: 18.0068, lng: 79.5638 },
-      'Warangal Fort': { lat: 17.9554, lng: 79.6231 },
+      Hanamkonda: { lat: 18.0135, lng: 79.5603, pincode: '506001' },
+      Kazipet: { lat: 17.9818, lng: 79.5218, pincode: '506004' },
+      Subedari: { lat: 18.0068, lng: 79.5638, pincode: '506001' },
+      'Warangal Fort': { lat: 17.9554, lng: 79.6231, pincode: '506002' },
     },
   },
   Tirupati: {
     lat: 13.6288,
     lng: 79.4192,
+    pincodes: ['517501', '517507'],
     localities: {
-      Alipiri: { lat: 13.6543, lng: 79.3995 },
-      'Bhavani Nagar': { lat: 13.6350, lng: 79.4210 },
-      'KT Road': { lat: 13.6315, lng: 79.4260 },
-      Chandragiri: { lat: 13.5855, lng: 79.3142 },
+      Alipiri: { lat: 13.6543, lng: 79.3995, pincode: '517507' },
+      'Bhavani Nagar': { lat: 13.6350, lng: 79.4210, pincode: '517501' },
+      'KT Road': { lat: 13.6315, lng: 79.4260, pincode: '517501' },
+      Chandragiri: { lat: 13.5855, lng: 79.3142, pincode: '517101' },
     },
   },
 };
 
 // Distance calculation between 2 coordinates (Haversine formula in KM)
-function calculateDistanceKm(lat1, lon1, lat2, lon2) {
+export function calculateDistanceKm(lat1, lon1, lat2, lon2) {
   const R = 6371; // Earth radius in km
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
   const dLon = ((lon2 - lon1) * Math.PI) / 180;
@@ -96,7 +103,52 @@ export function LocationProvider({ children }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDetecting, setIsDetecting] = useState(false);
 
-  // Sync to localStorage whenever location changes
+  // Saved Addresses Collection (Home, Work, Other)
+  const [savedAddresses, setSavedAddresses] = useState(() => {
+    try {
+      const stored = localStorage.getItem('manamart_saved_addresses');
+      if (stored) return JSON.parse(stored);
+    } catch (e) {}
+    return [
+      {
+        id: 'addr-1',
+        tag: 'Home',
+        flatNo: 'Flat 402, Sri Sai Towers',
+        street: '100 Feet Road, Ayyappa Society',
+        landmark: 'Opposite Meridian School',
+        locality: 'Madhapur',
+        city: 'Hyderabad',
+        pincode: '500081',
+        phone: '9876543210',
+        instructions: 'Leave at front door. Ring bell once.',
+        isDefault: true,
+        lat: 17.4480,
+        lng: 78.3910,
+      },
+      {
+        id: 'addr-2',
+        tag: 'Work',
+        flatNo: 'Building 12B, 4th Floor',
+        street: 'Mindspace Cyberabad IT Park',
+        landmark: 'Near Inorbit Mall Gate 2',
+        locality: 'Madhapur',
+        city: 'Hyderabad',
+        pincode: '500081',
+        phone: '9876543210',
+        instructions: 'Hand over to reception desk / security.',
+        isDefault: false,
+        lat: 17.4412,
+        lng: 78.3814,
+      },
+    ];
+  });
+
+  // Currently active selected address
+  const [activeAddress, setActiveAddress] = useState(() => {
+    return savedAddresses.find((a) => a.isDefault) || savedAddresses[0];
+  });
+
+  // Sync to localStorage
   useEffect(() => {
     try {
       localStorage.setItem(
@@ -104,27 +156,106 @@ export function LocationProvider({ children }) {
         JSON.stringify({ currentCity, selectedLocality, coordinates })
       );
     } catch (e) {
-      console.warn('Failed to save location to localStorage:', e);
+      console.warn('Failed to save location:', e);
     }
   }, [currentCity, selectedLocality, coordinates]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('manamart_saved_addresses', JSON.stringify(savedAddresses));
+    } catch (e) {}
+  }, [savedAddresses]);
 
   useEffect(() => {
     api
       .get('/discovery/cities')
       .then((res) => {
-        if (res.data.success) {
+        if (res.data.success && res.data.cities) {
           setCities(res.data.cities);
         }
       })
-      .catch((err) => console.error('Failed to load cities:', err));
+      .catch(() => {});
   }, []);
+
+  // Check serviceability of an area or pincode
+  const checkServiceability = (query) => {
+    if (!query) return { serviceable: false, reason: 'Empty location specified' };
+    const clean = query.trim().toLowerCase();
+
+    // Check against all supported localities across cities
+    for (const [cityName, cityData] of Object.entries(CITY_PRESETS)) {
+      if (clean.includes(cityName.toLowerCase())) {
+        return { serviceable: true, city: cityName, locality: Object.keys(cityData.localities)[0] };
+      }
+      for (const [locName, locData] of Object.entries(cityData.localities)) {
+        if (clean.includes(locName.toLowerCase()) || clean.includes(locData.pincode)) {
+          return { serviceable: true, city: cityName, locality: locName, coords: locData };
+        }
+      }
+    }
+
+    return {
+      serviceable: false,
+      query,
+      reason: `ManaMart hyperlocal service is currently active across Hyderabad, Vijayawada, Visakhapatnam, Warangal, and Tirupati. We are actively expanding to new pin codes!`,
+    };
+  };
+
+  const addSavedAddress = (address) => {
+    const newAddr = {
+      ...address,
+      id: `addr-${Date.now()}`,
+      isDefault: savedAddresses.length === 0,
+    };
+    setSavedAddresses((prev) => [...prev, newAddr]);
+    if (newAddr.isDefault) {
+      setActiveAddress(newAddr);
+      setSelectedLocality(newAddr.locality);
+      setCurrentCity(newAddr.city);
+    }
+    return newAddr;
+  };
+
+  const updateSavedAddress = (id, updatedFields) => {
+    setSavedAddresses((prev) =>
+      prev.map((addr) => (addr.id === id ? { ...addr, ...updatedFields } : addr))
+    );
+    if (activeAddress?.id === id) {
+      setActiveAddress((prev) => ({ ...prev, ...updatedFields }));
+    }
+  };
+
+  const deleteSavedAddress = (id) => {
+    setSavedAddresses((prev) => {
+      const remaining = prev.filter((addr) => addr.id !== id);
+      if (activeAddress?.id === id && remaining.length > 0) {
+        setActiveAddress(remaining[0]);
+      }
+      return remaining;
+    });
+  };
+
+  const setDefaultAddress = (id) => {
+    setSavedAddresses((prev) =>
+      prev.map((addr) => ({ ...addr, isDefault: addr.id === id }))
+    );
+    const target = savedAddresses.find((a) => a.id === id);
+    if (target) {
+      setActiveAddress({ ...target, isDefault: true });
+      setSelectedLocality(target.locality);
+      setCurrentCity(target.city);
+      if (target.lat && target.lng) {
+        setCoordinates({ lat: target.lat, lng: target.lng });
+      }
+    }
+  };
 
   // Real GPS Location Detection with Distance Matching & Reverse Geocoding
   const detectGPSLocation = () => {
     setIsDetecting(true);
 
     if (!('geolocation' in navigator)) {
-      alert('Geolocation sensor is not supported by your browser.');
+      alert('Geolocation sensor is not supported by your browser. Please select your area manually.');
       setIsDetecting(false);
       return;
     }
@@ -164,11 +295,9 @@ export function LocationProvider({ children }) {
             setIsModalOpen(false);
             return;
           }
-        } catch (err) {
-          // Fallback to closest preset city
-        }
+        } catch (err) {}
 
-        // 2. Intelligent Distance-Based Closest Preset Match
+        // 2. Fallback to closest preset
         let closestCity = 'Hyderabad';
         let minCityDist = Infinity;
 
@@ -181,7 +310,6 @@ export function LocationProvider({ children }) {
           }
         });
 
-        // Find closest locality inside that city
         let closestLocality = 'Madhapur';
         let minLocDist = Infinity;
         const localities = CITY_PRESETS[closestCity]?.localities || {};
@@ -201,31 +329,22 @@ export function LocationProvider({ children }) {
         setIsModalOpen(false);
       },
       (error) => {
-        console.warn('GPS detection denied or timed out:', error.message);
+        console.warn('Geolocation sensor error/denial:', error);
         setIsDetecting(false);
-        // Default to Madhapur, Hyderabad if permission denied
-        setCurrentCity('Hyderabad');
-        setSelectedLocality('Madhapur');
-        setCoordinates({ lat: 17.4480, lng: 78.3910 });
+        // Do not force GPS, keep default city gracefully
       },
-      { enableHighAccuracy: true, timeout: 8000 }
+      { timeout: 7000 }
     );
   };
 
-  const selectCityAndLocality = (city, locality, coords) => {
-    setCurrentCity(city);
-    setSelectedLocality(locality);
-
-    // Look up accurate coordinates for the selected locality
-    const presetCoords = CITY_PRESETS[city]?.localities?.[locality];
-    if (presetCoords) {
-      setCoordinates(presetCoords);
-    } else if (coords) {
+  const selectCityAndLocality = (cityName, localityName, coords) => {
+    setCurrentCity(cityName);
+    setSelectedLocality(localityName);
+    if (coords) {
       setCoordinates(coords);
-    } else if (CITY_PRESETS[city]) {
-      setCoordinates({ lat: CITY_PRESETS[city].lat, lng: CITY_PRESETS[city].lng });
+    } else if (CITY_PRESETS[cityName]?.localities[localityName]) {
+      setCoordinates(CITY_PRESETS[cityName].localities[localityName]);
     }
-
     setIsModalOpen(false);
   };
 
@@ -238,9 +357,17 @@ export function LocationProvider({ children }) {
         coordinates,
         isModalOpen,
         isDetecting,
+        savedAddresses,
+        activeAddress,
         setIsModalOpen,
         detectGPSLocation,
         selectCityAndLocality,
+        checkServiceability,
+        addSavedAddress,
+        updateSavedAddress,
+        deleteSavedAddress,
+        setDefaultAddress,
+        setActiveAddress,
       }}
     >
       {children}

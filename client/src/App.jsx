@@ -11,6 +11,7 @@ import CartDrawer from './components/CartDrawer';
 import LocationModal from './components/LocationModal';
 import SplashScreen from './components/SplashScreen';
 import ProtectedRoute from './components/ProtectedRoute';
+import OfflineBanner from './components/OfflineBanner';
 
 // Public & Auth Pages
 import LandingPage from './pages/public/LandingPage';
@@ -21,6 +22,7 @@ import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
 // Customer Pages
 import HomePage from './pages/customer/HomePage';
 import MerchantDetailsPage from './pages/customer/MerchantDetailsPage';
+import SearchPage from './pages/customer/SearchPage';
 import SocialFeedPage from './pages/customer/SocialFeedPage';
 import RecurringListsPage from './pages/customer/RecurringListsPage';
 import OrderTrackingPage from './pages/customer/OrderTrackingPage';
@@ -28,6 +30,9 @@ import OrdersHistoryPage from './pages/customer/OrdersHistoryPage';
 import ParcelDeliveryPage from './pages/customer/ParcelDeliveryPage';
 import ReservationsPage from './pages/customer/ReservationsPage';
 import ServicesPage from './pages/customer/ServicesPage';
+import SupportPage from './pages/customer/SupportPage';
+import SettingsPage from './pages/customer/SettingsPage';
+import ProfilePage from './pages/customer/ProfilePage';
 
 // Merchant Onboarding & Dashboard Pages
 import MerchantOnboardingPage from './pages/merchant/MerchantOnboardingPage';
@@ -49,6 +54,9 @@ function AppLayout() {
 
   return (
     <div className="min-h-screen flex flex-col bg-surface text-on-surface font-sans selection:bg-primary-fixed selection:text-on-primary-fixed">
+      {/* Offline Connectivity Status Banner (Module 14) */}
+      <OfflineBanner />
+
       {/* Animated Brand Splash Screen (Only on initial visit per session) */}
       <SplashScreen />
 
@@ -69,26 +77,33 @@ function AppLayout() {
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
-          {/* Customer Marketplace Catalog (Hyperlocal Discovery) */}
-          <Route
-            path="/app"
-            element={
-              <ProtectedRoute allowedRoles={['customer', 'merchant', 'rider', 'admin']}>
-                <HomePage />
-              </ProtectedRoute>
-            }
-          />
+          {/* Customer Marketplace Catalog (Guest Mode Enabled - Module 1) */}
+          <Route path="/app" element={<HomePage />} />
+          <Route path="/search" element={<SearchPage />} />
+          
           {/* Canonical Store Profile & Backward-Compatible Merchant Link */}
           <Route path="/store/:id" element={<MerchantDetailsPage />} />
           <Route path="/merchant/:id" element={<MerchantDetailsPage />} />
-          <Route
-            path="/feed"
-            element={
-              <ProtectedRoute allowedRoles={['customer', 'merchant', 'rider', 'admin']}>
-                <SocialFeedPage />
-              </ProtectedRoute>
-            }
-          />
+          
+          {/* Social Feed & Community Updates */}
+          <Route path="/feed" element={<SocialFeedPage />} />
+
+          {/* Table Reservations & Dining Booking */}
+          <Route path="/reservations" element={<ReservationsPage />} />
+
+          {/* Neighborhood Services (Maids, Plumbers, Electricians) */}
+          <Route path="/services" element={<ServicesPage />} />
+
+          {/* Customer Help, FAQs & Complaint Tickets (Module 9) */}
+          <Route path="/support" element={<SupportPage />} />
+
+          {/* Settings, Language (English/Telugu) & Accessibility (Module 13) */}
+          <Route path="/settings" element={<SettingsPage />} />
+
+          {/* Customer Account & Wallet Profile Hub */}
+          <Route path="/profile" element={<ProfilePage />} />
+
+          {/* Authenticated Customer Flows */}
           <Route
             path="/recurring"
             element={
@@ -118,22 +133,6 @@ function AppLayout() {
             element={
               <ProtectedRoute allowedRoles={['customer', 'merchant', 'rider', 'admin']}>
                 <ParcelDeliveryPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/reservations"
-            element={
-              <ProtectedRoute allowedRoles={['customer', 'merchant', 'rider', 'admin']}>
-                <ReservationsPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/services"
-            element={
-              <ProtectedRoute allowedRoles={['customer', 'merchant', 'rider', 'admin']}>
-                <ServicesPage />
               </ProtectedRoute>
             }
           />
