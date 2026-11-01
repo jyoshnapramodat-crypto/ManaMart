@@ -199,7 +199,7 @@ export default function Navbar() {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder={t('nav.searchPlaceholder') || 'Search Biryani, Milk, Groceries, Store...'}
+                  placeholder={t('nav.searchPlaceholder') || 'Search biryani, groceries, medicines...'}
                   className="w-full min-w-0 flex-1 bg-transparent text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none py-0.5 truncate"
                 />
 
@@ -490,7 +490,7 @@ export default function Navbar() {
                   </Link>
                   <Link
                     to="/signup"
-                    className="hidden sm:inline-flex items-center space-x-1 px-3.5 py-1.5 rounded-lg bg-primary hover:bg-primary-container text-on-primary text-xs font-bold shadow-xs transition-all"
+                    className="hidden lg:inline-flex items-center space-x-1 px-3.5 py-1.5 rounded-lg bg-primary hover:bg-primary-container text-on-primary text-xs font-bold shadow-xs transition-all"
                   >
                     <span>Register</span>
                   </Link>
@@ -534,7 +534,7 @@ export default function Navbar() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={t('nav.searchPlaceholder') || 'Search Biryani, Groceries, Medicines...'}
+                placeholder={t('nav.searchPlaceholder') || 'Search biryani, groceries, medicines...'}
                 className="w-full min-w-0 flex-1 bg-transparent text-xs text-on-surface placeholder:text-outline focus:outline-none truncate"
               />
               {searchQuery && (

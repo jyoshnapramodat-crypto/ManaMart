@@ -1,14 +1,48 @@
 # 🛒 ManaMart — Mana Ooru. Mana Market.
 ### *Your Entire Neighborhood, Delivered.* (Powered by LocalLoop)
 
-![License](https://img.shields.io/badge/License-MIT-orange.svg)
-![React](https://img.shields.io/badge/React-18-blue.svg)
-![Vite](https://img.shields.io/badge/Vite-5.4-purple.svg)
-![Node](https://img.shields.io/badge/Node-v20+-green.svg)
-![MongoDB](https://img.shields.io/badge/MongoDB-8.2-green.svg)
-![Tailwind](https://img.shields.io/badge/TailwindCSS-v3.4-teal.svg)
-![Socket.IO](https://img.shields.io/badge/Socket.IO-Real--Time-black.svg)
-![Languages](https://img.shields.io/badge/Languages-English%20%7C%20%E0%B0%A4%E0%B1%86%E0%B0%B2%E0%B1%81%E0%B0%97%E0%B1%81-red.svg)
+[![Live Demo on Render](https://img.shields.io/badge/Demo-Live_on_Render-00c853?style=for-the-badge&logo=render&logoColor=white)](https://manamart-o409.onrender.com)
+[![GitHub stars](https://img.shields.io/github/stars/jyoshnapramodat-crypto/ManaMart?style=for-the-badge&color=fe6b00)](https://github.com/jyoshnapramodat-crypto/ManaMart)
+[![React](https://img.shields.io/badge/React-18-blue.svg?style=flat-square)](https://react.dev/)
+[![Vite](https://img.shields.io/badge/Vite-5.4-purple.svg?style=flat-square)](https://vitejs.dev/)
+[![Node](https://img.shields.io/badge/Node-v20+-green.svg?style=flat-square)](https://nodejs.org/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-8.2-green.svg?style=flat-square)](https://www.mongodb.com/)
+[![TailwindCSS](https://img.shields.io/badge/TailwindCSS-v3.4-teal.svg?style=flat-square)](https://tailwindcss.com/)
+[![Socket.IO](https://img.shields.io/badge/Socket.IO-Real--Time-black.svg?style=flat-square)](https://socket.io/)
+[![Languages](https://img.shields.io/badge/Languages-English%20%7C%20%E0%B0%A4%E0%B1%86%E0%B0%B2%E0%B1%81%E0%B0%97%E0%B1%81-red.svg?style=flat-square)](#)
+
+---
+
+## 🌐 Live Production Application
+🚀 **ManaMart is live in production! Visit the live deployment:**  
+👉 **[https://manamart-o409.onrender.com](https://manamart-o409.onrender.com)**
+
+> [!TIP]
+> **Zero-Friction Demo Testing**: You can explore every capability (Customer, Restaurant Owner, Delivery Rider, or Platform Admin) instantly using the **Quick Role Switcher** or the **1-Click Demo Buttons** on the Sign-In page without having to register or verify external credentials.
+
+---
+
+## 📸 Application Screenshots & Visual Tour
+
+| 🌟 **Marketplace Overview & Clean Two-Tier Header** | 🚀 **ManaMart Brand Portal & Splash Experience** |
+| :---: | :---: |
+| ![Marketplace Overview](./docs/screenshots/marketplace-overview.png) | ![Launch Portal](./docs/screenshots/launch-portal.png) |
+| *Spacious search bar, Telugu/English switcher, category filters & local stories* | *2-second welcoming splash screen with instant town & locality discovery* |
+
+| 🗺️ **Live GPS Radar & Turn-by-Turn Order Tracking** | 🍽️ **Restaurant Menu & Dish Customizations** |
+| :---: | :---: |
+| ![Live GPS Radar Tracking](./docs/screenshots/order-tracking.png) | ![Store Catalog & Menu](./docs/screenshots/store-catalog.png) |
+| *Vector road Bezier routing, animated sonar radar, speedometer & delivery OTP* | *Authentic regional Telugu dishes, portion sizes, spice meters & add-to-cart* |
+
+| 🏪 **Hyperlocal Store Discovery Grid** | 🔔 **Real-Time Notification Center & Audio Soundboard** |
+| :---: | :---: |
+| ![Customer Store Discovery](./docs/screenshots/customer-discovery.png) | ![Notifications & Audio Soundboard](./docs/screenshots/notifications-center.png) |
+| *Verified neighborhood kirana, restaurants, bakeries & pharmacies with FSSAI badges* | *WebSocket live alerts from followed shops with Web Audio API synthesizer* |
+
+| 📱 **Mobile-First Responsive Experience** |
+| :---: |
+| ![Mobile App Design](./docs/screenshots/mobile-app-design.jpg) |
+| *High-speed responsive PWA layout designed specifically for Indian tier-2/3 smartphones* |
 
 ---
 
@@ -123,7 +157,7 @@ ManaMart includes a **Quick Role Switcher Toolbar** and **1-Click Test Accounts*
 
 ### 1. Clone & Install Dependencies
 ```bash
-git clone https://github.com/YOUR_USERNAME/ManaMart.git
+git clone https://github.com/jyoshnapramodat-crypto/ManaMart.git
 cd ManaMart
 
 # Install root, backend, and frontend dependencies in one command

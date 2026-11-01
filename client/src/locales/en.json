@@ -14,7 +14,7 @@
     "tables": "Reservations",
     "profile": "Profile",
     "cart": "Cart",
-    "searchPlaceholder": "Search for biryani, groceries, medicine, or shops...",
+    "searchPlaceholder": "Search biryani, groceries, medicines, shops...",
     "changeLocation": "Change Location",
     "role": "Role"
   },
