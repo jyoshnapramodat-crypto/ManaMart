@@ -245,32 +245,78 @@ export async function createParcelOrder(req, res) {
   }
 }
 
-// Restaurant Table Reservation
+// Restaurant Table Reservation (BookMyShow-style Dine-In Pass)
 export async function bookReservation(req, res) {
   try {
-    const { merchantId, partySize, reservationDate, reservationTime, specialRequests } = req.body;
+    const {
+      merchantId,
+      partySize,
+      reservationDate,
+      reservationTime,
+      tableNumber,
+      seatingArea,
+      occasion,
+      specialRequests,
+      guestName,
+      guestPhone,
+      preOrderedItems,
+    } = req.body;
+
     const merchant = mockDb.merchants.find((m) => m.id === merchantId) || mockDb.merchants[0];
+    const bookingCode = `MM-RES-${Math.floor(100000 + Math.random() * 900000)}`;
 
     const newReservation = {
       id: `res-${uuidv4().slice(0, 8)}`,
+      bookingCode,
       customerId: req.user.id,
-      customerName: req.user.name || 'Valued Guest',
-      customerPhone: req.user.phone || '9876543210',
+      customerName: guestName || req.user.name || 'Valued Guest',
+      customerPhone: guestPhone || req.user.phone || '9876543210',
       merchantId: merchant.id,
       merchantName: merchant.businessName,
+      merchantAddress: merchant.address || 'Road No. 36, Madhapur, Hyderabad',
       partySize: Number(partySize) || 2,
       reservationDate: reservationDate || new Date().toISOString().split('T')[0],
       reservationTime: reservationTime || '08:00 PM',
+      tableNumber: tableNumber || 'T-04',
+      seatingArea: seatingArea || 'AC Fine Dining Hall',
+      occasion: occasion || 'Casual Dining',
       specialRequests: specialRequests || '',
+      preOrderedItems: preOrderedItems || [],
+      qrCode: `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(
+        JSON.stringify({ code: bookingCode, store: merchant.businessName, guests: partySize })
+      )}`,
       status: 'confirmed',
       createdAt: new Date().toISOString(),
     };
 
     mockDb.reservations.unshift(newReservation);
 
+    // Create persistent notification
+    mockDb.notifications.unshift({
+      id: `notif-${uuidv4().slice(0, 8)}`,
+      userId: req.user.id,
+      title: `Table Confirmed at ${merchant.businessName} 🍽️`,
+      message: `Table ${newReservation.tableNumber} for ${newReservation.partySize} guests is booked for ${newReservation.reservationDate} at ${newReservation.reservationTime}. Ticket Pass: ${bookingCode}`,
+      type: 'reservation',
+      isRead: false,
+      createdAt: new Date().toISOString(),
+    });
+
+    // Real-time Socket Broadcast
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('notification:new', {
+        id: `notif-${uuidv4().slice(0, 8)}`,
+        title: `Dine-In Booking Confirmed! 🎫`,
+        message: `${newReservation.customerName} booked Table ${newReservation.tableNumber} at ${merchant.businessName}`,
+        type: 'reservation',
+        createdAt: new Date().toISOString(),
+      });
+    }
+
     return res.status(201).json({
       success: true,
-      message: 'Table reservation confirmed!',
+      message: 'Table reservation confirmed successfully!',
       reservation: newReservation,
     });
   } catch (error) {

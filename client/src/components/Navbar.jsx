@@ -188,6 +188,10 @@ export default function Navbar() {
               
               {/* Quick Links on Large Screens */}
               <div className="hidden lg:flex items-center space-x-3 text-xs font-semibold text-slate-600">
+                <Link to="/reservations" className="flex items-center space-x-1 hover:text-amber-600 transition-colors">
+                  <CalendarDays className="w-3.5 h-3.5 text-amber-600" />
+                  <span>Dine-In Booking</span>
+                </Link>
                 <Link to="/feed" className="flex items-center space-x-1 hover:text-[#FF5A00] transition-colors">
                   <Sparkles className="w-3.5 h-3.5 text-purple-600" />
                   <span>{t('nav.feed')}</span>
@@ -197,7 +201,7 @@ export default function Navbar() {
                   <span>{t('nav.recurring')}</span>
                 </Link>
                 <Link to="/parcel" className="flex items-center space-x-1 hover:text-[#FF5A00] transition-colors">
-                  <Package className="w-3.5 h-3.5 text-amber-600" />
+                  <Package className="w-3.5 h-3.5 text-[#FF5A00]" />
                   <span>{t('nav.parcel')}</span>
                 </Link>
               </div>

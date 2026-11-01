@@ -743,6 +743,7 @@ export default function LandingPage() {
             <h4 className="text-title-md font-title-md font-bold text-on-surface mb-space-sm">Explore ManaMart</h4>
             <ul className="space-y-2 text-body-sm font-body-sm text-on-surface-variant">
               <li><Link to="/app" className="hover:text-primary transition-colors">Marketplace Catalog</Link></li>
+              <li><Link to="/reservations" className="hover:text-primary transition-colors font-semibold text-secondary">Restaurant Table Booking</Link></li>
               <li><Link to="/merchant/apply" className="hover:text-primary transition-colors">Partner With Us</Link></li>
               <li><Link to="/rider/apply" className="hover:text-primary transition-colors">Delivery Fleet</Link></li>
               <li><Link to="/parcel" className="hover:text-primary transition-colors">Neighborhood Courier</Link></li>

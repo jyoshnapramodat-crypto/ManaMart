@@ -28,6 +28,20 @@ export async function markNotificationRead(req, res) {
   }
 }
 
+export async function getMyReservations(req, res) {
+  try {
+    const userId = req.user.id;
+    const reservations = mockDb.reservations.filter((r) => r.customerId === userId);
+    return res.json({
+      success: true,
+      count: reservations.length,
+      reservations,
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+}
+
 export async function submitReview(req, res) {
   try {
     const { merchantId, rating, comment } = req.body;

@@ -15,7 +15,9 @@ import {
   Sparkles,
   ArrowLeft,
   Share2,
+  Utensils,
 } from 'lucide-react';
+import TableReservationModal from '../../components/TableReservationModal';
 
 export default function MerchantDetailsPage() {
   const { id } = useParams();
@@ -27,6 +29,7 @@ export default function MerchantDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [activeMenuTab, setActiveMenuTab] = useState('All');
   const [vegFilter, setVegFilter] = useState(false);
+  const [isReservationOpen, setIsReservationOpen] = useState(false);
 
   useEffect(() => {
     fetchMerchantDetails();
@@ -217,11 +220,11 @@ export default function MerchantDetailsPage() {
 
                 {merchant.hasTableBooking && (
                   <button
-                    onClick={() => navigate('/reservations')}
-                    className="px-4 py-2 rounded-2xl text-xs font-extrabold bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 flex items-center space-x-1.5 shadow-sm"
+                    onClick={() => setIsReservationOpen(true)}
+                    className="px-4 py-2 rounded-2xl text-xs font-extrabold bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white flex items-center space-x-1.5 shadow-md active:scale-95 transition-all cursor-pointer"
                   >
-                    <CalendarDays className="w-3.5 h-3.5 text-amber-600" />
-                    <span>{t('store.bookTable')}</span>
+                    <CalendarDays className="w-3.5 h-3.5" />
+                    <span>Book Table (Live Floor Plan)</span>
                   </button>
                 )}
               </div>
@@ -399,6 +402,13 @@ export default function MerchantDetailsPage() {
           </div>
         </div>
       </div>
+
+      {/* BookMyShow Style Dine-In Table Reservation Modal */}
+      <TableReservationModal
+        isOpen={isReservationOpen}
+        onClose={() => setIsReservationOpen(false)}
+        restaurant={merchant}
+      />
 
     </div>
   );

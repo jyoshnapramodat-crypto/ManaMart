@@ -132,6 +132,13 @@ export default function HomePage() {
 
             <div className="pt-2 flex flex-wrap justify-center lg:justify-start gap-2.5">
               <Link
+                to="/reservations"
+                className="inline-flex items-center space-x-2 bg-amber-400 hover:bg-amber-300 text-slate-900 px-4 py-2.5 rounded-2xl font-extrabold text-xs shadow-md transition-all"
+              >
+                <Utensils className="w-4 h-4 text-amber-950" />
+                <span>Book Restaurant Table</span>
+              </Link>
+              <Link
                 to="/recurring"
                 className="inline-flex items-center space-x-2 bg-white text-[#006837] hover:bg-emerald-50 px-4 py-2.5 rounded-2xl font-bold text-xs shadow-md transition-all"
               >
@@ -427,9 +434,16 @@ export default function HomePage() {
                     <span className="font-bold text-orange-600 uppercase text-[10px] tracking-wider bg-orange-50 px-2 py-0.5 rounded-md">
                       {merchant.category}
                     </span>
-                    <span className="text-[11px] font-semibold text-slate-500">
-                      ₹{merchant.avgPriceForTwo || 300} for two
-                    </span>
+                    {merchant.hasTableBooking ? (
+                      <span className="inline-flex items-center gap-1 font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-md text-[10px]">
+                        <Utensils className="w-3 h-3 text-amber-600" />
+                        <span>Dine-In Booking Open</span>
+                      </span>
+                    ) : (
+                      <span className="text-[11px] font-semibold text-slate-500">
+                        ₹{merchant.avgPriceForTwo || 300} for two
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
