@@ -12,6 +12,7 @@ import LocationModal from './components/LocationModal';
 import SplashScreen from './components/SplashScreen';
 import ProtectedRoute from './components/ProtectedRoute';
 import OfflineBanner from './components/OfflineBanner';
+import DevMailboxDrawer from './components/DevMailboxDrawer';
 
 // Public & Auth Pages
 import LandingPage from './pages/public/LandingPage';
@@ -204,9 +205,10 @@ function AppLayout() {
         </Routes>
       </main>
 
-      {/* Shared Cart & Location Overlays */}
+      {/* Shared Cart, Location & Dev Mailbox Overlays */}
       <CartDrawer />
       <LocationModal />
+      <DevMailboxDrawer />
 
       {/* Mobile-First Bottom Navigation (Shown in app pages) */}
       {!isLanding && !isAuthPage && <BottomNav />}

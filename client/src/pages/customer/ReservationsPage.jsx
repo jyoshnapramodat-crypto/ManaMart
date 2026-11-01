@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
+import notificationService from '../../services/notificationService';
 import TableReservationModal from '../../components/TableReservationModal';
 import {
   CalendarDays,
@@ -118,10 +119,21 @@ export default function ReservationsPage() {
   const fetchPasses = async () => {
     setLoadingPasses(true);
     try {
-      const res = await api.get('/customers/reservations');
-      if (res.data.success && res.data.reservations) {
-        setMyReservations(res.data.reservations);
-      }
+      const localPasses = notificationService.getSavedReservations();
+      try {
+        const res = await api.get('/customers/reservations');
+        if (res.data.success && res.data.reservations) {
+          const combined = [...localPasses, ...res.data.reservations];
+          const seen = new Set();
+          const unique = combined.filter((r) => {
+            const k = r.bookingId || r.bookingCode || r.id;
+            return seen.has(k) ? false : seen.add(k);
+          });
+          setMyReservations(unique);
+          return;
+        }
+      } catch (e) {}
+      setMyReservations(localPasses);
     } catch (err) {
       console.error('Failed to load reservations:', err);
     } finally {
@@ -467,7 +479,7 @@ export default function ReservationsPage() {
       </div>
 
       {/* BookMyShow Style Modal */}
-      {selectedRestaurant && (
+      {isModalOpen && (
         <TableReservationModal
           isOpen={isModalOpen}
           onClose={() => {

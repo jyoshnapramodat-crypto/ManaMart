@@ -146,13 +146,17 @@ export default function HomePage() {
             </p>
 
             <div className="pt-2 flex flex-wrap justify-center md:justify-start gap-2">
-              <Link
-                to="/reservations"
-                className="inline-flex items-center space-x-1.5 bg-secondary-container hover:bg-secondary text-on-primary px-3.5 py-2 rounded-xl font-bold text-xs shadow-xs transition-all"
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedRestaurant(null);
+                  setBookingModalOpen(true);
+                }}
+                className="inline-flex items-center space-x-1.5 bg-secondary-container hover:bg-secondary text-on-primary px-3.5 py-2 rounded-xl font-bold text-xs shadow-xs transition-all cursor-pointer"
               >
                 <Utensils className="w-3.5 h-3.5" />
                 <span>Book Restaurant Table</span>
-              </Link>
+              </button>
               <Link
                 to="/recurring"
                 className="inline-flex items-center space-x-1.5 bg-surface-container-lowest text-primary hover:bg-surface-container px-3.5 py-2 rounded-xl font-bold text-xs shadow-xs transition-all"
@@ -478,7 +482,7 @@ export default function HomePage() {
       </section>
 
       {/* BookMyShow-style Interactive Restaurant Table Reservation Modal */}
-      {selectedRestaurant && (
+      {bookingModalOpen && (
         <TableReservationModal
           isOpen={bookingModalOpen}
           onClose={() => {
