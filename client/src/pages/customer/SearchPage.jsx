@@ -234,6 +234,14 @@ export default function SearchPage() {
             >
               <Mic className="w-4 h-4" />
             </button>
+
+            {/* Direct Search Submit Button */}
+            <button
+              type="submit"
+              className="px-3.5 py-2 bg-gradient-to-r from-[#fe6b00] to-[#fd5a05] text-white rounded-xl text-xs font-bold shadow-xs hover:opacity-95 flex items-center gap-1 active:scale-95"
+            >
+              <span>Search</span>
+            </button>
           </div>
         </form>
 

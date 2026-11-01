@@ -215,9 +215,10 @@ export default function Navbar() {
 
                 <button
                   type="submit"
-                  className="px-3 py-1 bg-primary text-on-primary rounded-lg text-xs font-bold hover:bg-primary-container transition-colors shrink-0 ml-1 shadow-xs"
+                  className="px-4 py-1.5 bg-gradient-to-r from-[#003527] to-[#064e3b] hover:from-[#064e3b] hover:to-[#003527] text-white rounded-xl text-xs font-bold transition-all shrink-0 ml-1.5 shadow-xs flex items-center gap-1.5 active:scale-95"
                 >
-                  Search
+                  <Search className="w-3.5 h-3.5" />
+                  <span>Search</span>
                 </button>
               </form>
             </div>
@@ -556,9 +557,10 @@ export default function Navbar() {
               )}
               <button
                 type="submit"
-                className="px-2.5 py-1 bg-primary text-on-primary rounded-lg text-xs font-bold shrink-0"
+                className="px-3.5 py-1.5 bg-gradient-to-r from-[#fe6b00] to-[#fd5a05] hover:opacity-95 text-white rounded-xl text-xs font-bold shrink-0 ml-1.5 shadow-xs flex items-center gap-1 active:scale-95"
               >
-                Go
+                <Search className="w-3.5 h-3.5" />
+                <span>Search</span>
               </button>
             </form>
           </div>

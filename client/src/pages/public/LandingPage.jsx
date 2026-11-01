@@ -301,9 +301,10 @@ export default function LandingPage() {
               </div>
               <button
                 type="submit"
-                className="px-3 py-1 bg-primary text-on-primary rounded-lg text-xs font-bold hover:bg-primary-container transition-colors shrink-0 ml-1 shadow-xs"
+                className="px-4 py-1.5 bg-gradient-to-r from-[#003527] to-[#064e3b] hover:from-[#064e3b] hover:to-[#003527] text-white rounded-xl text-xs font-bold transition-all shrink-0 ml-1.5 shadow-xs flex items-center gap-1.5 active:scale-95"
               >
-                Search
+                <span className="material-symbols-outlined text-sm">search</span>
+                <span>Search</span>
               </button>
             </form>
           </div>
@@ -414,9 +415,10 @@ export default function LandingPage() {
             )}
             <button
               type="submit"
-              className="px-2.5 py-1 bg-primary text-on-primary rounded-lg text-xs font-bold shrink-0"
+              className="px-3.5 py-1.5 bg-gradient-to-r from-[#fe6b00] to-[#fd5a05] hover:opacity-95 text-white rounded-xl text-xs font-bold shrink-0 ml-1.5 shadow-xs flex items-center gap-1 active:scale-95"
             >
-              Go
+              <span className="material-symbols-outlined text-sm">search</span>
+              <span>Search</span>
             </button>
           </form>
         </div>
@@ -473,10 +475,10 @@ export default function LandingPage() {
                     </div>
                     <button
                       type="submit"
-                      className="px-4 py-2.5 rounded-xl bg-secondary-container hover:bg-secondary text-on-primary font-bold text-xs sm:text-sm transition-colors shadow-xs shrink-0 flex items-center gap-1"
+                      className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#fe6b00] to-[#fd5a05] hover:opacity-95 text-white font-bold text-xs sm:text-sm transition-all shadow-sm shrink-0 flex items-center gap-1.5 active:scale-95"
                     >
+                      <span className="material-symbols-outlined text-[18px]">search</span>
                       <span>Search</span>
-                      <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
                     </button>
                   </form>
 

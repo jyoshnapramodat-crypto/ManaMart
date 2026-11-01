@@ -1232,3 +1232,4 @@ self.addEventListener('push', (event) => {
     </div>
   );
 }
+
