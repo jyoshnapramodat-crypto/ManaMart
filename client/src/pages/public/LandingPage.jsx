@@ -268,43 +268,43 @@ export default function LandingPage() {
             </button>
           </div>
 
-          {/* Centered & Aligned Search Bar (Desktop) */}
-          <div className="hidden md:flex flex-1 max-w-xl mx-2 lg:mx-6 items-center">
+          {/* Centered & Spacious Search Bar (Desktop) */}
+          <div className="hidden md:flex flex-1 min-w-[220px] max-w-xl mx-2 lg:mx-4 items-center">
             <form
               onSubmit={handleSearch}
-              className="w-full flex items-center bg-surface-container-lowest rounded-xl shadow-xs border border-outline-variant/30 px-3 py-1.5 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/15 transition-all"
+              className="w-full flex items-center bg-white rounded-full shadow-xs border border-slate-200/90 hover:border-slate-300 focus-within:border-[#003527] focus-within:ring-2 focus-within:ring-[#003527]/10 px-3.5 py-1.5 transition-all"
             >
-              <div className="flex items-center gap-1 pr-2 border-r border-outline-variant/30 text-on-surface-variant text-xs font-semibold shrink-0">
-                <span className="hidden lg:inline">All Stores</span>
-                <span className="material-symbols-outlined text-sm">expand_more</span>
-              </div>
-              <div className="flex items-center flex-1 min-w-0 pl-2">
-                <span className="material-symbols-outlined text-outline text-[18px] mr-2 shrink-0">
-                  search
-                </span>
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search organic mandi veggies, biryani, medicines, daily kirana..."
-                  className="w-full bg-transparent font-body-md text-xs sm:text-sm text-on-surface placeholder:text-outline focus:outline-none"
-                />
-                {searchQuery && (
-                  <button
-                    type="button"
-                    onClick={() => setSearchQuery('')}
-                    className="p-1 text-outline hover:text-on-surface mr-1"
-                  >
-                    <span className="material-symbols-outlined text-sm">close</span>
-                  </button>
-                )}
-              </div>
+              {/* Single Search Icon on Left */}
+              <span className="material-symbols-outlined text-slate-400 text-lg mr-2 shrink-0">
+                search
+              </span>
+
+              {/* Spacious Text Input */}
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search groceries, biryani, medicines, stores..."
+                className="w-full bg-transparent text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none py-0.5"
+              />
+
+              {/* Clear button if query present */}
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="p-1 text-slate-400 hover:text-slate-700 mr-1.5 shrink-0"
+                >
+                  <span className="material-symbols-outlined text-sm">close</span>
+                </button>
+              )}
+
+              {/* Sleek, Uncongested Submit Button */}
               <button
                 type="submit"
-                className="px-4 py-1.5 bg-gradient-to-r from-[#003527] to-[#064e3b] hover:from-[#064e3b] hover:to-[#003527] text-white rounded-xl text-xs font-bold transition-all shrink-0 ml-1.5 shadow-xs flex items-center gap-1.5 active:scale-95"
+                className="px-4 py-1.5 bg-[#003527] hover:bg-[#064e3b] text-white rounded-full text-xs font-bold transition-all shrink-0 shadow-2xs active:scale-95 ml-1"
               >
-                <span className="material-symbols-outlined text-sm">search</span>
-                <span>Search</span>
+                Search
               </button>
             </form>
           </div>
@@ -477,8 +477,8 @@ export default function LandingPage() {
                       type="submit"
                       className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#fe6b00] to-[#fd5a05] hover:opacity-95 text-white font-bold text-xs sm:text-sm transition-all shadow-sm shrink-0 flex items-center gap-1.5 active:scale-95"
                     >
-                      <span className="material-symbols-outlined text-[18px]">search</span>
                       <span>Search</span>
+                      <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
                     </button>
                   </form>
 
