@@ -110,7 +110,7 @@ export default function HomePage() {
   const filteredMerchants = vegOnly ? merchants.filter((m) => m.pureVeg) : merchants;
 
   return (
-    <div className="min-h-screen pb-24 md:pb-12 space-y-6 sm:space-y-8">
+    <div className="bg-surface min-h-screen pb-24 md:pb-12 space-y-6 sm:space-y-8">
       
       {/* Hero Welcome Banner with Official ManaMart Colors */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">

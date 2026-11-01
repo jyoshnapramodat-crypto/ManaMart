@@ -48,7 +48,7 @@ function AppLayout() {
   const isAuthPage = ['/login', '/signup', '/forgot-password'].includes(location.pathname);
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FCFBF8] text-slate-900 font-sans selection:bg-orange-500 selection:text-white">
+    <div className="min-h-screen flex flex-col bg-surface text-on-surface font-sans selection:bg-primary-fixed selection:text-on-primary-fixed">
       {/* Animated Brand Splash Screen (Only on initial visit per session) */}
       <SplashScreen />
 
