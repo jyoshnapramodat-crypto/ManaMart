@@ -34,6 +34,7 @@ import ServicesPage from './pages/customer/ServicesPage';
 import SupportPage from './pages/customer/SupportPage';
 import SettingsPage from './pages/customer/SettingsPage';
 import ProfilePage from './pages/customer/ProfilePage';
+import NotificationCenterPage from './pages/customer/NotificationCenterPage';
 
 // Merchant Onboarding & Dashboard Pages
 import MerchantOnboardingPage from './pages/merchant/MerchantOnboardingPage';
@@ -94,6 +95,9 @@ function AppLayout() {
 
           {/* Neighborhood Services (Maids, Plumbers, Electricians) */}
           <Route path="/services" element={<ServicesPage />} />
+
+          {/* Notifications Center & Acoustic Soundboard */}
+          <Route path="/notifications" element={<NotificationCenterPage />} />
 
           {/* Customer Help, FAQs & Complaint Tickets (Module 9) */}
           <Route path="/support" element={<SupportPage />} />

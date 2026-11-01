@@ -89,6 +89,20 @@ export default function QuickRoleSwitcher() {
             );
           })}
         </div>
+
+        {/* Quick link to Notification Architecture & Soundboard */}
+        <div className="pt-2">
+          <button
+            onClick={() => {
+              navigate('/notifications');
+              setIsOpen(false);
+            }}
+            className="w-full flex items-center justify-center space-x-1.5 bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-700/80 text-emerald-300 py-1.5 px-3 rounded-xl text-xs font-bold transition-colors"
+          >
+            <span>🔔</span>
+            <span>Soundboard & Push Console</span>
+          </button>
+        </div>
       </div>
 
       <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-[11px]">

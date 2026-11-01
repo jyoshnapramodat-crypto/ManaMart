@@ -8,6 +8,7 @@ import { socket } from '../services/socket';
 import api from '../services/api';
 import Logo from './Logo';
 import NotificationModal from './NotificationModal';
+import soundService from '../services/soundService';
 import {
   MapPin,
   Search,
@@ -98,6 +99,15 @@ export default function Navbar() {
     const handleNewNotif = (notif) => {
       // Add to notifications list
       setNotifications((prev) => [notif, ...prev]);
+
+      // Acoustic chime playback
+      if (notif.type === 'order' || notif.orderId) {
+        soundService.playOrderChime();
+      } else if (notif.type === 'rider') {
+        soundService.playRiderChirp();
+      } else {
+        soundService.playDealDing();
+      }
 
       // Trigger floating live toast
       setLiveToast(notif);
@@ -340,6 +350,21 @@ export default function Navbar() {
                           </div>
                         ))
                       )}
+                    </div>
+
+                    <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
+                      <span className="text-slate-400 font-mono flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                        Web Audio V2.4
+                      </span>
+                      <Link
+                        to="/notifications"
+                        onClick={() => setNotifDropdownOpen(false)}
+                        className="font-bold text-[#055c24] hover:text-[#004217] hover:underline flex items-center gap-0.5"
+                      >
+                        <span>Audio Console & Specs</span>
+                        <span>→</span>
+                      </Link>
                     </div>
                   </div>
                 )}

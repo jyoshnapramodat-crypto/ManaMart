@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import soundService from '../services/soundService';
 import {
   X,
   Bell,
@@ -14,6 +15,7 @@ import {
   ChevronRight,
   ShieldCheck,
   CheckCircle2,
+  Volume2,
 } from 'lucide-react';
 
 export default function NotificationModal({ isOpen, onClose }) {
@@ -83,6 +85,11 @@ export default function NotificationModal({ isOpen, onClose }) {
     setNotifications((prev) =>
       prev.map((n) => (n.id === notif.id ? { ...n, isRead: true } : n))
     );
+    if (notif.category === 'orders') {
+      soundService.playOrderChime();
+    } else {
+      soundService.playDealDing();
+    }
     onClose();
     if (notif.link) {
       navigate(notif.link);
@@ -236,13 +243,44 @@ export default function NotificationModal({ isOpen, onClose }) {
                   <p className="text-[11px] text-slate-600 mt-0.5 leading-relaxed">
                     {notif.message}
                   </p>
-                  <span className="text-[10px] text-slate-400 mt-1 block font-mono">
-                    {notif.time}
-                  </span>
+                  <div className="flex items-center justify-between mt-1">
+                    <span className="text-[10px] text-slate-400 font-mono">
+                      {notif.time}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (notif.category === 'orders') soundService.playOrderChime();
+                        else if (notif.category === 'refunds') soundService.playDealDing();
+                        else soundService.playRiderChirp();
+                      }}
+                      className="text-slate-400 hover:text-orange-600 p-1 rounded-md hover:bg-white transition-colors"
+                      title="Preview Tone"
+                    >
+                      <Volume2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
               </div>
             ))
           )}
+        </div>
+
+        {/* Footer Link to Soundboard & Architecture Page */}
+        <div className="p-3 bg-slate-50 border-t border-slate-200/80 flex items-center justify-between">
+          <div className="flex items-center space-x-1.5 text-xs text-slate-600">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="font-semibold">Web Audio Synthesizer</span>
+          </div>
+          <Link
+            to="/notifications"
+            onClick={onClose}
+            className="text-xs font-bold text-[#055c24] hover:text-[#004217] flex items-center space-x-1 bg-white border border-emerald-300 px-2.5 py-1.5 rounded-lg shadow-2xs hover:bg-emerald-50 transition-colors"
+          >
+            <span>Open Soundboard</span>
+            <ChevronRight className="w-3.5 h-3.5" />
+          </Link>
         </div>
 
       </div>
