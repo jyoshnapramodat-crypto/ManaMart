@@ -158,7 +158,7 @@ export default function Navbar() {
   return (
     <>
       <header className="sticky top-0 z-40 bg-surface/95 backdrop-blur-md border-b border-surface-container-high/60 shadow-xs">
-        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-20 gap-3 sm:gap-4">
             
             {/* Brand Logo & Location Pill */}
@@ -184,7 +184,7 @@ export default function Navbar() {
             </div>
 
             {/* Desktop Centered & Spacious Search Bar */}
-            <div className="hidden md:flex flex-1 min-w-[280px] max-w-2xl mx-2 lg:mx-4 items-center">
+            <div className="hidden md:flex flex-1 min-w-[280px] max-w-2xl mx-2 lg:mx-6 items-center">
               <form
                 onSubmit={handleSearchSubmit}
                 className="w-full flex items-center bg-white rounded-full shadow-xs border border-slate-200 hover:border-slate-300 focus-within:border-[#003527] focus-within:ring-2 focus-within:ring-[#003527]/10 px-3.5 py-1.5 transition-all"
@@ -235,35 +235,8 @@ export default function Navbar() {
             </div>
 
             {/* Right Action Icons & Utilities */}
-            <div className="flex items-center space-x-2 sm:space-x-2.5 shrink-0">
+            <div className="flex items-center space-x-2 sm:space-x-3 shrink-0">
               
-              {/* Dine-In Quick Pill */}
-              <Link
-                to={isLoggedIn ? "/reservations" : "/login"}
-                state={{ from: { pathname: "/reservations" }, message: "Please sign in or select a demo role to book a dining table." }}
-                className="hidden xl:flex items-center space-x-1.5 px-3 py-1.5 rounded-full bg-secondary-container/10 hover:bg-secondary-container/20 text-secondary-container font-bold text-xs transition-colors shrink-0"
-                title="Book Restaurant Table"
-              >
-                <CalendarDays className="w-3.5 h-3.5" />
-                <span>Dine-In Booking</span>
-              </Link>
-
-              {/* Extended Services on Extra-Wide Displays */}
-              <div className="hidden 2xl:flex items-center space-x-3 text-xs font-semibold text-on-surface-variant">
-                <Link to="/feed" className="flex items-center space-x-1 hover:text-primary transition-colors">
-                  <Sparkles className="w-3.5 h-3.5 text-secondary" />
-                  <span>{t('nav.feed')}</span>
-                </Link>
-                <Link to="/recurring" className="flex items-center space-x-1 hover:text-primary transition-colors">
-                  <Repeat className="w-3.5 h-3.5 text-primary" />
-                  <span>{t('nav.recurring')}</span>
-                </Link>
-                <Link to="/parcel" className="flex items-center space-x-1 hover:text-primary transition-colors">
-                  <Package className="w-3.5 h-3.5 text-primary" />
-                  <span>{t('nav.parcel')}</span>
-                </Link>
-              </div>
-
               {/* Language Switcher Pill */}
               <button
                 onClick={toggleLanguage}
@@ -590,6 +563,55 @@ export default function Navbar() {
                 <span>Search</span>
               </button>
             </form>
+          </div>
+        </div>
+
+        {/* Hyperlocal Category & Quick Service Ribbon (Desktop) */}
+        <div className="hidden md:block bg-surface-container-low/70 border-t border-outline-variant/20 py-2 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-[1440px] mx-auto flex items-center justify-between text-xs font-bold">
+            <div className="flex items-center space-x-6">
+              <Link
+                to={isLoggedIn ? "/reservations" : "/login"}
+                state={{ from: { pathname: "/reservations" }, message: "Please sign in or choose a demo login to book a dining table." }}
+                className="flex items-center space-x-1.5 text-secondary hover:text-secondary-container transition-colors group"
+              >
+                <div className="w-5 h-5 rounded-md bg-secondary-container/15 flex items-center justify-center text-secondary-container group-hover:scale-110 transition-transform">
+                  <CalendarDays className="w-3.5 h-3.5" />
+                </div>
+                <span>Book Restaurant Table</span>
+              </Link>
+
+              <Link to="/feed" className="flex items-center space-x-1.5 text-on-surface-variant hover:text-primary transition-colors">
+                <Sparkles className="w-3.5 h-3.5 text-[#fe6b00]" />
+                <span>{t('nav.feed')}</span>
+              </Link>
+
+              <Link to="/recurring" className="flex items-center space-x-1.5 text-on-surface-variant hover:text-primary transition-colors">
+                <Repeat className="w-3.5 h-3.5 text-primary" />
+                <span>{t('nav.recurring')}</span>
+              </Link>
+
+              <Link to="/parcel" className="flex items-center space-x-1.5 text-on-surface-variant hover:text-primary transition-colors">
+                <Package className="w-3.5 h-3.5 text-primary" />
+                <span>{t('nav.parcel')}</span>
+              </Link>
+
+              <Link to="/services" className="flex items-center space-x-1.5 text-on-surface-variant hover:text-primary transition-colors">
+                <Wrench className="w-3.5 h-3.5 text-slate-500" />
+                <span>Local Services</span>
+              </Link>
+            </div>
+
+            <div className="flex items-center space-x-4 text-[11px] text-on-surface-variant font-medium">
+              <span className="flex items-center gap-1.5 text-emerald-800 font-semibold">
+                <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />
+                Delivering in {selectedLocality}, {currentCity}
+              </span>
+              <span>•</span>
+              <Link to="/support" className="hover:text-primary transition-colors">
+                24x7 Help Desk
+              </Link>
+            </div>
           </div>
         </div>
       </header>
