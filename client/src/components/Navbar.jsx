@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useLocation } from '../context/LocationContext';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import Logo from './Logo';
 import {
   MapPin,
   Search,
@@ -17,16 +18,21 @@ import {
   Bell,
   ChevronDown,
   User,
+  LogOut,
+  Store,
+  Bike,
+  ShieldCheck,
 } from 'lucide-react';
 
 export default function Navbar() {
   const { t, i18n } = useTranslation();
   const { currentCity, selectedLocality, setIsModalOpen } = useLocation();
   const { totalItemCount, total, setIsCartOpen } = useCart();
-  const { user } = useAuth();
+  const { user, isLoggedIn, logout, role } = useAuth();
   const navigate = useNavigate();
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
   const toggleLanguage = () => {
     const nextLang = i18n.language === 'en' ? 'te' : 'en';
@@ -37,8 +43,16 @@ export default function Navbar() {
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      navigate(`/?q=${encodeURIComponent(searchQuery.trim())}`);
+      navigate(`/app?q=${encodeURIComponent(searchQuery.trim())}`);
+    } else {
+      navigate('/app');
     }
+  };
+
+  const handleLogout = () => {
+    logout();
+    setUserDropdownOpen(false);
+    navigate('/');
   };
 
   return (
@@ -48,22 +62,7 @@ export default function Navbar() {
           
           {/* Brand Logo & Location Pill */}
           <div className="flex items-center space-x-3 sm:space-x-5 flex-shrink-0">
-            <Link to="/" className="flex items-center space-x-2 group">
-              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-tr from-orange-600 via-orange-500 to-amber-500 text-white flex items-center justify-center font-black text-xl shadow-md group-hover:scale-105 transition-transform">
-                M
-              </div>
-              <div className="flex flex-col">
-                <div className="flex items-center space-x-1">
-                  <span className="font-extrabold text-xl sm:text-2xl text-slate-900 tracking-tight">ManaMart</span>
-                  <span className="text-[10px] uppercase font-bold bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded-md hidden md:inline">
-                    LocalLoop
-                  </span>
-                </div>
-                <span className="text-[10px] text-slate-400 font-medium hidden sm:block tracking-wide">
-                  {i18n.language === 'te' ? 'మన ఊరు. మన మార్కెట్.' : 'Mana Ooru. Mana Market.'}
-                </span>
-              </div>
-            </Link>
+            <Logo size="md" showTagline={true} to="/" />
 
             {/* Location Selector Pill */}
             <button
@@ -129,17 +128,107 @@ export default function Navbar() {
               <span>{i18n.language === 'en' ? 'తెలుగు' : 'English'}</span>
             </button>
 
-            {/* User Account / Sign In Button */}
-            <Link
-              to="/login"
-              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl border border-slate-200 hover:border-orange-300 bg-white hover:bg-orange-50/50 text-xs font-bold text-slate-800 transition-all shadow-2xs"
-              title="Account Login / Register"
-            >
-              <User className="w-3.5 h-3.5 text-orange-600" />
-              <span className="max-w-[80px] sm:max-w-[110px] truncate">
-                {user ? user.name.split(' ')[0] : 'Sign In'}
-              </span>
-            </Link>
+            {/* User Account / Sign In Dropdown */}
+            {isLoggedIn ? (
+              <div className="relative">
+                <button
+                  onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                  className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl border border-slate-200 hover:border-orange-300 bg-white hover:bg-orange-50/50 text-xs font-bold text-slate-800 transition-all shadow-2xs"
+                >
+                  <div className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-[10px] font-black">
+                    {user?.name ? user.name[0].toUpperCase() : 'U'}
+                  </div>
+                  <span className="max-w-[70px] sm:max-w-[100px] truncate">
+                    {user?.name ? user.name.split(' ')[0] : 'Account'}
+                  </span>
+                  <ChevronDown className="w-3 h-3 text-slate-400" />
+                </button>
+
+                {userDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-52 bg-white rounded-2xl shadow-xl border border-slate-100 p-2 z-50 text-xs font-medium space-y-1">
+                    <div className="px-3 py-2 border-b border-slate-100">
+                      <p className="font-bold text-slate-900 truncate">{user?.name}</p>
+                      <p className="text-[10px] text-slate-400 capitalize">{user?.role} Mode</p>
+                    </div>
+
+                    <Link
+                      to="/app"
+                      onClick={() => setUserDropdownOpen(false)}
+                      className="flex items-center space-x-2 px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-50 transition-colors"
+                    >
+                      <ShoppingBag className="w-4 h-4 text-orange-600" />
+                      <span>Marketplace Store</span>
+                    </Link>
+
+                    {role === 'merchant' && (
+                      <Link
+                        to="/merchant"
+                        onClick={() => setUserDropdownOpen(false)}
+                        className="flex items-center space-x-2 px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-50 transition-colors"
+                      >
+                        <Store className="w-4 h-4 text-emerald-600" />
+                        <span>Merchant Dashboard</span>
+                      </Link>
+                    )}
+
+                    {role === 'rider' && (
+                      <Link
+                        to="/rider"
+                        onClick={() => setUserDropdownOpen(false)}
+                        className="flex items-center space-x-2 px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-50 transition-colors"
+                      >
+                        <Bike className="w-4 h-4 text-orange-600" />
+                        <span>Rider Console</span>
+                      </Link>
+                    )}
+
+                    {role === 'admin' && (
+                      <Link
+                        to="/admin"
+                        onClick={() => setUserDropdownOpen(false)}
+                        className="flex items-center space-x-2 px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-50 transition-colors"
+                      >
+                        <ShieldCheck className="w-4 h-4 text-purple-600" />
+                        <span>Platform Governance</span>
+                      </Link>
+                    )}
+
+                    <Link
+                      to="/orders"
+                      onClick={() => setUserDropdownOpen(false)}
+                      className="flex items-center space-x-2 px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-50 transition-colors"
+                    >
+                      <Package className="w-4 h-4 text-slate-500" />
+                      <span>My Orders</span>
+                    </Link>
+
+                    <button
+                      onClick={handleLogout}
+                      className="w-full flex items-center space-x-2 px-3 py-2 rounded-xl text-red-600 hover:bg-red-50 transition-colors text-left font-bold"
+                    >
+                      <LogOut className="w-4 h-4 text-red-600" />
+                      <span>Sign Out</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex items-center space-x-1.5">
+                <Link
+                  to="/login"
+                  className="flex items-center space-x-1 px-3 py-1.5 rounded-xl border border-slate-200 hover:border-orange-300 bg-white hover:bg-orange-50/50 text-xs font-bold text-slate-800 transition-all shadow-2xs"
+                >
+                  <User className="w-3.5 h-3.5 text-orange-600" />
+                  <span>Sign In</span>
+                </Link>
+                <Link
+                  to="/signup"
+                  className="hidden sm:inline-flex items-center space-x-1 px-3 py-1.5 rounded-xl bg-gradient-to-r from-[#FF5E1E] to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white text-xs font-bold shadow-2xs transition-all"
+                >
+                  <span>Register</span>
+                </Link>
+              </div>
+            )}
 
             {/* Cart Trigger Button */}
             <button

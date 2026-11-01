@@ -11,12 +11,9 @@ export function AuthProvider({ children }) {
   const [token, setToken] = useState(() => localStorage.getItem('manamart_token') || '');
   const [loading, setLoading] = useState(false);
 
-  // Initialize with default demo customer on first load if not set
-  useEffect(() => {
-    if (!user || !token) {
-      quickSwitchRole('customer');
-    }
-  }, []);
+  // Do NOT auto-login as customer on first visit.
+  // Allow visitors to see the Splash Screen & Landing Page naturally.
+  // Persisted user in localStorage is retained across refreshes.
 
   const quickSwitchRole = async (role) => {
     setLoading(true);
@@ -55,15 +52,17 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Login existing user
-  const login = async (identifier, otp) => {
+  // Login existing user via Password OR OTP
+  const login = async (identifier, credentials = {}) => {
     setLoading(true);
     try {
-      const isEmail = identifier.includes('@');
-      const payload = {
-        otp,
-        ...(isEmail ? { email: identifier } : { phone: identifier }),
-      };
+      let payload = { identifier };
+      if (typeof credentials === 'string') {
+        payload.otp = credentials;
+      } else {
+        if (credentials.password) payload.password = credentials.password;
+        if (credentials.otp) payload.otp = credentials.otp;
+      }
       const res = await api.post('/auth/login', payload);
       if (res.data.success) {
         setUser(res.data.user);
@@ -85,13 +84,14 @@ export function AuthProvider({ children }) {
   };
 
   // Register brand new user with uniqueness validation
-  const register = async ({ name, phone, email, role, otp, businessName, vehicleType }) => {
+  const register = async ({ name, phone, email, password, role = 'customer', otp, businessName, vehicleType }) => {
     setLoading(true);
     try {
       const payload = {
         name,
         phone,
         email,
+        password,
         role,
         otp,
         businessName,
@@ -110,6 +110,22 @@ export function AuthProvider({ children }) {
       return {
         success: false,
         message: err.response?.data?.message || 'Registration failed.',
+      };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Reset Password using OTP
+  const resetPassword = async ({ identifier, otp, newPassword }) => {
+    setLoading(true);
+    try {
+      const res = await api.post('/auth/reset-password', { identifier, otp, newPassword });
+      return res.data;
+    } catch (err) {
+      return {
+        success: false,
+        message: err.response?.data?.message || 'Password reset failed.',
       };
     } finally {
       setLoading(false);
@@ -146,6 +162,7 @@ export function AuthProvider({ children }) {
         sendOtp,
         login,
         register,
+        resetPassword,
         checkAvailability,
         quickSwitchRole,
         logout,

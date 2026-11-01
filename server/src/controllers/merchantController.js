@@ -1,5 +1,138 @@
 import { mockDb } from '../utils/mockDbStore.js';
 import { v4 as uuidv4 } from 'uuid';
+import { MerchantApplication } from '../models/MerchantApplication.js';
+import { isConnectedToMongo } from '../config/db.js';
+
+export async function getMyApplicationStatus(req, res) {
+  try {
+    const userId = req.user.id || req.user._id;
+
+    // Check MongoDB
+    let appRecord = null;
+    if (isConnectedToMongo) {
+      try {
+        appRecord = await MerchantApplication.findOne({ userId });
+      } catch (err) {
+        console.warn('Mongo app fetch error:', err.message);
+      }
+    }
+
+    // Check memory store
+    if (!appRecord) {
+      appRecord = mockDb.pendingMerchants.find((m) => m.userId === userId || m.phone === req.user.phone);
+    }
+
+    // If merchant is already active and verified in mockDb.merchants
+    const activeMerchant = mockDb.merchants.find((m) => m.userId === userId || m.phone === req.user.phone);
+
+    return res.json({
+      success: true,
+      hasApplied: Boolean(appRecord || activeMerchant),
+      status: activeMerchant ? activeMerchant.verificationStatus : (appRecord?.status || 'not_applied'),
+      application: appRecord || activeMerchant,
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+}
+
+export async function submitMerchantApplication(req, res) {
+  try {
+    const userId = req.user.id || req.user._id;
+    const {
+      businessName,
+      category,
+      ownerName,
+      phone,
+      email,
+      street,
+      locality,
+      city,
+      pincode,
+      openTime,
+      closeTime,
+      fssaiLicense,
+      drugLicense,
+      panNumber,
+      gstin,
+    } = req.body;
+
+    if (!businessName || !category || !street || !locality || !city) {
+      return res.status(400).json({ success: false, message: 'Please provide all mandatory store details.' });
+    }
+
+    // Food category MUST submit FSSAI
+    if (category === 'food' && !fssaiLicense) {
+      return res.status(400).json({ success: false, message: 'FSSAI License registration number is mandatory for Food and Restaurant businesses.' });
+    }
+
+    // Pharmacy category MUST submit Drug License
+    if (category === 'pharmacy' && !drugLicense) {
+      return res.status(400).json({ success: false, message: 'Drug License number is mandatory for Pharmacies.' });
+    }
+
+    const applicationData = {
+      id: `pm-${Date.now()}`,
+      userId,
+      businessName,
+      category,
+      ownerName: ownerName || req.user.name,
+      phone: phone || req.user.phone,
+      email: email || req.user.email,
+      address: {
+        street,
+        locality,
+        city,
+        pincode: pincode || '500081',
+        lat: 17.4480,
+        lng: 78.3910,
+      },
+      city,
+      locality,
+      status: 'pending_review',
+      submittedAt: new Date().toISOString(),
+      documents: {
+        fssai: fssaiLicense || '',
+        fssaiDoc: fssaiLicense ? 'fssai_cert_uploaded.pdf' : '',
+        drugLicense: drugLicense || '',
+        pan: panNumber || 'APXPR1294K',
+        tradeLicense: gstin || '36AAACR1234F1Z8',
+      },
+    };
+
+    if (isConnectedToMongo) {
+      try {
+        await MerchantApplication.findOneAndUpdate(
+          { userId },
+          applicationData,
+          { upsert: true, new: true }
+        );
+      } catch (err) {
+        console.warn('Mongo app save fallback:', err.message);
+      }
+    }
+
+    // Update in-memory queue
+    const existingIndex = mockDb.pendingMerchants.findIndex((m) => m.userId === userId);
+    if (existingIndex !== -1) {
+      mockDb.pendingMerchants[existingIndex] = applicationData;
+    } else {
+      mockDb.pendingMerchants.push(applicationData);
+    }
+
+    // Update user role to merchant with pending status
+    req.user.role = 'merchant';
+    req.user.status = 'pending';
+
+    return res.status(201).json({
+      success: true,
+      message: 'Merchant application submitted successfully! It is now pending Administrator review.',
+      application: applicationData,
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+}
 
 export async function getMyStore(req, res) {
   try {
@@ -135,26 +268,7 @@ export async function uploadDocuments(req, res) {
     if (fssaiLicense) merchant.fssaiLicense = fssaiLicense;
     if (drugLicense) merchant.drugLicense = drugLicense;
 
-    // Queue for admin verification
     merchant.verificationStatus = 'pending';
-
-    mockDb.pendingMerchants.push({
-      id: `pm-${Date.now()}`,
-      businessName: merchant.businessName,
-      ownerName: req.user.name,
-      category: merchant.category,
-      phone: merchant.phone,
-      city: merchant.address.city,
-      locality: merchant.address.locality,
-      status: 'pending',
-      submittedAt: new Date().toISOString(),
-      documents: {
-        fssai: fssaiLicense,
-        drugLicense,
-        pan: panNumber || 'APXPR1294K',
-        tradeLicense: gstin || '36AAACR1234F1Z8',
-      },
-    });
 
     return res.json({
       success: true,
@@ -175,4 +289,3 @@ export async function getReservations(req, res) {
     return res.status(500).json({ success: false, message: error.message });
   }
 }
-

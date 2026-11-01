@@ -8,7 +8,7 @@ export default function QuickRoleSwitcher() {
   const navigate = useNavigate();
 
   const roles = [
-    { id: 'customer', label: 'Customer', icon: User, path: '/' },
+    { id: 'customer', label: 'Customer', icon: User, path: '/app' },
     { id: 'merchant', label: 'Merchant', icon: Store, path: '/merchant' },
     { id: 'rider', label: 'Rider Partner', icon: Bike, path: '/rider' },
     { id: 'admin', label: 'Platform Admin', icon: ShieldCheck, path: '/admin' },

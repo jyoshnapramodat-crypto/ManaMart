@@ -1,5 +1,111 @@
 import { mockDb } from '../utils/mockDbStore.js';
 import { v4 as uuidv4 } from 'uuid';
+import { RiderApplication } from '../models/RiderApplication.js';
+import { isConnectedToMongo } from '../config/db.js';
+
+export async function getMyRiderApplicationStatus(req, res) {
+  try {
+    const userId = req.user.id || req.user._id;
+
+    // Check Mongo
+    let appRecord = null;
+    if (isConnectedToMongo) {
+      try {
+        appRecord = await RiderApplication.findOne({ userId });
+      } catch (err) {
+        console.warn('Mongo rider app fetch error:', err.message);
+      }
+    }
+
+    if (!appRecord) {
+      appRecord = mockDb.pendingRiders.find((r) => r.userId === userId || r.phone === req.user.phone);
+    }
+
+    const activeRider = mockDb.riders.find((r) => r.userId === userId || r.phone === req.user.phone);
+
+    return res.json({
+      success: true,
+      hasApplied: Boolean(appRecord || activeRider),
+      status: activeRider ? activeRider.verificationStatus : (appRecord?.status || 'not_applied'),
+      application: appRecord || activeRider,
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+}
+
+export async function submitRiderApplication(req, res) {
+  try {
+    const userId = req.user.id || req.user._id;
+    const {
+      name,
+      phone,
+      city,
+      preferredArea,
+      vehicleType,
+      vehicleNumber,
+      drivingLicense,
+      rcNumber,
+    } = req.body;
+
+    if (!name || !city || !preferredArea || !vehicleType) {
+      return res.status(400).json({ success: false, message: 'Please provide all required vehicle and rider information.' });
+    }
+
+    if (vehicleType !== 'bicycle' && !drivingLicense) {
+      return res.status(400).json({ success: false, message: 'Driving license number is mandatory for motorized vehicle delivery partners.' });
+    }
+
+    const applicationData = {
+      id: `pr-${Date.now()}`,
+      userId,
+      name: name || req.user.name,
+      phone: phone || req.user.phone,
+      city,
+      preferredArea,
+      vehicleType,
+      vehicleNumber: vehicleNumber || 'Pending Reg',
+      status: 'pending_review',
+      submittedAt: new Date().toISOString(),
+      documents: {
+        drivingLicense: drivingLicense || 'Cycle Rider - No DL',
+        licenseDoc: 'license_scanned.jpg',
+        rcDoc: 'rc_book.jpg',
+        insuranceDoc: 'insurance.pdf',
+      },
+    };
+
+    if (isConnectedToMongo) {
+      try {
+        await RiderApplication.findOneAndUpdate(
+          { userId },
+          applicationData,
+          { upsert: true, new: true }
+        );
+      } catch (err) {
+        console.warn('Mongo rider app save fallback:', err.message);
+      }
+    }
+
+    const existingIndex = mockDb.pendingRiders.findIndex((r) => r.userId === userId);
+    if (existingIndex !== -1) {
+      mockDb.pendingRiders[existingIndex] = applicationData;
+    } else {
+      mockDb.pendingRiders.push(applicationData);
+    }
+
+    req.user.role = 'rider';
+    req.user.status = 'pending';
+
+    return res.status(201).json({
+      success: true,
+      message: 'Rider Partner application submitted successfully! It is now in the Admin verification queue.',
+      application: applicationData,
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+}
 
 export async function getRiderProfile(req, res) {
   try {
@@ -29,6 +135,15 @@ export async function toggleOnlineStatus(req, res) {
   try {
     const riderId = req.user.riderId || 'r-1';
     const rider = mockDb.riders.find((r) => r.id === riderId) || mockDb.riders[0];
+
+    // Check approval
+    if (rider.verificationStatus !== 'verified') {
+      return res.status(403).json({
+        success: false,
+        message: 'Your rider partner account is pending Administrator document verification. You cannot go online yet.',
+      });
+    }
+
     rider.isOnline = !rider.isOnline;
 
     return res.json({
@@ -53,7 +168,7 @@ export async function getNearbyTasks(req, res) {
         merchantAddress: o.merchantAddress,
         deliveryAddress: o.deliveryAddress.street + ', ' + o.deliveryAddress.locality,
         distanceKm: 3.4,
-        proposedPayout: Math.round((o.deliveryFee || 35) * 0.85) + 15, // Base payout to rider
+        proposedPayout: Math.round((o.deliveryFee || 35) * 0.85) + 15,
         itemsCount: o.items ? o.items.length : 1,
         orderStatus: o.orderStatus,
       }));
@@ -72,6 +187,10 @@ export async function acceptTask(req, res) {
     const { id } = req.params;
     const riderId = req.user.riderId || 'r-1';
     const rider = mockDb.riders.find((r) => r.id === riderId) || mockDb.riders[0];
+
+    if (rider.verificationStatus !== 'verified') {
+      return res.status(403).json({ success: false, message: 'Unverified rider accounts cannot accept delivery tasks.' });
+    }
 
     const order = mockDb.orders.find((o) => o.id === id);
     if (!order) {
@@ -122,7 +241,6 @@ export async function verifyDeliveryOtp(req, res) {
       return res.status(404).json({ success: false, message: 'Order not found.' });
     }
 
-    // Verify OTP against the order's generated OTP or demo 1234
     if (otp !== order.deliveryOtp && otp !== '1234') {
       return res.status(400).json({
         success: false,
@@ -138,7 +256,6 @@ export async function verifyDeliveryOtp(req, res) {
       note: `Package handed over securely with verified OTP ${otp}`,
     });
 
-    // Credit rider wallet
     const riderId = req.user.riderId || 'r-1';
     const rider = mockDb.riders.find((r) => r.id === riderId) || mockDb.riders[0];
     const payoutEarned = 55;
@@ -146,7 +263,6 @@ export async function verifyDeliveryOtp(req, res) {
     rider.todayDeliveries = (rider.todayDeliveries || 0) + 1;
     rider.totalDeliveries = (rider.totalDeliveries || 0) + 1;
 
-    // Send customer delivered notification
     mockDb.notifications.unshift({
       id: `notif-${uuidv4().slice(0, 8)}`,
       userId: order.customerId,
@@ -189,4 +305,3 @@ export async function getRiderEarnings(req, res) {
     return res.status(500).json({ success: false, message: error.message });
   }
 }
-
