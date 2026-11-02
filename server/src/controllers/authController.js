@@ -661,10 +661,10 @@ export async function changePassword(req, res) {
 // Quick Switch Login for frictionless evaluation and testing
 export async function quickLogin(req, res) {
   try {
-    const { role = 'customer' } = req.body;
-    let user = mockDb.users.find((u) => u.role === role && u.isDemo);
+    const targetRole = (req.body.role || 'customer').toUpperCase();
+    let user = mockDb.users.find((u) => (u.role || '').toUpperCase() === targetRole && u.isDemo);
     if (!user) {
-      user = mockDb.users.find((u) => u.role === role) || mockDb.users[0];
+      user = mockDb.users.find((u) => (u.role || '').toUpperCase() === targetRole) || mockDb.users[0];
     }
 
     const tokenPayload = {

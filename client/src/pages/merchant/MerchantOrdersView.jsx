@@ -49,7 +49,9 @@ export default function MerchantOrdersView() {
 
   const filteredOrders = orders.filter((o) => {
     if (filter === 'all') return true;
-    return o.orderStatus === filter;
+    const st = (o.orderStatus || '').toLowerCase();
+    if (filter === 'received') return ['new', 'received', 'pending'].includes(st);
+    return st === filter;
   });
 
   return (
@@ -67,7 +69,7 @@ export default function MerchantOrdersView() {
 
           {/* Filter Pills */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
-            {['all', 'pending', 'preparing', 'out_for_delivery', 'delivered'].map((st) => (
+            {['all', 'received', 'preparing', 'ready_for_pickup', 'handed_over', 'delivered'].map((st) => (
               <button
                 key={st}
                 onClick={() => setFilter(st)}
@@ -122,31 +124,48 @@ export default function MerchantOrdersView() {
                 {/* Status & Action */}
                 <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
                   <span className={`px-2.5 py-1 rounded-full font-bold uppercase tracking-wider text-[10px] ${
-                    order.orderStatus === 'delivered' ? 'bg-emerald-100 text-emerald-800' :
-                    order.orderStatus === 'pending' ? 'bg-amber-100 text-amber-800' :
-                    'bg-orange-100 text-[#FF6B00]'
+                    order.orderStatus?.toLowerCase() === 'delivered' ? 'bg-emerald-100 text-emerald-800' :
+                    ['new', 'received', 'pending'].includes(order.orderStatus?.toLowerCase()) ? 'bg-amber-100 text-amber-800' :
+                    order.orderStatus?.toLowerCase() === 'preparing' ? 'bg-orange-100 text-orange-800' :
+                    order.orderStatus?.toLowerCase() === 'ready_for_pickup' ? 'bg-blue-100 text-blue-800' :
+                    order.orderStatus?.toLowerCase() === 'handed_over' ? 'bg-purple-100 text-purple-800' :
+                    'bg-slate-100 text-slate-800'
                   }`}>
                     Status: {order.orderStatus?.replace('_', ' ')}
                   </span>
 
                   <div className="flex items-center gap-2">
-                    {order.orderStatus === 'pending' && (
+                    {['new', 'received', 'pending'].includes(order.orderStatus?.toLowerCase()) && (
                       <button
-                        onClick={() => handleUpdateStatus(order.id, 'preparing')}
+                        onClick={() => handleUpdateStatus(order.id, 'PREPARING')}
                         className="px-3.5 py-1.5 bg-[#064E3B] hover:bg-[#033B2D] text-white rounded-xl font-bold cursor-pointer flex items-center gap-1 shadow-xs"
                       >
                         <ChefHat className="w-3.5 h-3.5" />
-                        <span>Accept & Prepare</span>
+                        <span>Accept & Cook</span>
                       </button>
                     )}
-                    {order.orderStatus === 'preparing' && (
+                    {order.orderStatus?.toUpperCase() === 'PREPARING' && (
                       <button
-                        onClick={() => handleUpdateStatus(order.id, 'out_for_delivery')}
+                        onClick={() => handleUpdateStatus(order.id, 'READY_FOR_PICKUP')}
                         className="px-3.5 py-1.5 bg-[#FF6B00] hover:bg-[#e05e00] text-white rounded-xl font-bold cursor-pointer flex items-center gap-1 shadow-xs"
                       >
                         <Truck className="w-3.5 h-3.5" />
-                        <span>Ready for Handover</span>
+                        <span>Mark Ready for Pickup</span>
                       </button>
+                    )}
+                    {order.orderStatus?.toUpperCase() === 'READY_FOR_PICKUP' && (
+                      <button
+                        onClick={() => handleUpdateStatus(order.id, 'HANDED_OVER')}
+                        className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold cursor-pointer flex items-center gap-1 shadow-xs"
+                      >
+                        <Truck className="w-3.5 h-3.5" />
+                        <span>Hand Over to Courier</span>
+                      </button>
+                    )}
+                    {order.orderStatus?.toUpperCase() === 'HANDED_OVER' && (
+                      <span className="text-purple-700 font-bold text-xs bg-purple-50 px-2.5 py-1 rounded-xl">
+                        In Transit • Awaiting Courier OTP Hand-off
+                      </span>
                     )}
                   </div>
                 </div>

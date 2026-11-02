@@ -283,6 +283,29 @@ class SoundService {
     setTimeout(() => this.playDealDing(), 2300);
     setTimeout(() => this.playUrgentAlert(), 4200);
   }
+
+  /**
+   * Continuous Audio Ringtone Loop for Incoming Orders
+   * Plays alert continuously until merchant clicks 'Acknowledge'
+   */
+  startOrderRingtoneLoop() {
+    if (this.ringtoneInterval) return;
+    this.playOrderChime();
+    this.ringtoneInterval = setInterval(() => {
+      this.playOrderChime();
+    }, 2400);
+  }
+
+  stopOrderRingtoneLoop() {
+    if (this.ringtoneInterval) {
+      clearInterval(this.ringtoneInterval);
+      this.ringtoneInterval = null;
+    }
+  }
+
+  isRingtoneActive() {
+    return Boolean(this.ringtoneInterval);
+  }
 }
 
 export const soundService = new SoundService();

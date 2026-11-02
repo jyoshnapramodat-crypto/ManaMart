@@ -252,12 +252,18 @@ export async function verifyMerchant(req, res) {
       // Update linked User to active merchant
       if (targetUserId) {
         if (isConnectedToMongo) {
-          await User.findByIdAndUpdate(targetUserId, { role: 'merchant', status: 'active' });
+          try {
+            await User.findOneAndUpdate(
+              { $or: [{ _id: targetUserId }, { id: targetUserId }] },
+              { role: 'MERCHANT', status: 'APPROVED', 'merchant_profile.status': 'APPROVED' }
+            );
+          } catch (_) {}
         }
         const u = mockDb.users.find((user) => user.id === targetUserId || user._id === targetUserId);
         if (u) {
-          u.role = 'merchant';
-          u.status = 'active';
+          u.role = 'MERCHANT';
+          u.status = 'APPROVED';
+          if (u.merchant_profile) u.merchant_profile.status = 'APPROVED';
         }
       }
 
@@ -461,12 +467,18 @@ export async function verifyRider(req, res) {
 
       if (targetUserId) {
         if (isConnectedToMongo) {
-          await User.findByIdAndUpdate(targetUserId, { role: 'rider', status: 'active' });
+          try {
+            await User.findOneAndUpdate(
+              { $or: [{ _id: targetUserId }, { id: targetUserId }] },
+              { role: 'RIDER', status: 'APPROVED', 'rider_profile.status': 'APPROVED' }
+            );
+          } catch (_) {}
         }
         const u = mockDb.users.find((user) => user.id === targetUserId || user._id === targetUserId);
         if (u) {
-          u.role = 'rider';
-          u.status = 'active';
+          u.role = 'RIDER';
+          u.status = 'APPROVED';
+          if (u.rider_profile) u.rider_profile.status = 'APPROVED';
         }
       }
 

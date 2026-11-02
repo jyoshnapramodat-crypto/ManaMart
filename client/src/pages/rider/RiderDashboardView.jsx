@@ -12,6 +12,8 @@ import {
   CheckCircle2,
   DollarSign,
   Radio,
+  Coins,
+  Wallet,
 } from 'lucide-react';
 
 export default function RiderDashboardView() {
@@ -98,12 +100,21 @@ export default function RiderDashboardView() {
           </div>
         )}
 
-        {/* Quick Stats Grid */}
+        {/* Quick Stats Grid with COD Cash-in-Hand */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
           <div className="bg-white p-4 rounded-3xl border border-slate-200/80 shadow-xs space-y-1">
-            <span className="text-[11px] font-bold text-slate-500">Today's Payout</span>
+            <span className="text-[11px] font-bold text-slate-500">Today's Payouts</span>
             <div className="text-2xl font-black text-slate-900">₹{rider?.todayEarnings || 380}</div>
             <span className="text-[10px] text-emerald-700 font-bold">Direct UPI settlement</span>
+          </div>
+
+          <div className="bg-white p-4 rounded-3xl border border-amber-200 bg-amber-50/30 shadow-xs space-y-1">
+            <span className="text-[11px] font-bold text-amber-900 flex items-center gap-1">
+              <Coins className="w-3.5 h-3.5 text-amber-700" />
+              <span>COD Cash-in-Hand</span>
+            </span>
+            <div className="text-2xl font-black text-amber-950">₹{rider?.cashInHand || 620}</div>
+            <span className="text-[10px] text-amber-700 font-semibold">Cash collected to remit at hub</span>
           </div>
 
           <div className="bg-white p-4 rounded-3xl border border-slate-200/80 shadow-xs space-y-1">
@@ -116,14 +127,6 @@ export default function RiderDashboardView() {
             <span className="text-[11px] font-bold text-slate-500">Partner Rating</span>
             <div className="text-2xl font-black text-slate-900">{rider?.rating || '4.9'} ★</div>
             <span className="text-[10px] text-amber-700 font-bold">Top Courier Tier</span>
-          </div>
-
-          <div className="bg-white p-4 rounded-3xl border border-slate-200/80 shadow-xs space-y-1">
-            <span className="text-[11px] font-bold text-slate-500">Vehicle Type</span>
-            <div className="text-2xl font-black text-slate-900 uppercase text-sm mt-2">
-              {rider?.vehicleType || 'Motorcycle'}
-            </div>
-            <span className="text-[10px] text-slate-400 font-mono">{rider?.vehicleNumber || 'AP 07 CD 5678'}</span>
           </div>
         </div>
 

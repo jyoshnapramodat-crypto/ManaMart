@@ -53,9 +53,14 @@ import RiderHistoryView from './pages/rider/RiderHistoryView';
 
 // Admin Control Center Dedicated Views
 import AdminAnalyticsView from './pages/admin/AdminAnalyticsView';
+import AdminVerificationsView from './pages/admin/AdminVerificationsView';
 import AdminMerchantsQueueView from './pages/admin/AdminMerchantsQueueView';
 import AdminRidersQueueView from './pages/admin/AdminRidersQueueView';
 import AdminDisputesView from './pages/admin/AdminDisputesView';
+
+// Development Utilities (Conditionally rendered in development mode only)
+import QuickRoleSwitcher from './components/QuickRoleSwitcher';
+import DevMailboxDrawer from './components/DevMailboxDrawer';
 
 function AppLayout() {
   const location = useLocation();
@@ -254,6 +259,14 @@ function AppLayout() {
             }
           />
           <Route
+            path="/admin/verifications"
+            element={
+              <ProtectedRoute allowedRoles={['ADMIN']}>
+                <AdminVerificationsView />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/admin/merchants/pending"
             element={
               <ProtectedRoute allowedRoles={['ADMIN']}>
@@ -289,6 +302,14 @@ function AppLayout() {
           <CartDrawer />
           <LocationModal />
           {!isLanding && <BottomNav />}
+        </>
+      )}
+
+      {/* Development Utilities: Rendered strictly when NODE_ENV === 'development' */}
+      {Boolean(import.meta.env.DEV) && (
+        <>
+          <QuickRoleSwitcher />
+          <DevMailboxDrawer />
         </>
       )}
     </div>

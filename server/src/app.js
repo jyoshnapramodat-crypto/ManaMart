@@ -22,8 +22,9 @@ app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Base API route
+// Base API routes
 app.use('/api/v1', apiRouter);
+app.use('/api', apiRouter);
 
 // Serve static frontend in production or when dist exists
 const clientDistPath = path.join(__dirname, '../../client/dist');

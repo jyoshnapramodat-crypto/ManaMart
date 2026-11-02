@@ -68,11 +68,11 @@ export default function MerchantPortalLayout({ children }) {
 
   const navItems = [
     { to: '/merchant/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { to: '/merchant/orders', label: 'Incoming Orders', icon: ShoppingBag, badge: pendingOrdersCount },
-    { to: '/merchant/menu', label: 'Menu & Inventory', icon: UtensilsCrossed },
-    { to: '/merchant/reservations', label: 'Table Bookings', icon: CalendarDays },
-    { to: '/merchant/finance', label: 'Finance & Payouts', icon: CircleDollarSign },
-    { to: '/merchant/status', label: 'Compliance & Audit', icon: ShieldCheck },
+    { to: '/merchant/orders', label: 'Active KOT & Orders', icon: ShoppingBag, badge: pendingOrdersCount },
+    { to: '/merchant/menu', label: 'Menu Management', icon: UtensilsCrossed },
+    { to: '/merchant/reservations', label: 'Table Reservations', icon: CalendarDays },
+    { to: '/merchant/finance', label: 'Financial Settlements', icon: CircleDollarSign },
+    { to: '/merchant/status', label: 'Compliance & Verification', icon: ShieldCheck },
   ];
 
   return (

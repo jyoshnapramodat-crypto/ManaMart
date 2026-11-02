@@ -8,6 +8,7 @@ import {
   bookReservation,
   bookService,
 } from '../controllers/orderController.js';
+import { verifyDeliveryOtp } from '../controllers/riderController.js';
 import { authenticate } from '../middleware/authMiddleware.js';
 
 const router = Router();
@@ -18,6 +19,7 @@ router.post('/create', createOrder);
 router.get('/my-orders', getMyOrders);
 router.get('/:id', getOrderById);
 router.put('/:id/status', updateOrderStatus);
+router.post('/:id/verify-delivery', verifyDeliveryOtp);
 
 // Parcel delivery & reservations
 router.post('/parcel', createParcelOrder);

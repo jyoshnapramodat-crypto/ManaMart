@@ -43,9 +43,10 @@ export default function AdminPortalLayout({ children }) {
 
   const navItems = [
     { to: '/admin/analytics', label: 'Platform Analytics', icon: BarChart3 },
+    { to: '/admin/verifications', label: 'Verification Queues', icon: ShieldCheck, badge: (stats?.pendingMerchants || 0) + (stats?.pendingRiders || 0) },
     { to: '/admin/merchants/pending', label: 'Merchant Audits', icon: Store, badge: stats?.pendingMerchants },
     { to: '/admin/riders/pending', label: 'Rider Compliance', icon: Bike, badge: stats?.pendingRiders },
-    { to: '/admin/disputes', label: 'Complaints & Disputes', icon: AlertTriangle },
+    { to: '/admin/disputes', label: 'Dispute Handling', icon: AlertTriangle },
   ];
 
   return (

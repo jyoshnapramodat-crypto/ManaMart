@@ -8,6 +8,7 @@ import {
   CheckCircle2,
   Calendar,
   ArrowUpRight,
+  Coins,
 } from 'lucide-react';
 
 export default function RiderEarningsView() {
@@ -43,12 +44,21 @@ export default function RiderEarningsView() {
           </p>
         </div>
 
-        {/* 3 Metric Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {/* 4 Metric Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-xs space-y-1">
             <span className="text-xs font-bold text-slate-500">Today's Earnings</span>
             <div className="text-2xl font-black text-slate-900">₹{todayEarnings}</div>
             <span className="text-[11px] text-emerald-800 font-bold">Auto-dispatched at 11:30 PM</span>
+          </div>
+
+          <div className="bg-white p-5 rounded-3xl border border-amber-200 bg-amber-50/40 shadow-xs space-y-1">
+            <span className="text-xs font-bold text-amber-900 flex items-center gap-1">
+              <Coins className="w-4 h-4 text-amber-700" />
+              <span>COD Cash-in-Hand</span>
+            </span>
+            <div className="text-2xl font-black text-amber-950">₹{rider?.cashInHand || 620}</div>
+            <span className="text-[11px] text-amber-700 font-semibold">Cash to remit at hub</span>
           </div>
 
           <div className="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-xs space-y-1">
