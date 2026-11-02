@@ -57,6 +57,7 @@ export const mockDb = {
       phone: '9876543210',
       role: 'customer',
       status: 'active',
+      isDemo: true,
       language: 'en',
       addresses: [
         {
@@ -91,6 +92,7 @@ export const mockDb = {
       role: 'merchant',
       merchantId: 'm-1',
       status: 'active',
+      isDemo: true,
       language: 'te',
     },
     {
@@ -101,6 +103,7 @@ export const mockDb = {
       role: 'merchant',
       merchantId: 'm-2',
       status: 'active',
+      isDemo: true,
       language: 'te',
     },
     {
@@ -111,6 +114,7 @@ export const mockDb = {
       role: 'rider',
       riderId: 'r-1',
       status: 'active',
+      isDemo: true,
       isOnline: true,
       currentLocation: { lat: 17.4490, lng: 78.3880 },
     },
@@ -121,6 +125,7 @@ export const mockDb = {
       phone: '9999999999',
       role: 'admin',
       status: 'active',
+      isDemo: true,
     },
   ],
 

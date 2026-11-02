@@ -1,10 +1,9 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { LocationProvider } from './context/LocationContext';
 import { CartProvider } from './context/CartContext';
 
-import QuickRoleSwitcher from './components/QuickRoleSwitcher';
 import Navbar from './components/Navbar';
 import BottomNav from './components/BottomNav';
 import CartDrawer from './components/CartDrawer';
@@ -12,7 +11,6 @@ import LocationModal from './components/LocationModal';
 import SplashScreen from './components/SplashScreen';
 import ProtectedRoute from './components/ProtectedRoute';
 import OfflineBanner from './components/OfflineBanner';
-import DevMailboxDrawer from './components/DevMailboxDrawer';
 
 // Public & Auth Pages
 import LandingPage from './pages/public/LandingPage';
@@ -20,7 +18,7 @@ import LoginPage from './pages/auth/LoginPage';
 import SignupPage from './pages/auth/SignupPage';
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
 
-// Customer Pages
+// Customer Portal Pages
 import HomePage from './pages/customer/HomePage';
 import MerchantDetailsPage from './pages/customer/MerchantDetailsPage';
 import SearchPage from './pages/customer/SearchPage';
@@ -36,90 +34,84 @@ import SettingsPage from './pages/customer/SettingsPage';
 import ProfilePage from './pages/customer/ProfilePage';
 import NotificationCenterPage from './pages/customer/NotificationCenterPage';
 
-// Merchant Onboarding & Dashboard Pages
+// Merchant Dedicated Portal Views
 import MerchantOnboardingPage from './pages/merchant/MerchantOnboardingPage';
 import MerchantStatusPage from './pages/merchant/MerchantStatusPage';
-import MerchantDashboardPage from './pages/merchant/MerchantDashboardPage';
+import MerchantDashboardView from './pages/merchant/MerchantDashboardView';
+import MerchantOrdersView from './pages/merchant/MerchantOrdersView';
+import MerchantMenuView from './pages/merchant/MerchantMenuView';
+import MerchantReservationsView from './pages/merchant/MerchantReservationsView';
+import MerchantFinanceView from './pages/merchant/MerchantFinanceView';
 
-// Rider Onboarding & Dashboard Pages
+// Delivery Hero (Rider) Dedicated Portal Views
 import RiderOnboardingPage from './pages/rider/RiderOnboardingPage';
 import RiderStatusPage from './pages/rider/RiderStatusPage';
-import RiderDashboardPage from './pages/rider/RiderDashboardPage';
+import RiderDashboardView from './pages/rider/RiderDashboardView';
+import RiderActiveTripView from './pages/rider/RiderActiveTripView';
+import RiderEarningsView from './pages/rider/RiderEarningsView';
+import RiderHistoryView from './pages/rider/RiderHistoryView';
 
-// Admin Governance Page
-import AdminDashboardPage from './pages/admin/AdminDashboardPage';
+// Admin Control Center Dedicated Views
+import AdminAnalyticsView from './pages/admin/AdminAnalyticsView';
+import AdminMerchantsQueueView from './pages/admin/AdminMerchantsQueueView';
+import AdminRidersQueueView from './pages/admin/AdminRidersQueueView';
+import AdminDisputesView from './pages/admin/AdminDisputesView';
 
 function AppLayout() {
   const location = useLocation();
-  const isLanding = location.pathname === '/';
-  const isAuthPage = ['/login', '/signup', '/forgot-password'].includes(location.pathname);
+  const path = location.pathname;
+
+  const isLanding = path === '/';
+  const isAuthPage = ['/login', '/signup', '/register', '/forgot-password'].includes(path);
+  const isMerchantPortal = path.startsWith('/merchant');
+  const isRiderPortal = path.startsWith('/rider');
+  const isAdminPortal = path.startsWith('/admin');
+
+  // Strict UI isolation: consumer nav, cart, and location modals NEVER render on merchant, rider, or admin portals
+  const isCustomerPortal = !isMerchantPortal && !isRiderPortal && !isAdminPortal && !isAuthPage;
 
   return (
     <div className="min-h-screen flex flex-col bg-surface text-on-surface font-sans selection:bg-primary-fixed selection:text-on-primary-fixed">
-      {/* Offline Connectivity Status Banner (Module 14) */}
+      {/* Offline Connectivity Status Banner */}
       <OfflineBanner />
 
       {/* Animated Brand Splash Screen (Only on initial visit per session) */}
       <SplashScreen />
 
-      {/* Test Simulator Top Toolbar */}
-      <QuickRoleSwitcher />
-
-      {/* Top Navigation (Hidden on Landing and Auth pages to preserve custom immersive design) */}
-      {!isLanding && !isAuthPage && <Navbar />}
+      {/* Consumer Top Navigation: ONLY on Customer Marketplace, NEVER on Merchant/Rider/Admin Portals */}
+      {isCustomerPortal && !isLanding && <Navbar />}
 
       {/* Main Content Router */}
       <main className="flex-1">
         <Routes>
-          {/* Public Root: High-Conversion Hyperlocal Landing Page */}
+          {/* ========================================================== */}
+          {/* 1. CUSTOMER PORTAL                                         */}
+          {/* ========================================================== */}
           <Route path="/" element={<LandingPage />} />
-
-          {/* Dedicated Authentication & Identity Flows */}
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
-          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-
-          {/* Customer Marketplace Catalog (Guest Mode Enabled - Module 1) */}
           <Route path="/app" element={<HomePage />} />
           <Route path="/search" element={<SearchPage />} />
-          
-          {/* Canonical Store Profile & Backward-Compatible Merchant Link */}
           <Route path="/store/:id" element={<MerchantDetailsPage />} />
           <Route path="/merchant/:id" element={<MerchantDetailsPage />} />
-          
-          {/* Social Feed & Community Updates */}
           <Route path="/feed" element={<SocialFeedPage />} />
+          <Route path="/services" element={<ServicesPage />} />
+          <Route path="/notifications" element={<NotificationCenterPage />} />
+          <Route path="/support" element={<SupportPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
 
-          {/* Table Reservations & Dining Booking */}
+          {/* Authenticated Customer Routes */}
           <Route
             path="/reservations"
             element={
-              <ProtectedRoute allowedRoles={['customer', 'merchant', 'rider', 'admin']}>
+              <ProtectedRoute allowedRoles={['CUSTOMER', 'MERCHANT', 'RIDER', 'ADMIN']}>
                 <ReservationsPage />
               </ProtectedRoute>
             }
           />
-
-          {/* Neighborhood Services (Maids, Plumbers, Electricians) */}
-          <Route path="/services" element={<ServicesPage />} />
-
-          {/* Notifications Center & Acoustic Soundboard */}
-          <Route path="/notifications" element={<NotificationCenterPage />} />
-
-          {/* Customer Help, FAQs & Complaint Tickets (Module 9) */}
-          <Route path="/support" element={<SupportPage />} />
-
-          {/* Settings, Language (English/Telugu) & Accessibility (Module 13) */}
-          <Route path="/settings" element={<SettingsPage />} />
-
-          {/* Customer Account & Wallet Profile Hub */}
-          <Route path="/profile" element={<ProfilePage />} />
-
-          {/* Authenticated Customer Flows */}
           <Route
             path="/recurring"
             element={
-              <ProtectedRoute allowedRoles={['customer', 'merchant', 'rider', 'admin']}>
+              <ProtectedRoute allowedRoles={['CUSTOMER', 'MERCHANT', 'RIDER', 'ADMIN']}>
                 <RecurringListsPage />
               </ProtectedRoute>
             }
@@ -127,7 +119,7 @@ function AppLayout() {
           <Route
             path="/orders"
             element={
-              <ProtectedRoute allowedRoles={['customer', 'merchant', 'rider', 'admin']}>
+              <ProtectedRoute allowedRoles={['CUSTOMER', 'MERCHANT', 'RIDER', 'ADMIN']}>
                 <OrdersHistoryPage />
               </ProtectedRoute>
             }
@@ -135,7 +127,7 @@ function AppLayout() {
           <Route
             path="/orders/:id"
             element={
-              <ProtectedRoute allowedRoles={['customer', 'merchant', 'rider', 'admin']}>
+              <ProtectedRoute allowedRoles={['CUSTOMER', 'MERCHANT', 'RIDER', 'ADMIN']}>
                 <OrderTrackingPage />
               </ProtectedRoute>
             }
@@ -143,86 +135,162 @@ function AppLayout() {
           <Route
             path="/parcel"
             element={
-              <ProtectedRoute allowedRoles={['customer', 'merchant', 'rider', 'admin']}>
+              <ProtectedRoute allowedRoles={['CUSTOMER', 'MERCHANT', 'RIDER', 'ADMIN']}>
                 <ParcelDeliveryPage />
               </ProtectedRoute>
             }
           />
 
-          {/* Merchant Workflow: Onboarding -> Regulatory Audit -> Verified Store */}
+          {/* ========================================================== */}
+          {/* 2. AUTHENTICATION & ONBOARDING                             */}
+          {/* ========================================================== */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<SignupPage />} />
+          <Route path="/signup" element={<SignupPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+
+          {/* Dedicated Merchant Registration & Status */}
+          <Route path="/merchant/register" element={<MerchantOnboardingPage />} />
+          <Route path="/merchant/apply" element={<MerchantOnboardingPage />} />
+          <Route path="/merchant/status" element={<MerchantStatusPage />} />
+
+          {/* Dedicated Rider Registration & Status */}
+          <Route path="/rider/register" element={<RiderOnboardingPage />} />
+          <Route path="/rider/apply" element={<RiderOnboardingPage />} />
+          <Route path="/rider/status" element={<RiderStatusPage />} />
+
+          {/* ========================================================== */}
+          {/* 3. MERCHANT WORKSPACE PORTAL                               */}
+          {/* ========================================================== */}
+          <Route path="/merchant" element={<Navigate to="/merchant/dashboard" replace />} />
           <Route
-            path="/merchant/apply"
+            path="/merchant/dashboard"
             element={
-              <ProtectedRoute allowedRoles={['merchant', 'customer', 'admin']} requireVerification={false}>
-                <MerchantOnboardingPage />
+              <ProtectedRoute allowedRoles={['MERCHANT', 'ADMIN']} requireVerification={true}>
+                <MerchantDashboardView />
               </ProtectedRoute>
             }
           />
           <Route
-            path="/merchant/status"
+            path="/merchant/orders"
             element={
-              <ProtectedRoute allowedRoles={['merchant', 'customer', 'admin']} requireVerification={false}>
-                <MerchantStatusPage />
+              <ProtectedRoute allowedRoles={['MERCHANT', 'ADMIN']} requireVerification={true}>
+                <MerchantOrdersView />
               </ProtectedRoute>
             }
           />
           <Route
-            path="/merchant"
+            path="/merchant/menu"
             element={
-              <ProtectedRoute allowedRoles={['merchant', 'admin']} requireVerification={true}>
-                <MerchantDashboardPage />
+              <ProtectedRoute allowedRoles={['MERCHANT', 'ADMIN']} requireVerification={true}>
+                <MerchantMenuView />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/merchant/reservations"
+            element={
+              <ProtectedRoute allowedRoles={['MERCHANT', 'ADMIN']} requireVerification={true}>
+                <MerchantReservationsView />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/merchant/finance"
+            element={
+              <ProtectedRoute allowedRoles={['MERCHANT', 'ADMIN']} requireVerification={true}>
+                <MerchantFinanceView />
               </ProtectedRoute>
             }
           />
 
-          {/* Rider Partner Workflow: Onboarding -> License Audit -> Active Courier */}
+          {/* ========================================================== */}
+          {/* 4. DELIVERY HERO (RIDER) CONSOLE                           */}
+          {/* ========================================================== */}
+          <Route path="/rider" element={<Navigate to="/rider/dashboard" replace />} />
           <Route
-            path="/rider/apply"
+            path="/rider/dashboard"
             element={
-              <ProtectedRoute allowedRoles={['rider', 'customer', 'admin']} requireVerification={false}>
-                <RiderOnboardingPage />
+              <ProtectedRoute allowedRoles={['RIDER', 'ADMIN']} requireVerification={true}>
+                <RiderDashboardView />
               </ProtectedRoute>
             }
           />
           <Route
-            path="/rider/status"
+            path="/rider/active-trip"
             element={
-              <ProtectedRoute allowedRoles={['rider', 'customer', 'admin']} requireVerification={false}>
-                <RiderStatusPage />
+              <ProtectedRoute allowedRoles={['RIDER', 'ADMIN']} requireVerification={true}>
+                <RiderActiveTripView />
               </ProtectedRoute>
             }
           />
           <Route
-            path="/rider"
+            path="/rider/earnings"
             element={
-              <ProtectedRoute allowedRoles={['rider', 'admin']} requireVerification={true}>
-                <RiderDashboardPage />
+              <ProtectedRoute allowedRoles={['RIDER', 'ADMIN']} requireVerification={true}>
+                <RiderEarningsView />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/rider/history"
+            element={
+              <ProtectedRoute allowedRoles={['RIDER', 'ADMIN']} requireVerification={true}>
+                <RiderHistoryView />
               </ProtectedRoute>
             }
           />
 
-          {/* Platform Governance Console */}
+          {/* ========================================================== */}
+          {/* 5. ADMIN CONTROL CENTER                                    */}
+          {/* ========================================================== */}
+          <Route path="/admin" element={<Navigate to="/admin/analytics" replace />} />
           <Route
-            path="/admin"
+            path="/admin/analytics"
             element={
-              <ProtectedRoute allowedRoles={['admin']}>
-                <AdminDashboardPage />
+              <ProtectedRoute allowedRoles={['ADMIN']}>
+                <AdminAnalyticsView />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/merchants/pending"
+            element={
+              <ProtectedRoute allowedRoles={['ADMIN']}>
+                <AdminMerchantsQueueView />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/riders/pending"
+            element={
+              <ProtectedRoute allowedRoles={['ADMIN']}>
+                <AdminRidersQueueView />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/disputes"
+            element={
+              <ProtectedRoute allowedRoles={['ADMIN']}>
+                <AdminDisputesView />
               </ProtectedRoute>
             }
           />
 
-          {/* Fallback to Landing */}
-          <Route path="*" element={<LandingPage />} />
+          {/* Fallback Catch-all Route */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
 
-      {/* Shared Cart, Location & Dev Mailbox Overlays */}
-      <CartDrawer />
-      <LocationModal />
-      <DevMailboxDrawer />
-
-      {/* Mobile-First Bottom Navigation (Shown in app pages) */}
-      {!isLanding && !isAuthPage && <BottomNav />}
+      {/* Customer Overlays: Only rendered in Customer Portal */}
+      {isCustomerPortal && (
+        <>
+          <CartDrawer />
+          <LocationModal />
+          {!isLanding && <BottomNav />}
+        </>
+      )}
     </div>
   );
 }

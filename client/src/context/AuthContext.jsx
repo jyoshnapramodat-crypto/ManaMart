@@ -58,18 +58,24 @@ export function AuthProvider({ children }) {
     try {
       let payload = { identifier };
       if (typeof credentials === 'string') {
-        payload.otp = credentials;
-      } else {
+        // Check if string is 6 digits OTP or standard password
+        if (/^\d{6}$/.test(credentials)) {
+          payload.otp = credentials;
+        } else {
+          payload.password = credentials;
+        }
+      } else if (typeof credentials === 'object' && credentials !== null) {
         if (credentials.password) payload.password = credentials.password;
         if (credentials.otp) payload.otp = credentials.otp;
       }
       const res = await api.post('/auth/login', payload);
       if (res.data.success) {
-        setUser(res.data.user);
+        const userData = res.data.user;
+        setUser(userData);
         setToken(res.data.token);
-        localStorage.setItem('manamart_user', JSON.stringify(res.data.user));
+        localStorage.setItem('manamart_user', JSON.stringify(userData));
         localStorage.setItem('manamart_token', res.data.token);
-        return { success: true, user: res.data.user, message: res.data.message };
+        return { success: true, user: userData, message: res.data.message };
       }
       return { success: false, message: res.data.message };
     } catch (err) {

@@ -356,12 +356,12 @@ export default function LandingPage() {
             {isLoggedIn ? (
               <Link
                 to={
-                  role === 'merchant'
-                    ? '/merchant'
-                    : role === 'rider'
-                    ? '/rider'
-                    : role === 'admin'
-                    ? '/admin'
+                  role?.toUpperCase() === 'MERCHANT'
+                    ? '/merchant/dashboard'
+                    : role?.toUpperCase() === 'RIDER'
+                    ? '/rider/dashboard'
+                    : role?.toUpperCase() === 'ADMIN'
+                    ? '/admin/analytics'
                     : '/app'
                 }
                 className="px-3 py-1.5 rounded-lg bg-primary text-on-primary font-label-md text-xs font-semibold hover:bg-primary-container transition-colors flex items-center gap-1 shadow-sm"

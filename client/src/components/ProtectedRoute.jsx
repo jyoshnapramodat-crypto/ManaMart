@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 
 export default function ProtectedRoute({
   children,
-  allowedRoles = [], // e.g. ['customer', 'merchant', 'rider', 'admin']
+  allowedRoles = [], // e.g. ['CUSTOMER', 'MERCHANT', 'RIDER', 'ADMIN']
   requireVerification = true,
 }) {
   const { user, token, isLoggedIn, loading } = useAuth();
@@ -12,9 +12,9 @@ export default function ProtectedRoute({
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#FCFBF8] text-slate-500 font-medium">
+      <div className="min-h-screen flex items-center justify-center bg-[#FFF8ED] text-slate-500 font-medium">
         <div className="flex flex-col items-center space-y-3">
-          <div className="w-8 h-8 border-3 border-orange-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-8 h-8 border-3 border-[#FF6B00] border-t-transparent rounded-full animate-spin" />
           <span className="text-xs">Authenticating your neighborhood session...</span>
         </div>
       </div>
@@ -23,36 +23,70 @@ export default function ProtectedRoute({
 
   // 1. Must be logged in
   if (!isLoggedIn || !user || !token) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    const portalName = location.pathname.startsWith('/merchant')
+      ? 'Merchant Workspace'
+      : location.pathname.startsWith('/rider')
+      ? 'Delivery Hero Console'
+      : location.pathname.startsWith('/admin')
+      ? 'Platform Governance'
+      : 'ManaMart';
+
+    return (
+      <Navigate
+        to="/login"
+        state={{
+          from: location,
+          message: `Please sign in to access the ${portalName}.`,
+        }}
+        replace
+      />
+    );
   }
 
-  // 2. Role Check
-  if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
-    // If a customer tries to access the merchant owner dashboard
-    if (user.role === 'customer' && location.pathname === '/merchant') {
-      return <Navigate to="/merchant/apply" state={{ message: 'Please register your store or restaurant first to access the merchant dashboard.' }} replace />;
+  const userRole = (user.role || 'CUSTOMER').toUpperCase();
+  const normalizedAllowed = allowedRoles.map((r) => r.toUpperCase());
+
+  // 2. Strict Role Access Control
+  if (normalizedAllowed.length > 0 && !normalizedAllowed.includes(userRole) && userRole !== 'ADMIN') {
+    let targetPortal = 'Customer';
+    let registerPath = '/register';
+
+    if (location.pathname.startsWith('/merchant')) {
+      targetPortal = 'Merchant';
+      registerPath = '/merchant/register';
+    } else if (location.pathname.startsWith('/rider')) {
+      targetPortal = 'Delivery Hero (Rider)';
+      registerPath = '/rider/register';
+    } else if (location.pathname.startsWith('/admin')) {
+      targetPortal = 'Platform Governance';
+      registerPath = '/login';
     }
-    // If a customer tries to access the rider courier dashboard
-    if (user.role === 'customer' && location.pathname === '/rider') {
-      return <Navigate to="/rider/apply" state={{ message: 'Please register as a delivery partner first to access the rider dashboard.' }} replace />;
-    }
-    // If merchant or rider tries to access something outside their scope
-    if (user.role === 'merchant') return <Navigate to="/merchant" replace />;
-    if (user.role === 'rider') return <Navigate to="/rider" replace />;
-    if (user.role === 'admin') return <Navigate to="/admin" replace />;
-    return <Navigate to="/app" replace />;
+
+    return (
+      <Navigate
+        to="/login"
+        state={{
+          error: `Access Denied: Your account role (${userRole}) is not authorized for the ${targetPortal} portal. Please register or sign in with an authorized ${targetPortal} account.`,
+          from: location,
+        }}
+        replace
+      />
+    );
   }
 
-  // 3. Verification & Compliance Check for Merchant & Rider
-  if (requireVerification) {
-    if (user.role === 'merchant' && user.status === 'pending' && location.pathname === '/merchant') {
+  // 3. Verification & Compliance Lifecycle Guard for Merchant & Rider
+  if (requireVerification && userRole !== 'ADMIN') {
+    const userStatus = (user.status || user.merchant_profile?.status || user.rider_profile?.status || 'PENDING').toUpperCase();
+    const isPending = userStatus === 'PENDING' || userStatus === 'PENDING_VERIFICATION' || userStatus === 'UNDER_REVIEW' || userStatus === 'CHANGES_REQUESTED';
+
+    if (userRole === 'MERCHANT' && isPending && !location.pathname.endsWith('/status')) {
       return <Navigate to="/merchant/status" replace />;
     }
-    if (user.role === 'rider' && user.status === 'pending' && location.pathname === '/rider') {
+
+    if (userRole === 'RIDER' && isPending && !location.pathname.endsWith('/status')) {
       return <Navigate to="/rider/status" replace />;
     }
   }
 
   return children;
 }
-

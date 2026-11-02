@@ -7,7 +7,6 @@ import soundService from '../services/soundService';
 
 export default function SplashScreen({ onComplete }) {
   const navigate = useNavigate();
-  const { quickSwitchRole } = useAuth();
   const { currentCity, selectedLocality } = useLocation();
 
   const [show, setShow] = useState(() => {
@@ -72,17 +71,6 @@ export default function SplashScreen({ onComplete }) {
       setShow(false);
       if (onComplete) onComplete();
     }, 300);
-  };
-
-  // 1-Click Role Direct Launch
-  const handleQuickRoleLaunch = async (role) => {
-    sessionStorage.setItem('manamart_splashed', 'true');
-    setShow(false);
-    await quickSwitchRole(role);
-    if (role === 'merchant') navigate('/merchant');
-    else if (role === 'rider') navigate('/rider');
-    else if (role === 'admin') navigate('/admin');
-    else navigate('/app');
   };
 
   if (!show) return null;
@@ -180,43 +168,11 @@ export default function SplashScreen({ onComplete }) {
           <div className="w-full max-w-md flex flex-col items-center gap-3">
             <button
               onClick={handleTriggerRedirect}
-              className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[#003527] to-[#064e3b] hover:from-[#064e3b] hover:to-[#003527] text-white py-3 px-6 rounded-xl font-bold text-sm shadow-md transition-all active:scale-[0.99]"
+              className="w-full flex items-center justify-center gap-2 bg-[#064E3B] hover:bg-[#033B2D] text-white py-3 px-6 rounded-2xl font-bold text-sm shadow-md transition-all active:scale-[0.99] cursor-pointer"
             >
               <span>Enter ManaMart Marketplace</span>
               <span className="material-symbols-outlined text-lg">arrow_forward</span>
             </button>
-
-            {/* Quick Demo Role Chips */}
-            <div className="flex flex-wrap items-center justify-center gap-2 w-full pt-1">
-              <button
-                type="button"
-                onClick={() => handleQuickRoleLaunch('customer')}
-                className="px-3 py-1.5 rounded-lg bg-white border border-slate-200 hover:border-[#003527] text-xs font-bold text-[#003527] hover:bg-emerald-50 transition-all shadow-2xs"
-              >
-                Customer
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickRoleLaunch('merchant')}
-                className="px-3 py-1.5 rounded-lg bg-white border border-slate-200 hover:border-[#fe6b00] text-xs font-bold text-[#fe6b00] hover:bg-orange-50 transition-all shadow-2xs"
-              >
-                Merchant
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickRoleLaunch('rider')}
-                className="px-3 py-1.5 rounded-lg bg-white border border-slate-200 hover:border-[#003527] text-xs font-bold text-[#003527] hover:bg-emerald-50 transition-all shadow-2xs"
-              >
-                Rider Partner
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickRoleLaunch('admin')}
-                className="px-3 py-1.5 rounded-lg bg-white border border-slate-200 hover:border-slate-800 text-xs font-bold text-slate-800 hover:bg-slate-100 transition-all shadow-2xs"
-              >
-                Super Admin
-              </button>
-            </div>
           </div>
         </main>
 

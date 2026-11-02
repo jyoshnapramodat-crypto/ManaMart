@@ -183,16 +183,14 @@ export default function Navbar() {
               </button>
             </div>
 
-            {/* Desktop Centered & Spacious Search Bar */}
-            <div className="hidden md:flex flex-1 min-w-[280px] max-w-2xl mx-2 lg:mx-6 items-center">
+            {/* Desktop Centered & Responsive Search Bar */}
+            <div className="hidden md:flex flex-1 min-w-[220px] max-w-xl mx-2 lg:mx-4 items-center">
               <form
                 onSubmit={handleSearchSubmit}
-                className="w-full flex items-center bg-white rounded-full shadow-xs border border-slate-200 hover:border-slate-300 focus-within:border-[#003527] focus-within:ring-2 focus-within:ring-[#003527]/10 px-3.5 py-1.5 transition-all"
+                className="w-full flex items-center bg-white rounded-full shadow-xs border border-slate-200 hover:border-slate-300 focus-within:border-[#064E3B] focus-within:ring-2 focus-within:ring-[#064E3B]/10 px-3 py-1.5 transition-all"
               >
                 {/* Single Search Icon on Left */}
-                <span className="material-symbols-outlined text-slate-400 text-lg mr-2 shrink-0">
-                  search
-                </span>
+                <Search className="w-4 h-4 text-slate-400 mr-2 shrink-0" />
 
                 {/* Spacious Text Input */}
                 <input
@@ -200,7 +198,7 @@ export default function Navbar() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={t('nav.searchPlaceholder') || 'Search biryani, groceries, medicines...'}
-                  className="w-full min-w-0 flex-1 bg-transparent text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none py-0.5 truncate"
+                  className="w-full min-w-0 flex-1 bg-transparent text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none py-0.5"
                 />
 
                 {/* Clear button if query present */}
@@ -209,6 +207,7 @@ export default function Navbar() {
                     type="button"
                     onClick={() => setSearchQuery('')}
                     className="p-1 text-slate-400 hover:text-slate-700 mr-1 shrink-0 cursor-pointer"
+                    title="Clear search"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -218,16 +217,16 @@ export default function Navbar() {
                 <button
                   type="button"
                   onClick={() => setIsVoiceModalOpen(true)}
-                  className="p-1.5 text-[#fe6b00] hover:text-[#d45800] hover:bg-orange-50 rounded-full transition-all shrink-0 cursor-pointer active:scale-95"
+                  className="p-1.5 text-[#FF6B00] hover:text-[#e05e00] hover:bg-orange-50 rounded-full transition-all shrink-0 cursor-pointer active:scale-95"
                   title="Voice Ordering in Telugu / English (మాట్లాడి ఆర్డర్ చేయండి)"
                 >
                   <Mic className="w-4 h-4" />
                 </button>
 
-                {/* Sleek, Uncongested Submit Button */}
+                {/* Sleek Submit Button */}
                 <button
                   type="submit"
-                  className="px-4 py-1.5 bg-[#003527] hover:bg-[#064e3b] text-white rounded-full text-xs font-bold transition-all shrink-0 shadow-2xs active:scale-95 ml-1 cursor-pointer"
+                  className="px-3.5 py-1.5 bg-[#064E3B] hover:bg-[#033B2D] text-white rounded-full text-xs font-bold transition-all shrink-0 shadow-2xs active:scale-95 ml-1 cursor-pointer"
                 >
                   Search
                 </button>
@@ -398,33 +397,33 @@ export default function Navbar() {
                       </Link>
 
                       {/* Only Show Merchant Portal If User is an actual Merchant */}
-                      {role === 'merchant' && (
+                      {role?.toUpperCase() === 'MERCHANT' && (
                         <Link
-                          to="/merchant"
+                          to="/merchant/dashboard"
                           onClick={() => setUserDropdownOpen(false)}
                           className="flex items-center space-x-2 px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-50 transition-colors"
                         >
-                          <Store className="w-4 h-4 text-[#006837]" />
-                          <span>My Restaurant Dashboard</span>
+                          <Store className="w-4 h-4 text-[#064E3B]" />
+                          <span>Merchant Workspace</span>
                         </Link>
                       )}
 
                       {/* Only Show Rider Portal If User is an actual Rider */}
-                      {role === 'rider' && (
+                      {role?.toUpperCase() === 'RIDER' && (
                         <Link
-                          to="/rider"
+                          to="/rider/dashboard"
                           onClick={() => setUserDropdownOpen(false)}
                           className="flex items-center space-x-2 px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-50 transition-colors"
                         >
-                          <Bike className="w-4 h-4 text-[#FF5A00]" />
-                          <span>Rider Partner Console</span>
+                          <Bike className="w-4 h-4 text-[#FF6B00]" />
+                          <span>Delivery Hero Console</span>
                         </Link>
                       )}
 
                       {/* Admin Console */}
-                      {role === 'admin' && (
+                      {role?.toUpperCase() === 'ADMIN' && (
                         <Link
-                          to="/admin"
+                          to="/admin/analytics"
                           onClick={() => setUserDropdownOpen(false)}
                           className="flex items-center space-x-2 px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-50 transition-colors"
                         >

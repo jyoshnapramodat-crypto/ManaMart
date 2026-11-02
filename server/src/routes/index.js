@@ -8,6 +8,7 @@ import merchantRoutes from './merchantRoutes.js';
 import riderRoutes from './riderRoutes.js';
 import adminRoutes from './adminRoutes.js';
 import customerRoutes from './customerRoutes.js';
+import { getDatabaseHealth } from '../config/db.js';
 
 const apiRouter = Router();
 
@@ -21,15 +22,23 @@ apiRouter.use('/riders', riderRoutes);
 apiRouter.use('/admin', adminRoutes);
 apiRouter.use('/customers', customerRoutes);
 
-// Health check endpoint
+// Comprehensive Platform Health & DB Status Endpoint
 apiRouter.get('/health', (req, res) => {
-  res.json({
-    status: 'ok',
-    app: 'ManaMart API',
-    version: '1.0.0',
+  const dbHealth = getDatabaseHealth();
+  const isHealthy = dbHealth.connected || (!process.env.NODE_ENV || process.env.NODE_ENV !== 'production');
+
+  res.status(isHealthy ? 200 : 503).json({
+    status: isHealthy ? 'healthy' : 'degraded',
+    app: 'ManaMart Hyperlocal Commerce API',
+    tagline: 'Mana Ooru. Mana Market.',
+    environment: process.env.NODE_ENV || 'development',
     time: new Date().toISOString(),
+    database: {
+      connected: dbHealth.connected,
+      mockMode: dbHealth.mockMode,
+      name: dbHealth.databaseName,
+    },
   });
 });
 
 export default apiRouter;
-

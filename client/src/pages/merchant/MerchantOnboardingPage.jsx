@@ -3,19 +3,19 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 import Logo from '../../components/Logo';
+import DocumentUploadInput from '../../components/DocumentUploadInput';
 import {
   Store,
   MapPin,
-  FileCheck2,
   Clock,
   ArrowRight,
   ArrowLeft,
   CheckCircle2,
   AlertCircle,
-  UploadCloud,
   ShieldCheck,
   Building2,
   CreditCard,
+  FileCheck2,
 } from 'lucide-react';
 
 export default function MerchantOnboardingPage() {
@@ -26,47 +26,55 @@ export default function MerchantOnboardingPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Form State
+  // Step 1: Store Basics
   const [businessName, setBusinessName] = useState('');
   const [category, setCategory] = useState('food');
   const [ownerName, setOwnerName] = useState(user?.name || '');
   const [phone, setPhone] = useState(user?.phone || '');
   const [email, setEmail] = useState(user?.email || '');
 
-  // Step 2
+  // Step 2: Location & Timings
   const [street, setStreet] = useState('');
-  const [locality, setLocality] = useState('Madhapur');
-  const [city, setCity] = useState('Hyderabad');
-  const [pincode, setPincode] = useState('500081');
+  const [locality, setLocality] = useState('Narakoduru');
+  const [city, setCity] = useState('Guntur District');
+  const [pincode, setPincode] = useState('522212');
   const [openTime, setOpenTime] = useState('08:00 AM');
   const [closeTime, setCloseTime] = useState('10:00 PM');
 
-  // Step 3: Regulatory
+  // Step 3: Regulatory & Documents
   const [fssaiLicense, setFssaiLicense] = useState('');
   const [drugLicense, setDrugLicense] = useState('');
   const [panNumber, setPanNumber] = useState('');
   const [gstin, setGstin] = useState('');
   const [payoutUpi, setPayoutUpi] = useState('');
 
-  // Check if merchant has already submitted an application
+  // Uploaded Document States
+  const [ownerIdDoc, setOwnerIdDoc] = useState(null);
+  const [tradeLicenseDoc, setTradeLicenseDoc] = useState(null);
+  const [panDoc, setPanDoc] = useState(null);
+  const [bankProofDoc, setBankProofDoc] = useState(null);
+  const [fssaiDoc, setFssaiDoc] = useState(null);
+  const [drugLicenseDoc, setDrugLicenseDoc] = useState(null);
+
+  // Check existing application status on load
   useEffect(() => {
     async function checkStatus() {
       if (!isLoggedIn) return;
       try {
         const res = await api.get('/merchants/application-status');
         if (res.data.success && res.data.hasApplied) {
-          if (res.data.status === 'verified') {
+          if (res.data.status === 'verified' || res.data.status === 'approved') {
             navigate('/merchant');
           } else {
             navigate('/merchant/status');
           }
         }
       } catch (err) {
-        // ok if no application yet
+        // Ok if not yet applied
       }
     }
     checkStatus();
-  }, [isLoggedIn]);
+  }, [isLoggedIn, navigate]);
 
   const handleNextStep1 = (e) => {
     e.preventDefault();
@@ -93,19 +101,49 @@ export default function MerchantOnboardingPage() {
     setError(null);
 
     // Food category validation
-    if (category === 'food' && !fssaiLicense.trim()) {
-      setError('FSSAI 14-digit registration number is mandatory for all food businesses.');
-      return;
+    if (category === 'food') {
+      if (!fssaiLicense.trim()) {
+        setError('FSSAI 14-digit registration number is mandatory for all food businesses.');
+        return;
+      }
+      if (!fssaiDoc) {
+        setError('Please upload your FSSAI certificate document scan or PDF.');
+        return;
+      }
     }
 
     // Pharmacy category validation
-    if (category === 'pharmacy' && !drugLicense.trim()) {
-      setError('Drug license registration number is mandatory for pharmacies.');
+    if (category === 'pharmacy') {
+      if (!drugLicense.trim()) {
+        setError('Drug license registration number is mandatory for pharmacies.');
+        return;
+      }
+      if (!drugLicenseDoc) {
+        setError('Please upload your Drug Controller license document scan or PDF.');
+        return;
+      }
+    }
+
+    // Baseline required docs
+    if (!ownerIdDoc) {
+      setError('Please upload the shop owner Govt ID proof (Aadhaar / Voter ID / Passport).');
+      return;
+    }
+    if (!tradeLicenseDoc) {
+      setError('Please upload your Trade License / Shop & Establishment document.');
       return;
     }
 
     setLoading(true);
     try {
+      const documents = [];
+      if (ownerIdDoc) documents.push(ownerIdDoc);
+      if (tradeLicenseDoc) documents.push(tradeLicenseDoc);
+      if (panDoc) documents.push(panDoc);
+      if (bankProofDoc) documents.push(bankProofDoc);
+      if (fssaiDoc) documents.push(fssaiDoc);
+      if (drugLicenseDoc) documents.push(drugLicenseDoc);
+
       const payload = {
         businessName,
         category,
@@ -123,13 +161,13 @@ export default function MerchantOnboardingPage() {
         panNumber,
         gstin,
         payoutUpi,
+        documents,
       };
 
       const res = await api.post('/merchants/apply', payload);
       if (res.data.success) {
-        // Update user state to reflect merchant pending role
         if (user) {
-          const updatedUser = { ...user, role: 'merchant', status: 'pending' };
+          const updatedUser = { ...user, role: 'merchant', status: 'pending_verification' };
           setUser(updatedUser);
           localStorage.setItem('manamart_user', JSON.stringify(updatedUser));
         }
@@ -145,7 +183,7 @@ export default function MerchantOnboardingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FCFBF8] py-10 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#FFF8ED] py-10 px-4 sm:px-6 lg:px-8">
       <div className="max-w-2xl mx-auto space-y-6">
         
         {/* Header */}
@@ -153,31 +191,31 @@ export default function MerchantOnboardingPage() {
           <div className="flex justify-center mb-1">
             <Logo size="lg" showTagline={false} to="/" />
           </div>
-          <div className="inline-flex items-center space-x-1.5 bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full text-xs font-bold border border-emerald-200">
-            <Store className="w-3.5 h-3.5 text-emerald-600" />
+          <div className="inline-flex items-center space-x-1.5 bg-[#E8F3EC] text-[#064E3B] px-3.5 py-1 rounded-full text-xs font-bold border border-emerald-200">
+            <Store className="w-3.5 h-3.5 text-[#064E3B]" />
             <span>Merchant Onboarding & Compliance</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
             Register Your Neighborhood Store
           </h1>
-          <p className="text-xs text-slate-500 font-medium">
+          <p className="text-xs text-slate-600 font-medium">
             Join hundreds of local dukans, restaurants, and pharmacies serving your neighborhood
           </p>
         </div>
 
         {/* Stepper Progress */}
         <div className="grid grid-cols-3 gap-2 bg-white p-3 rounded-2xl border border-slate-200/80 shadow-xs text-xs font-bold">
-          <div className={`flex items-center space-x-2 p-2 rounded-xl ${step === 1 ? 'bg-emerald-50 text-emerald-800' : 'text-slate-400'}`}>
-            <span className="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs">1</span>
+          <div className={`flex items-center space-x-2 p-2 rounded-xl ${step === 1 ? 'bg-[#E8F3EC] text-[#064E3B]' : 'text-slate-400'}`}>
+            <span className="w-6 h-6 rounded-full bg-[#064E3B] text-white flex items-center justify-center text-xs">1</span>
             <span className="truncate">Store Info</span>
           </div>
-          <div className={`flex items-center space-x-2 p-2 rounded-xl ${step === 2 ? 'bg-emerald-50 text-emerald-800' : 'text-slate-400'}`}>
-            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${step >= 2 ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-600'}`}>2</span>
+          <div className={`flex items-center space-x-2 p-2 rounded-xl ${step === 2 ? 'bg-[#E8F3EC] text-[#064E3B]' : 'text-slate-400'}`}>
+            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${step >= 2 ? 'bg-[#064E3B] text-white' : 'bg-slate-200 text-slate-600'}`}>2</span>
             <span className="truncate">Location</span>
           </div>
-          <div className={`flex items-center space-x-2 p-2 rounded-xl ${step === 3 ? 'bg-emerald-50 text-emerald-800' : 'text-slate-400'}`}>
-            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${step >= 3 ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-600'}`}>3</span>
-            <span className="truncate">Compliance</span>
+          <div className={`flex items-center space-x-2 p-2 rounded-xl ${step === 3 ? 'bg-[#E8F3EC] text-[#064E3B]' : 'text-slate-400'}`}>
+            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${step >= 3 ? 'bg-[#064E3B] text-white' : 'bg-slate-200 text-slate-600'}`}>3</span>
+            <span className="truncate">Compliance Docs</span>
           </div>
         </div>
 
@@ -204,7 +242,7 @@ export default function MerchantOnboardingPage() {
                   value={businessName}
                   onChange={(e) => setBusinessName(e.target.value)}
                   placeholder="e.g. Swagath Grand Family Restaurant or Sri Balaji Kirana"
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-medium focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 outline-none"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-medium focus:border-[#064E3B] focus:ring-4 focus:ring-emerald-100 outline-none"
                 />
               </div>
 
@@ -215,9 +253,9 @@ export default function MerchantOnboardingPage() {
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-medium focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 outline-none bg-white"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-medium focus:border-[#064E3B] focus:ring-4 focus:ring-emerald-100 outline-none bg-white"
                 >
-                  <option value="food">Food & Restaurant (Requires FSSAI)</option>
+                  <option value="food">Food & Restaurant (Requires FSSAI & Certificate)</option>
                   <option value="grocery">Kirana & Supermarket</option>
                   <option value="pharmacy">Pharmacy & Healthcare (Requires Drug License)</option>
                   <option value="bakery">Bakery & Sweets</option>
@@ -236,7 +274,7 @@ export default function MerchantOnboardingPage() {
                     value={ownerName}
                     onChange={(e) => setOwnerName(e.target.value)}
                     placeholder="Owner's Name"
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-medium focus:border-emerald-500 outline-none"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-medium focus:border-[#064E3B] outline-none"
                   />
                 </div>
                 <div>
@@ -248,7 +286,7 @@ export default function MerchantOnboardingPage() {
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="Shop phone"
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-medium focus:border-emerald-500 outline-none"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-medium focus:border-[#064E3B] outline-none"
                   />
                 </div>
               </div>
@@ -256,7 +294,7 @@ export default function MerchantOnboardingPage() {
               <div className="pt-4">
                 <button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-bold text-sm py-3 rounded-2xl shadow-md transition-all flex items-center justify-center space-x-2"
+                  className="w-full bg-[#064E3B] hover:bg-[#033B2D] text-white font-bold text-sm py-3 rounded-2xl shadow-md transition-all flex items-center justify-center space-x-2 cursor-pointer"
                 >
                   <span>Continue to Store Location</span>
                   <ArrowRight className="w-4 h-4" />
@@ -277,8 +315,8 @@ export default function MerchantOnboardingPage() {
                   required
                   value={street}
                   onChange={(e) => setStreet(e.target.value)}
-                  placeholder="Shop No. 4, Main Bazaar Road"
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-medium focus:border-emerald-500 outline-none"
+                  placeholder="Shop No. 4, Main Road"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-medium focus:border-[#064E3B] outline-none"
                 />
               </div>
 
@@ -292,21 +330,21 @@ export default function MerchantOnboardingPage() {
                     required
                     value={locality}
                     onChange={(e) => setLocality(e.target.value)}
-                    placeholder="e.g. Madhapur"
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-medium focus:border-emerald-500 outline-none"
+                    placeholder="e.g. Narakoduru"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-medium focus:border-[#064E3B] outline-none"
                   />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
-                    City <span className="text-red-500">*</span>
+                    City / District <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
                     required
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
-                    placeholder="e.g. Hyderabad"
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-medium focus:border-emerald-500 outline-none"
+                    placeholder="e.g. Guntur District"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-medium focus:border-[#064E3B] outline-none"
                   />
                 </div>
                 <div>
@@ -317,8 +355,8 @@ export default function MerchantOnboardingPage() {
                     type="text"
                     value={pincode}
                     onChange={(e) => setPincode(e.target.value)}
-                    placeholder="500081"
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-medium focus:border-emerald-500 outline-none"
+                    placeholder="522212"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-medium focus:border-[#064E3B] outline-none"
                   />
                 </div>
               </div>
@@ -354,80 +392,101 @@ export default function MerchantOnboardingPage() {
                 <button
                   type="button"
                   onClick={() => setStep(1)}
-                  className="px-4 py-3 rounded-2xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 flex items-center space-x-1"
+                  className="px-4 py-3 rounded-2xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 flex items-center space-x-1 cursor-pointer"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   <span>Back</span>
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-bold text-sm py-3 rounded-2xl shadow-md transition-all flex items-center justify-center space-x-2"
+                  className="flex-1 bg-[#064E3B] hover:bg-[#033B2D] text-white font-bold text-sm py-3 rounded-2xl shadow-md transition-all flex items-center justify-center space-x-2 cursor-pointer"
                 >
-                  <span>Continue to Compliance</span>
+                  <span>Continue to Compliance & Documents</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
             </form>
           )}
 
-          {/* Step 3: Regulatory Compliance */}
+          {/* Step 3: Regulatory Compliance & Genuine Document Uploads */}
           {step === 3 && (
-            <form onSubmit={handleSubmitApplication} className="space-y-4">
+            <form onSubmit={handleSubmitApplication} className="space-y-5">
               
               {/* Category-Specific Regulatory Warning */}
               {category === 'food' && (
-                <div className="p-3.5 bg-amber-50 rounded-2xl border border-amber-200 text-amber-800 text-xs font-semibold flex items-start space-x-2">
+                <div className="p-3.5 bg-amber-50 rounded-2xl border border-amber-200 text-amber-900 text-xs font-semibold flex items-start space-x-2">
                   <ShieldCheck className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
                   <span>
-                    Under Food Safety & Standards Regulations, all restaurants, cloud kitchens, and food shops must register a valid 14-digit FSSAI license.
+                    Under Food Safety & Standards Regulations (FSSAI), all food businesses must register a valid 14-digit FSSAI license and upload the certificate for administrative verification.
                   </span>
                 </div>
               )}
 
               {category === 'pharmacy' && (
-                <div className="p-3.5 bg-blue-50 rounded-2xl border border-blue-200 text-blue-800 text-xs font-semibold flex items-start space-x-2">
+                <div className="p-3.5 bg-blue-50 rounded-2xl border border-blue-200 text-blue-900 text-xs font-semibold flex items-start space-x-2">
                   <ShieldCheck className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
                   <span>
-                    Pharmacies require state drug controller license certification before dispensing prescription medications.
+                    Pharmacies require state drug controller license certification (Form 20/21) prior to dispensing prescription medications.
                   </span>
                 </div>
               )}
 
-              {/* FSSAI */}
+              {/* FSSAI Registration */}
               {category === 'food' && (
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    FSSAI Registration / License Number <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
+                <div className="space-y-3 p-4 rounded-2xl bg-amber-50/50 border border-amber-200">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-800 mb-1">
+                      FSSAI Registration / License Number <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      maxLength={14}
+                      value={fssaiLicense}
+                      onChange={(e) => setFssaiLicense(e.target.value.replace(/\D/g, ''))}
+                      placeholder="14-digit FSSAI number e.g. 13621014000452"
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-medium focus:border-[#064E3B] outline-none tracking-wider bg-white"
+                    />
+                  </div>
+                  <DocumentUploadInput
+                    label="FSSAI Certificate Document"
+                    description="Upload clear photo or PDF copy of your 14-digit FSSAI registration certificate"
+                    docType="fssai_certificate"
                     required
-                    maxLength={14}
-                    value={fssaiLicense}
-                    onChange={(e) => setFssaiLicense(e.target.value.replace(/\D/g, ''))}
-                    placeholder="14-digit FSSAI number e.g. 13621014000452"
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-medium focus:border-emerald-500 outline-none tracking-wider"
+                    value={fssaiDoc}
+                    onChange={setFssaiDoc}
                   />
                 </div>
               )}
 
               {/* Drug License */}
               {category === 'pharmacy' && (
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Drug License Number (Form 20/21) <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
+                <div className="space-y-3 p-4 rounded-2xl bg-blue-50/50 border border-blue-200">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-800 mb-1">
+                      Drug License Number (Form 20/21) <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={drugLicense}
+                      onChange={(e) => setDrugLicense(e.target.value)}
+                      placeholder="e.g. DL-AP-2024-9842"
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-medium focus:border-[#064E3B] outline-none bg-white"
+                    />
+                  </div>
+                  <DocumentUploadInput
+                    label="Drug Controller License Certificate"
+                    description="Upload valid pharmacy license certificate issued by state drug authority"
+                    docType="drug_license"
                     required
-                    value={drugLicense}
-                    onChange={(e) => setDrugLicense(e.target.value)}
-                    placeholder="e.g. DL-HYD-2024-9842"
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-medium focus:border-emerald-500 outline-none"
+                    value={drugLicenseDoc}
+                    onChange={setDrugLicenseDoc}
                   />
                 </div>
               )}
 
+              {/* Business Identification & Tax */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
@@ -439,7 +498,7 @@ export default function MerchantOnboardingPage() {
                     value={panNumber}
                     onChange={(e) => setPanNumber(e.target.value.toUpperCase())}
                     placeholder="ABCDE1234F"
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-medium uppercase"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-medium uppercase focus:border-[#064E3B]"
                   />
                 </div>
                 <div>
@@ -452,14 +511,14 @@ export default function MerchantOnboardingPage() {
                     value={gstin}
                     onChange={(e) => setGstin(e.target.value.toUpperCase())}
                     placeholder="36AAAAA0000A1Z5"
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-medium uppercase"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-medium uppercase focus:border-[#064E3B]"
                   />
                 </div>
               </div>
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Settlement UPI ID / Bank Account
+                  Settlement UPI ID / Bank Payout
                 </label>
                 <div className="relative">
                   <input
@@ -467,24 +526,61 @@ export default function MerchantOnboardingPage() {
                     value={payoutUpi}
                     onChange={(e) => setPayoutUpi(e.target.value)}
                     placeholder="e.g. shopowner@okhdfcbank"
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-medium"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-medium focus:border-[#064E3B]"
                   />
                   <CreditCard className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 </div>
               </div>
 
-              {/* Upload Document Mock Trigger */}
-              <div className="p-4 border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center text-center space-y-1 text-slate-500 bg-slate-50/50">
-                <UploadCloud className="w-6 h-6 text-emerald-600" />
-                <span className="text-xs font-bold text-slate-700">Digital Certificate Scans Attached</span>
-                <span className="text-[10px] text-slate-400">PDF, JPG, PNG up to 5MB (Pre-linked for verification)</span>
+              {/* Mandatory Document Uploads */}
+              <div className="pt-2 border-t border-slate-100 space-y-4">
+                <h3 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                  <FileCheck2 className="w-4 h-4 text-[#064E3B]" />
+                  <span>Required Regulatory Documents</span>
+                </h3>
+
+                <DocumentUploadInput
+                  label="Owner Identity Proof"
+                  description="Aadhaar Card, Passport, or Voter ID of the store proprietor"
+                  docType="owner_id"
+                  required
+                  value={ownerIdDoc}
+                  onChange={setOwnerIdDoc}
+                />
+
+                <DocumentUploadInput
+                  label="Trade License / Shop Establishment Proof"
+                  description="Municipal trade license, Gram Panchayat registration, or shop certificate"
+                  docType="trade_license"
+                  required
+                  value={tradeLicenseDoc}
+                  onChange={setTradeLicenseDoc}
+                />
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <DocumentUploadInput
+                    label="PAN Card Document"
+                    description="PAN card scan of proprietor / entity"
+                    docType="pan_card"
+                    value={panDoc}
+                    onChange={setPanDoc}
+                  />
+
+                  <DocumentUploadInput
+                    label="Bank Account Proof"
+                    description="Cancelled cheque or passbook first page"
+                    docType="bank_proof"
+                    value={bankProofDoc}
+                    onChange={setBankProofDoc}
+                  />
+                </div>
               </div>
 
               <div className="pt-4 flex items-center space-x-3">
                 <button
                   type="button"
                   onClick={() => setStep(2)}
-                  className="px-4 py-3 rounded-2xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 flex items-center space-x-1"
+                  className="px-4 py-3 rounded-2xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 flex items-center space-x-1 cursor-pointer"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   <span>Back</span>
@@ -492,13 +588,13 @@ export default function MerchantOnboardingPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-bold text-sm py-3 rounded-2xl shadow-md transition-all flex items-center justify-center space-x-2 disabled:opacity-50"
+                  className="flex-1 bg-[#064E3B] hover:bg-[#033B2D] text-white font-bold text-sm py-3 rounded-2xl shadow-md transition-all flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
                 >
                   {loading ? (
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   ) : (
                     <>
-                      <span>Submit for Admin Audit</span>
+                      <span>Submit for Admin Audit & Verification</span>
                       <CheckCircle2 className="w-4 h-4" />
                     </>
                   )}
@@ -513,4 +609,3 @@ export default function MerchantOnboardingPage() {
     </div>
   );
 }
-
