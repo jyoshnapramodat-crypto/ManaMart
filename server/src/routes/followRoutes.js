@@ -5,8 +5,8 @@ import {
   getMyFollowedShops,
   getSocialFeed,
   likePost,
-  createPost,
 } from '../controllers/followController.js';
+import { createPost } from '../controllers/merchantController.js';
 import { authenticate } from '../middleware/authMiddleware.js';
 
 const router = Router();

@@ -261,3 +261,5 @@ export async function likePost(req, res) {
     return res.status(500).json({ success: false, message: error.message });
   }
 }
+
+export { createPost } from './merchantController.js';
