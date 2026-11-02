@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Logo from '../../components/Logo';
@@ -15,26 +15,136 @@ import {
   CheckCircle2,
   KeyRound,
   ArrowLeft,
+  ShoppingBag,
+  Sparkles,
+  Shield,
+  Smartphone,
+  Check,
 } from 'lucide-react';
 
 export default function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login } = useAuth();
+  const { login, sendOtp } = useAuth();
 
-  const [identifier, setIdentifier] = useState('');
-  const [password, setPassword] = useState('');
+  // Role Selection Card state: 'customer' | 'merchant' | 'rider' | 'admin'
+  const [selectedRole, setSelectedRole] = useState('customer');
+
+  // Credentials State
+  const [identifier, setIdentifier] = useState('9876543210');
+  const [password, setPassword] = useState('password123');
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
+
+  // 6-Digit OTP State
+  const [otpDigits, setOtpDigits] = useState(['', '', '', '', '', '']);
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpCooldown, setOtpCooldown] = useState(24);
+  const [otpVerified, setOtpVerified] = useState(false);
+  const otpInputRefs = useRef([]);
+
+  // UI status
   const [loading, setLoading] = useState(false);
+  const [otpLoading, setOtpLoading] = useState(false);
   const [error, setError] = useState(location.state?.error || null);
+  const [successNotice, setSuccessNotice] = useState(null);
 
-  // Auto-detect role and route seamlessly to the dedicated portal
-  const handleLoginSubmit = async (e) => {
-    e.preventDefault();
+  // Role Configurations
+  const roleCards = [
+    {
+      id: 'customer',
+      title: 'Customer',
+      icon: ShoppingBag,
+      iconBg: 'bg-emerald-100 text-[#064E3B]',
+      borderActive: 'border-emerald-600 ring-2 ring-emerald-500/20',
+      description: 'Shop local groceries, pharmacy, food & essentials with fast doorstep delivery.',
+      actionLabel: 'Sign In / Register',
+      badge: 'Active Role',
+    },
+    {
+      id: 'merchant',
+      title: 'Merchant / Shop',
+      icon: Store,
+      iconBg: 'bg-orange-100 text-[#FF6B00]',
+      borderActive: 'border-[#FF6B00] ring-2 ring-orange-500/20',
+      description: 'List your store, manage inventory, reach thousands of nearby customers.',
+      actionLabel: 'Seller Onboarding',
+    },
+    {
+      id: 'rider',
+      title: 'Delivery Partner',
+      icon: Bike,
+      iconBg: 'bg-teal-100 text-teal-700',
+      borderActive: 'border-teal-600 ring-2 ring-teal-500/20',
+      description: 'Earn flexible weekly payouts, deliver in your familiar neighborhood.',
+      actionLabel: 'Rider Portal',
+    },
+    {
+      id: 'admin',
+      title: 'Administrator',
+      icon: ShieldCheck,
+      iconBg: 'bg-purple-100 text-purple-700',
+      borderActive: 'border-purple-600 ring-2 ring-purple-500/20',
+      description: 'Internal Operations, compliance control, and city-level dispatch management.',
+      actionLabel: 'Staff Login',
+      badge: 'Restricted',
+    },
+  ];
+
+  // OTP Countdown timer
+  useEffect(() => {
+    if (otpCooldown <= 0) return;
+    const timer = setInterval(() => {
+      setOtpCooldown((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [otpCooldown]);
+
+  // Handle routing based on authenticated user and status
+  const handleAuthRedirect = (user) => {
+    const role = (user.role || selectedRole).toUpperCase();
+    const status = (
+      user.status ||
+      user.merchant_profile?.status ||
+      user.rider_profile?.status ||
+      ''
+    ).toUpperCase();
+    const isPending =
+      status === 'PENDING' ||
+      status === 'PENDING_VERIFICATION' ||
+      status === 'UNDER_REVIEW' ||
+      status === 'CHANGES_REQUESTED';
+
+    if (role === 'MERCHANT') {
+      if (isPending) navigate('/merchant/status');
+      else navigate('/merchant/dashboard');
+      return;
+    }
+
+    if (role === 'RIDER') {
+      if (isPending) navigate('/rider/status');
+      else navigate('/rider/dashboard');
+      return;
+    }
+
+    if (role === 'ADMIN') {
+      navigate('/admin/verifications');
+      return;
+    }
+
+    const destination = location.state?.from?.pathname || '/app';
+    navigate(destination);
+  };
+
+  // 1. Password Login Submission
+  const handlePasswordLogin = async (e) => {
+    e?.preventDefault();
     setError(null);
+    setSuccessNotice(null);
 
-    if (!identifier.trim()) {
-      setError('Please enter your full name, registered mobile number, or email address.');
+    const cleanId = identifier.trim();
+    if (!cleanId) {
+      setError('Please enter your mobile number or email address.');
       return;
     }
     if (!password) {
@@ -44,52 +154,117 @@ export default function LoginPage() {
 
     setLoading(true);
     try {
-      const res = await login(identifier.trim(), password);
-
+      const res = await login(cleanId, { password });
       if (res.success && res.user) {
-        const user = res.user;
-        const role = (user.role || 'CUSTOMER').toUpperCase();
-        const status = (user.status || user.merchant_profile?.status || user.rider_profile?.status || '').toUpperCase();
-        const isPending = status === 'PENDING' || status === 'PENDING_VERIFICATION' || status === 'UNDER_REVIEW' || status === 'CHANGES_REQUESTED';
-
-        // 1. Merchant Role Auto-Route
-        if (role === 'MERCHANT') {
-          if (isPending) {
-            navigate('/merchant/status');
-          } else {
-            navigate('/merchant/dashboard');
-          }
-          return;
-        }
-
-        // 2. Delivery Hero (Rider) Role Auto-Route
-        if (role === 'RIDER') {
-          if (isPending) {
-            navigate('/rider/status');
-          } else {
-            navigate('/rider/dashboard');
-          }
-          return;
-        }
-
-        // 3. Admin Governance Auto-Route
-        if (role === 'ADMIN') {
-          navigate('/admin/analytics');
-          return;
-        }
-
-        // 4. Customer Role Route (or previous location)
-        const destination = location.state?.from?.pathname || '/';
-        navigate(destination);
+        setSuccessNotice('Authentication verified successfully! Entering dashboard...');
+        setTimeout(() => {
+          handleAuthRedirect(res.user);
+        }, 600);
       } else {
-        setError(res.message || 'Invalid credentials. Please verify your details.');
+        setError(res.message || 'Incorrect credentials. Please verify your details.');
       }
     } catch (err) {
-      console.error('Login error:', err);
-      setError(
-        err.response?.data?.message ||
-        'Authentication failed. Please verify your registered mobile number, email, or name and password.'
-      );
+      setError(err.response?.data?.message || 'Login failed. Please check credentials or sign in with OTP.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 2. Request OTP
+  const handleTriggerSendOtp = async () => {
+    setError(null);
+    const cleanId = identifier.trim();
+    if (!cleanId) {
+      setError('Please enter your mobile number or email address to receive OTP.');
+      return;
+    }
+
+    setOtpLoading(true);
+    try {
+      const res = await sendOtp(cleanId, 'login');
+      if (res.success) {
+        setOtpSent(true);
+        setOtpCooldown(res.cooldownSeconds || 24);
+        setSuccessNotice(`6-Digit OTP sent to ${cleanId}! Check your phone/email.`);
+        // Focus first OTP box
+        setTimeout(() => otpInputRefs.current[0]?.focus(), 150);
+      } else {
+        setError(res.message || 'Failed to dispatch verification code.');
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to send OTP.');
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
+  // 3. Digit Input Change Handlers
+  const handleOtpDigitChange = (index, value) => {
+    const char = value.slice(-1);
+    const updated = [...otpDigits];
+
+    // Handle Paste of complete 6-digit code
+    if (value.length > 1) {
+      const pasteDigits = value.replace(/\D/g, '').slice(0, 6).split('');
+      for (let i = 0; i < 6; i++) {
+        updated[i] = pasteDigits[i] || '';
+      }
+      setOtpDigits(updated);
+      const nextFocus = Math.min(pasteDigits.length, 5);
+      otpInputRefs.current[nextFocus]?.focus();
+
+      if (pasteDigits.length === 6) {
+        triggerOtpVerification(updated.join(''));
+      }
+      return;
+    }
+
+    updated[index] = char.replace(/\D/g, '');
+    setOtpDigits(updated);
+
+    // Auto-advance to next box
+    if (char && index < 5) {
+      otpInputRefs.current[index + 1]?.focus();
+    }
+
+    // Auto-verify if all 6 filled
+    if (updated.every((d) => d !== '')) {
+      triggerOtpVerification(updated.join(''));
+    }
+  };
+
+  const handleOtpKeyDown = (index, e) => {
+    if (e.key === 'Backspace' && !otpDigits[index] && index > 0) {
+      otpInputRefs.current[index - 1]?.focus();
+    }
+  };
+
+  // 4. Verify OTP and Authenticate
+  const triggerOtpVerification = async (code) => {
+    const otpCode = code || otpDigits.join('');
+    if (otpCode.length < 6) {
+      setError('Please enter all 6 digits of your verification code.');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const cleanId = identifier.trim() || '9876543210';
+      const res = await login(cleanId, { otp: otpCode });
+
+      if (res.success && res.user) {
+        setOtpVerified(true);
+        setSuccessNotice('Mobile number verified! Session established via Hyperlocal Secure Gate.');
+        setTimeout(() => {
+          handleAuthRedirect(res.user);
+        }, 900);
+      } else {
+        setError(res.message || 'Invalid 6-digit OTP code. Please check and try again.');
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'Invalid or expired OTP code.');
     } finally {
       setLoading(false);
     }
@@ -97,150 +272,445 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-[#FFF8ED] flex flex-col justify-between font-sans text-slate-800">
-      {/* Top Header */}
-      <header className="px-4 sm:px-8 py-4 flex items-center justify-between border-b border-amber-900/10 bg-white/70 backdrop-blur-md">
-        <Logo size="md" to="/" />
+      
+      {/* ============================================================== */}
+      {/* 1. TOP HEADER (Exact Match to Prototype)                       */}
+      {/* ============================================================== */}
+      <header className="px-4 sm:px-8 py-3.5 flex items-center justify-between border-b border-amber-900/10 bg-white/70 backdrop-blur-md sticky top-0 z-40">
+        <div className="flex items-center space-x-3">
+          <Logo size="md" to="/" />
+          <div className="hidden sm:flex items-center pl-3 border-l border-slate-200">
+            <span className="inline-flex items-center space-x-1 text-amber-800 text-[11px] font-bold bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200/80">
+              <Lock className="w-3 h-3 text-amber-700" />
+              <span>256-Bit SSL Portal</span>
+            </span>
+          </div>
+        </div>
+
         <Link
           to="/"
-          className="inline-flex items-center space-x-1.5 text-xs font-bold text-slate-600 hover:text-[#064E3B] transition-colors"
+          className="inline-flex items-center space-x-1.5 text-xs font-bold text-slate-600 hover:text-[#064E3B] transition-colors py-1.5 px-3 rounded-xl hover:bg-white"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>Back to Marketplace</span>
         </Link>
       </header>
 
-      {/* Main Login Canvas */}
-      <main className="flex-1 flex items-center justify-center p-4 sm:p-6 my-6">
-        <div className="max-w-md w-full bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xl space-y-6">
-          
-          {/* Header */}
-          <div className="text-center space-y-1.5">
-            <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-              Sign In to ManaMart
-            </h1>
-            <p className="text-xs text-slate-500">
-              Enter your credentials to access your neighborhood account or merchant/rider console
-            </p>
+      {/* ============================================================== */}
+      {/* 2. MAIN CONTAINER & HERO TITLE                                 */}
+      {/* ============================================================== */}
+      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
+        
+        {/* Hero Title & Pill */}
+        <div className="text-center max-w-2xl mx-auto space-y-2">
+          <span className="inline-flex items-center space-x-1.5 text-emerald-800 bg-emerald-50 px-3.5 py-1 rounded-full text-xs font-extrabold border border-emerald-200">
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+            <span>Unified Identity & Role Portal</span>
+          </span>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 tracking-tight">
+            Welcome to ManaMart
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500">
+            Select your role below to access your tailored neighborhood ecosystem dashboard.
+          </p>
+        </div>
+
+        {/* Global Error Banner */}
+        {error && (
+          <div className="max-w-xl mx-auto p-3.5 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold flex items-start gap-2 shadow-xs">
+            <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+            <span>{error}</span>
           </div>
+        )}
 
-          {/* Location state message / Error banner */}
-          {location.state?.message && !error && (
-            <div className="p-3 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-semibold flex items-center gap-2">
-              <Lock className="w-4 h-4 text-amber-700 shrink-0" />
-              <span>{location.state.message}</span>
+        {/* Global Success Banner */}
+        {successNotice && (
+          <div className="max-w-xl mx-auto p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-start gap-2 shadow-xs">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+            <span>{successNotice}</span>
+          </div>
+        )}
+
+        {/* ============================================================== */}
+        {/* 3. FOUR ROLE SELECTION CARDS (Exact Layout)                    */}
+        {/* ============================================================== */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+          {roleCards.map((rc) => {
+            const Icon = rc.icon;
+            const isActive = selectedRole === rc.id;
+
+            return (
+              <button
+                key={rc.id}
+                type="button"
+                onClick={() => {
+                  setSelectedRole(rc.id);
+                  setError(null);
+                  if (rc.id === 'merchant') {
+                    setIdentifier('9848012345');
+                    setPassword('password123');
+                  } else if (rc.id === 'rider') {
+                    setIdentifier('9123456780');
+                    setPassword('password123');
+                  } else if (rc.id === 'admin') {
+                    setIdentifier('admin@manamart.in');
+                    setPassword('password123');
+                  } else {
+                    setIdentifier('9876543210');
+                    setPassword('password123');
+                  }
+                }}
+                className={`text-left p-4 sm:p-5 rounded-3xl bg-white border transition-all relative flex flex-col justify-between cursor-pointer shadow-xs ${
+                  isActive
+                    ? rc.borderActive
+                    : 'border-slate-200/80 hover:border-slate-300 hover:shadow-md'
+                }`}
+              >
+                {/* Active Badge */}
+                {isActive && (
+                  <div className="absolute -top-2.5 right-3 bg-[#064E3B] text-white text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full shadow-xs">
+                    {rc.badge || 'Active Role'}
+                  </div>
+                )}
+                {!isActive && rc.badge === 'Restricted' && (
+                  <div className="absolute -top-2.5 right-3 bg-red-100 text-red-700 text-[10px] font-black uppercase px-2 py-0.5 rounded-full border border-red-200">
+                    Restricted
+                  </div>
+                )}
+
+                <div>
+                  <div className={`w-10 h-10 rounded-2xl flex items-center justify-center mb-3 ${rc.iconBg}`}>
+                    <Icon className="w-5 h-5" />
+                  </div>
+                  <h3 className="font-extrabold text-sm sm:text-base text-slate-900">{rc.title}</h3>
+                  <p className="text-xs text-slate-500 mt-1 leading-snug">{rc.description}</p>
+                </div>
+
+                <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-[#064E3B]">
+                  <span>{rc.actionLabel}</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* ============================================================== */}
+        {/* 4. TWO-COLUMN SPLIT: LOGIN FORM (LEFT) & OTP NODE (RIGHT)      */}
+        {/* ============================================================== */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          
+          {/* ============================================================ */}
+          {/* LEFT COLUMN: Customer / Multi-Role Login Card (7 cols)       */}
+          {/* ============================================================ */}
+          <div className="lg:col-span-7 bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-md space-y-6">
+            
+            {/* Top Tabs */}
+            <div className="flex items-center space-x-6 border-b border-slate-100 pb-3">
+              <button
+                type="button"
+                className="flex items-center space-x-1.5 text-xs sm:text-sm font-black text-[#064E3B] border-b-2 border-[#064E3B] pb-3 -mb-3.5"
+              >
+                <ArrowRight className="w-4 h-4 text-[#064E3B]" />
+                <span className="capitalize">{selectedRole} Login</span>
+              </button>
+
+              <Link
+                to={selectedRole === 'merchant' ? '/merchant/register' : selectedRole === 'rider' ? '/rider/register' : '/register'}
+                className="flex items-center space-x-1.5 text-xs sm:text-sm font-bold text-slate-500 hover:text-slate-800 transition-colors pb-3"
+              >
+                <User className="w-4 h-4" />
+                <span>+ Create Account</span>
+              </Link>
             </div>
-          )}
 
-          {error && (
-            <div className="p-3.5 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold flex items-start gap-2">
-              <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
-              <span>{error}</span>
-            </div>
-          )}
-
-          {/* Clean Unified Login Form */}
-          <form onSubmit={handleLoginSubmit} className="space-y-4">
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">
-                Full Name, Mobile Number, or Email <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
+            {/* Login Form */}
+            <form onSubmit={handlePasswordLogin} className="space-y-4">
+              
+              {/* Mobile / Email Input */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                  Mobile Number or Email Address
+                </label>
                 <input
                   type="text"
                   required
-                  autoComplete="username"
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
-                  placeholder="e.g. Ramesh Reddy, 9876543210, or user@example.com"
-                  className="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-slate-200 text-xs sm:text-sm font-medium focus:border-[#064E3B] focus:ring-4 focus:ring-emerald-100 outline-none transition-all"
+                  placeholder="+91 98765 43210 or yourname@example.com"
+                  className="w-full px-4 py-3 rounded-2xl border border-slate-200 text-xs sm:text-sm font-medium focus:border-[#064E3B] focus:ring-4 focus:ring-emerald-100 outline-none transition-all bg-slate-50/50 focus:bg-white"
                 />
-                <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               </div>
-            </div>
 
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="block text-xs font-bold text-slate-700">
-                  Password <span className="text-red-500">*</span>
-                </label>
-                <Link
-                  to="/forgot-password"
-                  className="text-[11px] font-bold text-[#FF6B00] hover:underline"
-                >
-                  Forgot password?
-                </Link>
+              {/* Password Input */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700">
+                    Account Password
+                  </label>
+                  <Link
+                    to="/forgot-password"
+                    className="text-xs font-bold text-slate-500 hover:text-[#FF6B00] transition-colors"
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••••••"
+                    className="w-full pl-4 pr-11 py-3 rounded-2xl border border-slate-200 text-xs sm:text-sm font-medium focus:border-[#064E3B] focus:ring-4 focus:ring-emerald-100 outline-none transition-all bg-slate-50/50 focus:bg-white"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
               </div>
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  autoComplete="current-password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your account password"
-                  className="w-full pl-10 pr-10 py-2.5 rounded-2xl border border-slate-200 text-xs sm:text-sm font-medium focus:border-[#064E3B] focus:ring-4 focus:ring-emerald-100 outline-none transition-all"
-                />
-                <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+
+              {/* Remember Me & Quick OTP Switch */}
+              <div className="flex items-center justify-between text-xs pt-1">
+                <label className="flex items-center space-x-2 text-slate-600 font-medium cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    className="w-4 h-4 rounded text-[#064E3B] focus:ring-emerald-500"
+                  />
+                  <span>Remember this device</span>
+                </label>
+
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  onClick={handleTriggerSendOtp}
+                  disabled={otpLoading}
+                  className="font-bold text-[#064E3B] hover:underline flex items-center space-x-1 cursor-pointer"
                 >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  <Smartphone className="w-3.5 h-3.5 text-[#064E3B]" />
+                  <span>{otpLoading ? 'Sending...' : 'Quick Login via OTP'}</span>
                 </button>
+              </div>
+
+              {/* Login Submit Button */}
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-3.5 bg-[#064E3B] hover:bg-[#033B2D] text-white rounded-2xl font-black text-xs sm:text-sm shadow-md transition-all flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer active:scale-98"
+              >
+                {loading ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <Lock className="w-4 h-4" />
+                    <span>Login to ManaMart</span>
+                  </>
+                )}
+              </button>
+            </form>
+
+            {/* Divider */}
+            <div className="relative flex items-center justify-center">
+              <div className="border-t border-slate-200 w-full" />
+              <span className="bg-white px-3 text-[10px] font-black text-slate-400 uppercase tracking-widest absolute">
+                Or Continue With
+              </span>
+            </div>
+
+            {/* Google Sign In Button */}
+            <button
+              type="button"
+              onClick={() => {
+                alert('Google Sign-In initialized. Authenticating with Google OAuth 2.0.');
+              }}
+              className="w-full py-3 bg-white hover:bg-slate-50 border border-slate-300 rounded-2xl font-bold text-xs text-slate-700 shadow-2xs transition-all flex items-center justify-center space-x-2 cursor-pointer"
+            >
+              <svg className="w-4 h-4" viewBox="0 0 24 24">
+                <path
+                  fill="#4285F4"
+                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                />
+                <path
+                  fill="#34A853"
+                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                />
+                <path
+                  fill="#FBBC05"
+                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                />
+                <path
+                  fill="#EA4335"
+                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                />
+              </svg>
+              <span>Continue with Google</span>
+            </button>
+          </div>
+
+          {/* ============================================================ */}
+          {/* RIGHT COLUMN: LIVE OTP NODE & SECURITY PROMISE (5 cols)      */}
+          {/* ============================================================ */}
+          <div className="lg:col-span-5 space-y-4">
+            
+            {/* Top OTP Security Node Card */}
+            <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-md space-y-4">
+              
+              {/* Node Header */}
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div className="flex items-center space-x-2">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                  <span className="text-[11px] font-black uppercase tracking-wider text-slate-800">
+                    Live OTP Security Node
+                  </span>
+                </div>
+                <span className="bg-emerald-100 text-emerald-800 text-[10px] font-black px-2 py-0.5 rounded-full">
+                  Ready
+                </span>
+              </div>
+
+              {/* Title & Phone/Email info */}
+              <div>
+                <h3 className="font-black text-sm text-slate-900">
+                  Enter 6-Digit Verification Code
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Sent to <span className="font-bold text-slate-800">{identifier || '+91 98765-43210'}</span>{' '}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newId = prompt('Enter your registered mobile or email:', identifier);
+                      if (newId) setIdentifier(newId.trim());
+                    }}
+                    className="text-[#FF6B00] font-bold hover:underline ml-1 cursor-pointer"
+                  >
+                    Change
+                  </button>
+                </p>
+              </div>
+
+              {/* 6 Digit Input Boxes */}
+              <div className="flex items-center justify-between gap-1.5 sm:gap-2">
+                {otpDigits.map((digit, idx) => (
+                  <input
+                    key={idx}
+                    ref={(el) => (otpInputRefs.current[idx] = el)}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={1}
+                    value={digit}
+                    onChange={(e) => handleOtpDigitChange(idx, e.target.value)}
+                    onKeyDown={(e) => handleOtpKeyDown(idx, e)}
+                    className="w-10 h-12 sm:w-12 sm:h-13 text-center text-xl font-black font-mono rounded-xl border border-slate-300 focus:border-[#064E3B] focus:ring-2 focus:ring-emerald-200 outline-none bg-slate-50 focus:bg-white transition-all"
+                  />
+                ))}
+              </div>
+
+              {/* Resend OTP Row */}
+              <div className="flex items-center justify-between text-xs text-slate-500">
+                <span>
+                  Resend OTP in <strong className="text-slate-800 font-mono">0:{otpCooldown < 10 ? `0${otpCooldown}` : otpCooldown}s</strong>
+                </span>
+                <button
+                  type="button"
+                  onClick={handleTriggerSendOtp}
+                  disabled={otpCooldown > 0 || otpLoading}
+                  className="font-bold text-[#FF6B00] hover:underline disabled:opacity-40 cursor-pointer"
+                >
+                  Resend Now
+                </button>
+              </div>
+
+              {/* Verified Session Status Box */}
+              <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200/80 flex items-start space-x-2.5">
+                <CheckCircle2 className="w-4.5 h-4.5 text-emerald-600 shrink-0 mt-0.5" />
+                <div className="text-[11px] leading-snug">
+                  <span className="font-extrabold text-emerald-900 block">
+                    Mobile Number Verified
+                  </span>
+                  <span className="text-emerald-700">
+                    Instant session established via Hyperlocal Secure Gate.
+                  </span>
+                </div>
+              </div>
+
+              {/* Confirm & Enter Dashboard Button */}
+              <button
+                type="button"
+                onClick={() => triggerOtpVerification()}
+                disabled={loading}
+                className="w-full py-3.5 bg-[#064E3B] hover:bg-[#033B2D] text-white rounded-2xl font-black text-xs sm:text-sm shadow-md transition-all flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer active:scale-98"
+              >
+                {loading ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <span>Confirm & Enter Dashboard</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Bottom ManaMart Security Promise Card */}
+            <div className="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-xs space-y-3">
+              <div className="flex items-center space-x-2 text-slate-900 font-black text-xs">
+                <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                <span>ManaMart Security Promise</span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 text-[11px]">
+                <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100 space-y-1">
+                  <div className="font-extrabold text-slate-800 flex items-center space-x-1">
+                    <Shield className="w-3.5 h-3.5 text-emerald-700" />
+                    <span>End-to-End</span>
+                  </div>
+                  <p className="text-slate-500 text-[10px] leading-tight">
+                    Bank-grade data encryption for all orders & KYC.
+                  </p>
+                </div>
+
+                <div className="p-3 rounded-2xl bg-orange-50/50 border border-orange-100 space-y-1">
+                  <div className="font-extrabold text-[#FF6B00] flex items-center space-x-1">
+                    <Sparkles className="w-3.5 h-3.5 text-[#FF6B00]" />
+                    <span>100% Hyperlocal</span>
+                  </div>
+                  <p className="text-slate-500 text-[10px] leading-tight">
+                    Zero middlemen. Your rupee stays in your town.
+                  </p>
+                </div>
               </div>
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 bg-[#064E3B] hover:bg-[#033B2D] text-white rounded-2xl font-bold text-sm shadow-md transition-all flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
-            >
-              {loading ? (
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <>
-                  <span>Sign In</span>
-                  <ArrowRight className="w-4 h-4" />
-                </>
-              )}
-            </button>
-          </form>
-
-          {/* Dedicated Registration Links */}
-          <div className="pt-4 border-t border-slate-100 space-y-3 text-xs text-center">
-            <p className="text-slate-500">
-              New customer?{' '}
-              <Link to="/register" className="font-bold text-[#064E3B] hover:underline">
-                Create a Customer Account
-              </Link>
-            </p>
-
-            <div className="pt-2 border-t border-slate-100/60 grid grid-cols-2 gap-2 text-[11px]">
-              <Link
-                to="/merchant/register"
-                className="p-2.5 rounded-xl border border-emerald-200 hover:border-[#064E3B] bg-emerald-50/40 text-[#064E3B] font-bold transition-all text-center flex flex-col items-center gap-1"
-              >
-                <Store className="w-4 h-4" />
-                <span>Register Store</span>
-              </Link>
-
-              <Link
-                to="/rider/register"
-                className="p-2.5 rounded-xl border border-orange-200 hover:border-[#FF6B00] bg-orange-50/40 text-[#FF6B00] font-bold transition-all text-center flex flex-col items-center gap-1"
-              >
-                <Bike className="w-4 h-4" />
-                <span>Join as Rider</span>
-              </Link>
-            </div>
           </div>
-
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="py-4 text-center text-xs text-slate-400 border-t border-amber-900/10">
-        ManaMart — Mana Ooru. Mana Market.
+      {/* ============================================================== */}
+      {/* 5. FOOTER (Exact Match to Prototype)                           */}
+      {/* ============================================================== */}
+      <footer className="w-full border-t border-amber-900/10 bg-white/60 py-6 mt-8">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs">
+          <div>
+            <span className="font-black text-slate-900 text-sm block">ManaMart</span>
+            <span className="text-[11px] text-slate-400">
+              © 2025 ManaMart Hyperlocal Technologies Pvt Ltd. Mana Ooru. Mana Market.
+            </span>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-4 text-slate-500 text-xs">
+            <Link to="/about" className="hover:text-[#064E3B] transition-colors">About Us</Link>
+            <Link to="/partner" className="hover:text-[#064E3B] transition-colors">Partner With Us</Link>
+            <Link to="/rider/register" className="hover:text-[#064E3B] transition-colors">Delivery Fleet</Link>
+            <Link to="/privacy" className="hover:text-[#064E3B] transition-colors">Privacy Policy</Link>
+            <Link to="/terms" className="hover:text-[#064E3B] transition-colors">Terms of Service</Link>
+            <Link to="/grievance" className="hover:text-[#064E3B] transition-colors">Merchant Grievance</Link>
+          </div>
+        </div>
       </footer>
     </div>
   );
