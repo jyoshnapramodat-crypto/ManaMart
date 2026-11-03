@@ -47,6 +47,7 @@ export default function AdminPortalLayout({ children }) {
     { to: '/admin/merchants/pending', label: 'Merchant Audits', icon: Store, badge: stats?.pendingMerchants },
     { to: '/admin/riders/pending', label: 'Rider Compliance', icon: Bike, badge: stats?.pendingRiders },
     { to: '/admin/disputes', label: 'Dispute Handling', icon: AlertTriangle },
+    { to: '/admin/team', label: 'Admin Team & Invites', icon: Users },
   ];
 
   return (

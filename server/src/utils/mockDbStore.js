@@ -1279,5 +1279,46 @@ export const mockDb = {
       },
     },
   ],
+
+  reviews: [
+    {
+      id: 'rev-1',
+      reviewId: 'rev-1',
+      orderId: 'MM-2026-8842',
+      customerId: 'user-cust-1',
+      customerName: 'Ravi Kumar',
+      storeId: 'm-1',
+      storeName: 'Swagath Grand Authentic Kitchen',
+      rating: 5,
+      storeRating: 5,
+      storeTags: ['Well Packaged', 'Hot & Tasty', 'Fresh'],
+      comment: 'Authentic Hyderabadi Dum Biryani arrived steaming hot with plenty of salan and raita. Absolutely top tier quality!',
+      riderId: 'r-1',
+      riderName: 'Suresh Varma',
+      riderRating: 5,
+      riderTip: 30,
+      createdAt: new Date(Date.now() - 3600000 * 5).toISOString(),
+    },
+  ],
+
+  reports: [
+    {
+      id: 'disp-init-1',
+      reportId: 'DISP-INIT-1',
+      reporterId: 'user-cust-1',
+      reporterName: 'Ravi Kumar',
+      reporterRole: 'customer',
+      targetType: 'order',
+      targetId: 'MM-2026-7719',
+      targetName: 'Order #MM-2026-7719',
+      reason: 'Low Rating Alert (<= 2 Stars) - Leaking Package',
+      details: 'Customer reported leaking dal packet during transit. Auto-dispatched for support mediation.',
+      status: 'pending',
+      priority: 'high',
+      createdAt: new Date(Date.now() - 3600000 * 12).toISOString(),
+    },
+  ],
+
+  adminInvites: [],
 };
 

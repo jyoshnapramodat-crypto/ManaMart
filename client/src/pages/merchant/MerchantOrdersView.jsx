@@ -16,6 +16,11 @@ export default function MerchantOrdersView() {
   const [filter, setFilter] = useState('all');
   const [loading, setLoading] = useState(true);
 
+  // Cancellation Modal State
+  const [cancelModalOrder, setCancelModalOrder] = useState(null);
+  const [merchantReason, setMerchantReason] = useState('Out of stock');
+  const [cancelling, setCancelling] = useState(false);
+
   useEffect(() => {
     fetchOrders();
   }, []);
@@ -44,6 +49,29 @@ export default function MerchantOrdersView() {
       }
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to update order status');
+    }
+  };
+
+  const handleCancelOrder = async () => {
+    if (!cancelModalOrder) return;
+    setCancelling(true);
+    try {
+      const res = await api.post(`/orders/${cancelModalOrder.id}/cancel`, {
+        reason: merchantReason,
+        cancelledBy: 'MERCHANT',
+      });
+      if (res.data?.success) {
+        setOrders((prev) =>
+          prev.map((o) =>
+            o.id === cancelModalOrder.id ? { ...o, orderStatus: 'CANCELLED', cancellationReason: merchantReason } : o
+          )
+        );
+        setCancelModalOrder(null);
+      }
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to cancel order.');
+    } finally {
+      setCancelling(false);
     }
   };
 
@@ -167,10 +195,97 @@ export default function MerchantOrdersView() {
                         In Transit • Awaiting Courier OTP Hand-off
                       </span>
                     )}
+
+                    {!['delivered', 'cancelled', 'handed_over'].includes(order.orderStatus?.toLowerCase()) && (
+                      <button
+                        onClick={() => {
+                          setMerchantReason('Out of stock');
+                          setCancelModalOrder(order);
+                        }}
+                        className="px-2.5 py-1.5 text-red-600 hover:bg-red-50 rounded-xl font-bold text-xs cursor-pointer border border-red-200 transition-colors flex items-center gap-1"
+                        title="Cancel Order"
+                      >
+                        <XCircle className="w-3.5 h-3.5" />
+                        <span>Cancel</span>
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Merchant Cancellation Quick Reason Modal */}
+        {cancelModalOrder && (
+          <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+            <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in duration-150">
+              <div className="flex items-start justify-between border-b border-slate-100 pb-3">
+                <div className="flex items-center gap-2 text-red-600">
+                  <XCircle className="w-5 h-5 text-red-600" />
+                  <h3 className="font-extrabold text-base text-slate-900">
+                    Cancel Order #{cancelModalOrder.id}
+                  </h3>
+                </div>
+                <button
+                  onClick={() => setCancelModalOrder(null)}
+                  className="text-slate-400 hover:text-slate-600 text-lg p-1 cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="bg-red-50 text-red-900 text-xs p-3 rounded-2xl border border-red-200 space-y-1">
+                <span className="font-bold block">Customer 100% Refund Guarantee</span>
+                <p className="text-[11px] text-red-700">
+                  Merchant-initiated cancellations immediately trigger a full 100% refund of ₹{cancelModalOrder.totalAmount} to the customer and unassign the delivery courier.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-slate-700 block">Select Merchant Reason:</label>
+                <div className="space-y-1.5">
+                  {[
+                    'Out of stock',
+                    'Kitchen closed',
+                    'Power outage',
+                    'Store closed for the day',
+                    'High peak demand / Kitchen overloaded',
+                  ].map((r) => (
+                    <button
+                      key={r}
+                      type="button"
+                      onClick={() => setMerchantReason(r)}
+                      className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
+                        merchantReason === r
+                          ? 'border-red-500 bg-red-50 text-red-900 font-bold'
+                          : 'border-slate-200 text-slate-700 hover:bg-slate-50'
+                      }`}
+                    >
+                      {r}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setCancelModalOrder(null)}
+                  className="flex-1 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 cursor-pointer"
+                >
+                  Keep Order
+                </button>
+                <button
+                  type="button"
+                  disabled={cancelling}
+                  onClick={handleCancelOrder}
+                  className="flex-1 py-2.5 rounded-xl text-xs font-extrabold text-white bg-red-600 hover:bg-red-700 shadow-sm cursor-pointer transition-colors"
+                >
+                  {cancelling ? 'Cancelling...' : 'Confirm Cancellation'}
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>

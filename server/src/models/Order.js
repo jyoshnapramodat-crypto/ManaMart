@@ -69,8 +69,11 @@ const orderSchema = new mongoose.Schema(
     },
     orderStatus: {
       type: String,
-      enum: ['Placed', 'Accepted', 'Preparing', 'ReadyForPickup', 'OutForDelivery', 'Delivered', 'Cancelled'],
-      default: 'Placed',
+      enum: [
+        'Placed', 'Accepted', 'Preparing', 'ReadyForPickup', 'OutForDelivery', 'Delivered', 'Cancelled',
+        'PLACED', 'ACCEPTED', 'PREPARING', 'READY_FOR_PICKUP', 'OUT_FOR_DELIVERY', 'DELIVERED', 'CANCELLED'
+      ],
+      default: 'PLACED',
       index: true,
     },
     deliveryOtp: {
@@ -91,6 +94,20 @@ const orderSchema = new mongoose.Schema(
     },
     rejectionReason: { type: String },
     cancellationReason: { type: String },
+    cancelledBy: { type: String, enum: ['customer', 'merchant', 'admin', 'system'] },
+    refundAmount: { type: Number, default: 0 },
+    cancellationFee: { type: Number, default: 0 },
+    refundPercentage: { type: Number, default: 0 },
+    cancelledAt: { type: Date },
+    reviewSubmitted: { type: Boolean, default: false },
+    review: {
+      storeRating: { type: Number },
+      storeTags: [{ type: String }],
+      storeComment: { type: String },
+      riderRating: { type: Number },
+      riderTip: { type: Number, default: 0 },
+      createdAt: { type: Date },
+    },
     eta: { type: String, default: '15-20 mins' },
   },
   { timestamps: true }

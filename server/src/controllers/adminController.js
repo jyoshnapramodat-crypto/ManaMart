@@ -9,6 +9,8 @@ import { Notification } from '../models/Notification.js';
 import { Report } from '../models/Report.js';
 import { AuditLog } from '../models/AuditLog.js';
 import { isConnectedToMongo } from '../config/db.js';
+import bcrypt from 'bcryptjs';
+import { signAdminInviteToken, verifyAdminInviteToken } from '../config/jwt.js';
 
 // Real Platform Analytics & Statistics
 export async function getPlatformStats(req, res) {
@@ -756,3 +758,276 @@ export async function processRefund(req, res) {
     return res.status(500).json({ success: false, message: error.message });
   }
 }
+
+// ----------------------------------------------------
+// Secure Admin Team Management & Invitation Engine
+// ----------------------------------------------------
+
+// 1. Get Admin Team Members and Pending Invites
+export async function getAdminTeam(req, res) {
+  try {
+    let admins = [];
+
+    if (isConnectedToMongo) {
+      try {
+        admins = await User.find({
+          role: { $in: ['ADMIN', 'admin'] },
+        }).select('-password');
+      } catch (err) {
+        console.warn('Mongo getAdminTeam warning:', err.message);
+      }
+    }
+
+    if (admins.length === 0) {
+      admins = mockDb.users.filter((u) => (u.role || '').toUpperCase() === 'ADMIN');
+    }
+
+    // Clean up or list pending invites
+    const pendingInvites = (mockDb.adminInvites || []).filter((inv) => {
+      return new Date(inv.expiresAt) > new Date();
+    });
+
+    return res.json({
+      success: true,
+      admins: admins.map((a) => ({
+        id: a.id || a._id,
+        name: a.name,
+        email: a.email,
+        role: 'ADMIN',
+        status: a.status || 'ACTIVE',
+        createdAt: a.createdAt,
+      })),
+      pendingInvites,
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+}
+
+// 2. Generate Expiring (48h) Admin Invite Link
+export async function inviteAdmin(req, res) {
+  try {
+    const { email, name } = req.body;
+
+    if (!email || !/\S+@\S+\.\S+/.test(email)) {
+      return res.status(400).json({ success: false, message: 'Please provide a valid email address.' });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+    const adminName = (name && name.trim()) || 'Staff Administrator';
+
+    // Verify user doesn't already exist as admin
+    let existingAdmin = null;
+    if (isConnectedToMongo) {
+      try {
+        existingAdmin = await User.findOne({ email: cleanEmail, role: { $in: ['ADMIN', 'admin'] } });
+      } catch (_) {}
+    }
+    if (!existingAdmin) {
+      existingAdmin = mockDb.users.find(
+        (u) => (u.email || '').toLowerCase() === cleanEmail && (u.role || '').toUpperCase() === 'ADMIN'
+      );
+    }
+
+    if (existingAdmin) {
+      return res.status(400).json({
+        success: false,
+        message: `An administrator account with email "${cleanEmail}" already exists.`,
+      });
+    }
+
+    // Sign 48-hour JWT token
+    const token = signAdminInviteToken({
+      email: cleanEmail,
+      name: adminName,
+      role: 'ADMIN',
+      invitedBy: req.user?.email || req.user?.name || 'Administrator',
+    });
+
+    const origin = req.headers.origin || process.env.CLIENT_URL || 'http://localhost:5173';
+    const inviteLink = `${origin}/admin/accept-invite?token=${token}`;
+
+    const inviteRecord = {
+      id: `inv-${Date.now()}`,
+      email: cleanEmail,
+      name: adminName,
+      token,
+      invitedBy: req.user?.email || req.user?.name || 'Root Administrator',
+      createdAt: new Date().toISOString(),
+      expiresAt: new Date(Date.now() + 48 * 3600 * 1000).toISOString(),
+      status: 'PENDING',
+    };
+
+    if (!mockDb.adminInvites) mockDb.adminInvites = [];
+    mockDb.adminInvites.unshift(inviteRecord);
+
+    // Audit Log
+    try {
+      const auditRecord = {
+        logId: `log-${Date.now()}`,
+        adminId: req.user.id || req.user._id,
+        adminName: req.user.name || 'Platform Administrator',
+        action: 'ADMIN_INVITATION_CREATED',
+        targetType: 'User',
+        targetId: cleanEmail,
+        details: { invitedEmail: cleanEmail, expiresAt: inviteRecord.expiresAt },
+        ipAddress: req.ip,
+      };
+      if (isConnectedToMongo) await AuditLog.create(auditRecord);
+    } catch (_) {}
+
+    return res.status(201).json({
+      success: true,
+      message: 'Admin invitation link generated successfully. Link expires in 48 hours.',
+      inviteLink,
+      invite: inviteRecord,
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+}
+
+// 3. Verify Admin Invite Token (Public Endpoint)
+export async function verifyAdminInvite(req, res) {
+  try {
+    const { token } = req.query;
+
+    if (!token) {
+      return res.status(400).json({ success: false, message: 'Invitation token is missing.' });
+    }
+
+    const decoded = verifyAdminInviteToken(token);
+    if (!decoded || !decoded.email) {
+      return res.status(400).json({
+        success: false,
+        message: 'This invitation link is invalid or has expired (48-hour limit). Please request a new invite from an administrator.',
+      });
+    }
+
+    // Check if token was already used in mock memory
+    const existingInvite = (mockDb.adminInvites || []).find((inv) => inv.token === token);
+    if (existingInvite && existingInvite.status === 'ACCEPTED') {
+      return res.status(400).json({
+        success: false,
+        message: 'This invitation link has already been accepted.',
+      });
+    }
+
+    return res.json({
+      success: true,
+      valid: true,
+      email: decoded.email,
+      name: decoded.name || '',
+      invitedBy: decoded.invitedBy || 'Platform Administrator',
+      expiresAt: decoded.exp ? new Date(decoded.exp * 1000).toISOString() : null,
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+}
+
+// 4. Accept Admin Invite & Set Strong Password (Public Endpoint)
+export async function acceptAdminInvite(req, res) {
+  try {
+    const { token, password, name: explicitName } = req.body;
+
+    if (!token) {
+      return res.status(400).json({ success: false, message: 'Invitation token is required.' });
+    }
+
+    const decoded = verifyAdminInviteToken(token);
+    if (!decoded || !decoded.email) {
+      return res.status(400).json({
+        success: false,
+        message: 'This invitation link is invalid or has expired (48-hour limit). Please request a new invite.',
+      });
+    }
+
+    // Check if invite was already accepted
+    const existingInvite = (mockDb.adminInvites || []).find((inv) => inv.token === token);
+    if (existingInvite && existingInvite.status === 'ACCEPTED') {
+      return res.status(400).json({
+        success: false,
+        message: 'This invitation has already been accepted.',
+      });
+    }
+
+    // Mandatory Strong Password Validation:
+    // Min 8 characters, at least 1 uppercase, 1 lowercase, 1 digit, 1 special character
+    const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/;
+    if (!password || !strongPasswordRegex.test(password)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character (!@#$%^&*).',
+      });
+    }
+
+    const cleanEmail = decoded.email.toLowerCase();
+    const adminName = explicitName || decoded.name || 'Platform Administrator';
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    let createdUser = null;
+
+    // Check if user already exists in Mongo
+    if (isConnectedToMongo) {
+      try {
+        let user = await User.findOne({ email: cleanEmail });
+        if (user) {
+          user.role = 'ADMIN';
+          user.status = 'ACTIVE';
+          user.password = hashedPassword;
+          user.name = adminName;
+          await user.save();
+          createdUser = user;
+        } else {
+          createdUser = await User.create({
+            name: adminName,
+            email: cleanEmail,
+            password: hashedPassword,
+            role: 'ADMIN',
+            status: 'ACTIVE',
+            isEmailVerified: true,
+            isPhoneVerified: true,
+          });
+        }
+      } catch (mongoErr) {
+        console.warn('Mongo admin creation warning:', mongoErr.message);
+      }
+    }
+
+    // Update in-memory user store
+    const memIndex = mockDb.users.findIndex((u) => (u.email || '').toLowerCase() === cleanEmail);
+    const newAdminObj = {
+      id: createdUser?.id || createdUser?._id || `user-adm-${Date.now()}`,
+      name: adminName,
+      email: cleanEmail,
+      role: 'ADMIN',
+      status: 'ACTIVE',
+      password: hashedPassword,
+      isEmailVerified: true,
+      isPhoneVerified: true,
+      createdAt: new Date().toISOString(),
+    };
+
+    if (memIndex !== -1) {
+      mockDb.users[memIndex] = { ...mockDb.users[memIndex], ...newAdminObj };
+    } else {
+      mockDb.users.push(newAdminObj);
+    }
+
+    // Mark invite as accepted
+    if (existingInvite) {
+      existingInvite.status = 'ACCEPTED';
+      existingInvite.acceptedAt = new Date().toISOString();
+    }
+
+    return res.status(201).json({
+      success: true,
+      message: 'Administrator account successfully created! You can now log in using your email and password.',
+      email: cleanEmail,
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+}
+

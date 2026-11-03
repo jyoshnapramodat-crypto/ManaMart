@@ -57,6 +57,8 @@ import AdminVerificationsView from './pages/admin/AdminVerificationsView';
 import AdminMerchantsQueueView from './pages/admin/AdminMerchantsQueueView';
 import AdminRidersQueueView from './pages/admin/AdminRidersQueueView';
 import AdminDisputesView from './pages/admin/AdminDisputesView';
+import AdminTeamView from './pages/admin/AdminTeamView';
+import AdminAcceptInviteView from './pages/admin/AdminAcceptInviteView';
 
 // Development Utilities (Conditionally rendered in development mode only)
 import QuickRoleSwitcher from './components/QuickRoleSwitcher';
@@ -67,10 +69,10 @@ function AppLayout() {
   const path = location.pathname;
 
   const isLanding = path === '/';
-  const isAuthPage = ['/login', '/signup', '/register', '/forgot-password'].includes(path);
+  const isAuthPage = ['/login', '/signup', '/register', '/forgot-password', '/admin/accept-invite'].includes(path);
   const isMerchantPortal = path.startsWith('/merchant');
   const isRiderPortal = path.startsWith('/rider');
-  const isAdminPortal = path.startsWith('/admin');
+  const isAdminPortal = path.startsWith('/admin') && path !== '/admin/accept-invite';
 
   // Strict UI isolation: consumer nav, cart, and location modals NEVER render on merchant, rider, or admin portals
   const isCustomerPortal = !isMerchantPortal && !isRiderPortal && !isAdminPortal && !isAuthPage;
@@ -290,6 +292,17 @@ function AppLayout() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/admin/team"
+            element={
+              <ProtectedRoute allowedRoles={['ADMIN']}>
+                <AdminTeamView />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Secure Admin Invitation Acceptance (Public Tokenized Route) */}
+          <Route path="/admin/accept-invite" element={<AdminAcceptInviteView />} />
 
           {/* Fallback Catch-all Route */}
           <Route path="*" element={<Navigate to="/" replace />} />

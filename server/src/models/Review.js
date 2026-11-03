@@ -22,12 +22,21 @@ const reviewSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
+    storeName: {
+      type: String,
+    },
     rating: {
       type: Number,
       required: true,
       min: 1,
       max: 5,
     },
+    storeRating: {
+      type: Number,
+      min: 1,
+      max: 5,
+    },
+    storeTags: [{ type: String }],
     comment: {
       type: String,
       trim: true,
@@ -35,6 +44,29 @@ const reviewSchema = new mongoose.Schema(
     merchantReply: {
       type: String,
       trim: true,
+    },
+    riderId: {
+      type: String,
+      index: true,
+    },
+    riderName: {
+      type: String,
+    },
+    riderRating: {
+      type: Number,
+      min: 1,
+      max: 5,
+    },
+    riderTip: {
+      type: Number,
+      default: 0,
+    },
+    autoDisputeCreated: {
+      type: Boolean,
+      default: false,
+    },
+    disputeId: {
+      type: String,
     },
   },
   {

@@ -27,3 +27,20 @@ export function verifyRefreshToken(token) {
   }
 }
 
+export function signAdminInviteToken(payload) {
+  return jwt.sign({ ...payload, purpose: 'ADMIN_INVITE' }, JWT_SECRET, { expiresIn: '48h' });
+}
+
+export function verifyAdminInviteToken(token) {
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    if (decoded && decoded.purpose === 'ADMIN_INVITE') {
+      return decoded;
+    }
+    return null;
+  } catch (err) {
+    return null;
+  }
+}
+
+

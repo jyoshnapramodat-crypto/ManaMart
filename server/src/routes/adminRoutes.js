@@ -12,14 +12,25 @@ import {
   getAuditLogs,
   getAllOrders,
   processRefund,
+  getAdminTeam,
+  inviteAdmin,
+  verifyAdminInvite,
+  acceptAdminInvite,
 } from '../controllers/adminController.js';
 import { authenticate, authorizeRoles } from '../middleware/authMiddleware.js';
 
 const router = Router();
 
+// Public Tokenized Endpoints: Only accessible with a valid, unexpired Admin Invite Token
+// (Note: No public /admin/register route exists)
+router.get('/invite/verify', verifyAdminInvite);
+router.post('/accept-invite', acceptAdminInvite);
+
 // Strict security: require authentication and administrator role for all admin routes
 router.use(authenticate, authorizeRoles('admin'));
 
+router.get('/team', getAdminTeam);
+router.post('/invite', inviteAdmin);
 router.get('/stats', getPlatformStats);
 router.get('/users', getUsers);
 router.put('/users/:id/status', updateUserStatus);

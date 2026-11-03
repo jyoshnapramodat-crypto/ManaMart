@@ -8,6 +8,9 @@ import { Product } from '../models/Product.js';
 import { Promotion } from '../models/Promotion.js';
 import { Notification } from '../models/Notification.js';
 import { Reservation } from '../models/Reservation.js';
+import { Review } from '../models/Review.js';
+import { Report } from '../models/Report.js';
+import { User } from '../models/User.js';
 import { isConnectedToMongo } from '../config/db.js';
 
 // Cache for duplicate order protection (15 seconds debounce)
@@ -454,6 +457,427 @@ export async function bookService(req, res) {
       success: true,
       message: 'Service appointment scheduled successfully!',
       booking: newService,
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+}
+
+// ----------------------------------------------------
+// Order Cancellation Engine & State Management
+// ----------------------------------------------------
+export async function cancelOrder(req, res) {
+  try {
+    const { id } = req.params;
+    const { reason, confirmDeduction, cancelledBy: explicitCancelledBy } = req.body;
+    const userRole = (req.user?.role || '').toUpperCase();
+    const cancelledBy = explicitCancelledBy || (userRole === 'MERCHANT' ? 'MERCHANT' : 'CUSTOMER');
+
+    let order = null;
+    let mongoOrder = null;
+
+    if (isConnectedToMongo) {
+      try {
+        mongoOrder = await Order.findOne({
+          $or: [
+            { orderId: id },
+            { id: id },
+            { _id: id.match(/^[0-9a-fA-F]{24}$/) ? id : null },
+          ].filter(Boolean),
+        });
+        if (mongoOrder) {
+          order = mongoOrder;
+        }
+      } catch (err) {
+        console.warn('Mongo order find warning in cancelOrder:', err.message);
+      }
+    }
+
+    const memoryOrder = mockDb.orders.find((o) => o.id === id || o.orderId === id);
+    if (!order && memoryOrder) {
+      order = memoryOrder;
+    }
+
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found.' });
+    }
+
+    const currentStatus = (order.orderStatus || order.status || '').toUpperCase();
+
+    // Disallow cancelling finished or already cancelled orders
+    if (currentStatus === 'CANCELLED') {
+      return res.status(400).json({ success: false, message: 'This order has already been cancelled.' });
+    }
+    if (currentStatus === 'DELIVERED') {
+      return res.status(400).json({ success: false, message: 'Delivered orders cannot be cancelled.' });
+    }
+
+    // Cancellation Policy Evaluation
+    let refundPercentage = 100;
+    let cancellationFee = 0;
+    let refundAmount = Number(order.totalAmount || 0);
+
+    // Rule: Out for delivery cannot be cancelled by customer
+    if (currentStatus === 'OUT_FOR_DELIVERY' || currentStatus === 'OUTFORDELIVERY') {
+      if (cancelledBy !== 'MERCHANT') {
+        return res.status(400).json({
+          success: false,
+          locked: true,
+          message: 'Order is out for delivery with our delivery partner and cannot be cancelled directly. Please contact support or the rider.',
+        });
+      }
+    }
+
+    if (cancelledBy === 'MERCHANT') {
+      // Merchant cancellations: 100% full customer refund
+      refundPercentage = 100;
+      cancellationFee = 0;
+      refundAmount = Number(order.totalAmount || 0);
+    } else {
+      // Customer cancellation policies
+      if (currentStatus === 'PLACED') {
+        // 1-Click instant cancellation with 100% refund
+        refundPercentage = 100;
+        cancellationFee = 0;
+        refundAmount = Number(order.totalAmount || 0);
+      } else if (
+        currentStatus === 'PREPARING' ||
+        currentStatus === 'ACCEPTED' ||
+        currentStatus === 'READY_FOR_PICKUP' ||
+        currentStatus === 'READYFORPICKUP'
+      ) {
+        // Food preparation underway -> 50% deduction warning
+        const deductionAmt = Math.round(Number(order.totalAmount || 0) * 0.5);
+        const refAmt = Number(order.totalAmount || 0) - deductionAmt;
+
+        if (!confirmDeduction) {
+          return res.status(400).json({
+            success: false,
+            requiresConfirmation: true,
+            deductionPercentage: 50,
+            deductionAmount: deductionAmt,
+            refundAmount: refAmt,
+            message: 'Food preparation is already underway. A 50% deduction applies to cover kitchen and packaging costs. Please confirm to proceed.',
+          });
+        }
+
+        cancellationFee = deductionAmt;
+        refundAmount = refAmt;
+        refundPercentage = 50;
+      }
+    }
+
+    const cancellationReason = reason || (cancelledBy === 'MERCHANT' ? 'Merchant unavailable / Item out of stock' : 'Customer requested cancellation');
+    const cancelledTimestamp = new Date().toISOString();
+
+    // Update in-memory order
+    if (memoryOrder) {
+      memoryOrder.orderStatus = 'Cancelled';
+      memoryOrder.status = 'cancelled';
+      memoryOrder.cancelledBy = cancelledBy;
+      memoryOrder.cancellationReason = cancellationReason;
+      memoryOrder.refundAmount = refundAmount;
+      memoryOrder.cancellationFee = cancellationFee;
+      memoryOrder.refundPercentage = refundPercentage;
+      memoryOrder.cancelledAt = cancelledTimestamp;
+      if (!Array.isArray(memoryOrder.timeline)) memoryOrder.timeline = [];
+      memoryOrder.timeline.push({
+        status: 'Cancelled',
+        timestamp: cancelledTimestamp,
+        note: `Cancelled by ${cancelledBy}. Reason: ${cancellationReason}. Refund: ₹${refundAmount} (${refundPercentage}%)`,
+      });
+      order = memoryOrder;
+    }
+
+    // Update MongoDB
+    if (isConnectedToMongo && mongoOrder) {
+      try {
+        mongoOrder.orderStatus = 'Cancelled';
+        mongoOrder.status = 'cancelled';
+        mongoOrder.cancelledBy = cancelledBy;
+        mongoOrder.cancellationReason = cancellationReason;
+        mongoOrder.refundAmount = refundAmount;
+        mongoOrder.cancellationFee = cancellationFee;
+        mongoOrder.refundPercentage = refundPercentage;
+        mongoOrder.cancelledAt = new Date(cancelledTimestamp);
+        mongoOrder.timeline = mongoOrder.timeline || [];
+        mongoOrder.timeline.push({
+          status: 'Cancelled',
+          timestamp: new Date(cancelledTimestamp),
+          note: `Cancelled by ${cancelledBy}. Reason: ${cancellationReason}. Refund: ₹${refundAmount} (${refundPercentage}%)`,
+        });
+        await mongoOrder.save();
+        order = mongoOrder;
+      } catch (saveErr) {
+        console.warn('Mongo order save error in cancelOrder:', saveErr.message);
+      }
+    }
+
+    // Real-time broadcast to Rider, Merchant, and Customer
+    const io = req.app.get('io');
+    if (io) {
+      const orderIdKey = order.orderId || order.id || id;
+      io.emit('order:cancelled', {
+        orderId: orderIdKey,
+        cancelledBy,
+        reason: cancellationReason,
+        refundAmount,
+        cancellationFee,
+        refundPercentage,
+        order,
+      });
+      io.emit('order:status_changed', {
+        orderId: orderIdKey,
+        status: 'Cancelled',
+        order,
+      });
+    }
+
+    return res.json({
+      success: true,
+      message: `Order successfully cancelled. Refund of ₹${refundAmount} (${refundPercentage}%) processed.`,
+      order,
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+}
+
+// ----------------------------------------------------
+// Multi-Vendor Review & Rating Engine
+// ----------------------------------------------------
+export async function submitOrderReview(req, res) {
+  try {
+    const { id } = req.params;
+    const { storeRating, storeTags = [], storeComment = '', riderRating, riderTip = 0 } = req.body;
+
+    if (!storeRating || Number(storeRating) < 1 || Number(storeRating) > 5) {
+      return res.status(400).json({ success: false, message: 'Please provide a valid store rating between 1 and 5 stars.' });
+    }
+
+    let order = null;
+    let mongoOrder = null;
+
+    if (isConnectedToMongo) {
+      try {
+        mongoOrder = await Order.findOne({
+          $or: [
+            { orderId: id },
+            { id: id },
+            { _id: id.match(/^[0-9a-fA-F]{24}$/) ? id : null },
+          ].filter(Boolean),
+        });
+        if (mongoOrder) order = mongoOrder;
+      } catch (err) {
+        console.warn('Mongo order lookup error in submitOrderReview:', err.message);
+      }
+    }
+
+    const memoryOrder = mockDb.orders.find((o) => o.id === id || o.orderId === id);
+    if (!order && memoryOrder) {
+      order = memoryOrder;
+    }
+
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found.' });
+    }
+
+    const currentStatus = (order.orderStatus || order.status || '').toUpperCase();
+    if (currentStatus !== 'DELIVERED') {
+      return res.status(400).json({ success: false, message: 'Reviews can only be submitted for delivered orders.' });
+    }
+
+    if (order.reviewSubmitted) {
+      return res.status(400).json({ success: false, message: 'You have already submitted a review for this order.' });
+    }
+
+    const reviewId = `rev-${Date.now()}`;
+    const targetOrderId = order.orderId || order.id || id;
+    const customerId = req.user?.id || req.user?._id || order.customerId || 'user-cust-1';
+    const customerName = req.user?.name || order.customerName || 'ManaMart Customer';
+    const storeId = order.storeId || order.merchantId || 'm-1';
+    const storeName = order.storeName || order.merchantName || 'ManaMart Store';
+    const riderId = order.assignedRiderId || order.riderId || 'r-1';
+    const riderName = order.assignedRiderName || order.riderName || 'Delivery Partner';
+
+    const numStoreRating = Number(storeRating);
+    const numRiderRating = riderRating ? Number(riderRating) : null;
+    const numRiderTip = Number(riderTip) || 0;
+
+    // Check if <= 2 stars (Low Rating Alert)
+    const isStoreLow = numStoreRating <= 2;
+    const isRiderLow = numRiderRating !== null && numRiderRating <= 2;
+    let autoDisputeCreated = false;
+    let disputeId = null;
+
+    if (isStoreLow || isRiderLow) {
+      autoDisputeCreated = true;
+      disputeId = `DISP-${Date.now().toString().slice(-6)}`;
+      const targetType = isStoreLow ? 'store' : 'rider';
+      const targetEntityId = isStoreLow ? storeId : riderId;
+      const targetEntityName = isStoreLow ? storeName : riderName;
+      const minStars = isRiderLow && (!isStoreLow || numRiderRating < numStoreRating) ? numRiderRating : numStoreRating;
+
+      const disputeRecord = {
+        id: disputeId.toLowerCase(),
+        reportId: disputeId,
+        reporterId: customerId,
+        reporterName: customerName,
+        reporterRole: 'customer',
+        targetType,
+        targetId: targetEntityId,
+        targetName: targetEntityName,
+        reason: `Low Rating Alert (${minStars} Stars) - Customer Dissatisfaction`,
+        details: `Order #${targetOrderId}: "${storeComment || 'Low rating given by customer'}" [Tags: ${storeTags.join(', ') || 'None'}]`,
+        status: 'pending',
+        priority: 'high',
+        createdAt: new Date().toISOString(),
+      };
+
+      if (!mockDb.reports) mockDb.reports = [];
+      mockDb.reports.unshift(disputeRecord);
+
+      if (isConnectedToMongo) {
+        try {
+          await Report.create(disputeRecord);
+        } catch (repErr) {
+          console.warn('Mongo report create warning:', repErr.message);
+        }
+      }
+
+      const io = req.app.get('io');
+      if (io) {
+        io.emit('report:new', disputeRecord);
+      }
+    }
+
+    const reviewPayload = {
+      id: reviewId,
+      reviewId,
+      orderId: targetOrderId,
+      customerId,
+      customerName,
+      storeId,
+      storeName,
+      rating: numStoreRating,
+      storeRating: numStoreRating,
+      storeTags: Array.isArray(storeTags) ? storeTags : [],
+      comment: storeComment,
+      storeComment,
+      riderId,
+      riderName,
+      riderRating: numRiderRating,
+      riderTip: numRiderTip,
+      autoDisputeCreated,
+      disputeId,
+      createdAt: new Date().toISOString(),
+    };
+
+    // Save to memory store
+    if (!mockDb.reviews) mockDb.reviews = [];
+    mockDb.reviews.unshift(reviewPayload);
+
+    // Save to MongoDB
+    if (isConnectedToMongo) {
+      try {
+        await Review.create(reviewPayload);
+      } catch (revErr) {
+        console.warn('Mongo review create warning:', revErr.message);
+      }
+    }
+
+    // Mark order as reviewed
+    if (memoryOrder) {
+      memoryOrder.reviewSubmitted = true;
+      memoryOrder.review = reviewPayload;
+    }
+    if (isConnectedToMongo && mongoOrder) {
+      try {
+        mongoOrder.reviewSubmitted = true;
+        mongoOrder.review = reviewPayload;
+        await mongoOrder.save();
+      } catch (saveErr) {
+        console.warn('Mongo order review mark error:', saveErr.message);
+      }
+    }
+
+    // Recalculate Store aggregate rating
+    const storeReviews = mockDb.reviews.filter((r) => r.storeId === storeId && r.storeRating);
+    if (storeReviews.length > 0) {
+      const avgStoreRating = Number(
+        (storeReviews.reduce((sum, r) => sum + Number(r.storeRating), 0) / storeReviews.length).toFixed(1)
+      );
+      if (mockDb.merchants) {
+        const merch = mockDb.merchants.find((m) => m.id === storeId || m.storeId === storeId);
+        if (merch) {
+          merch.rating = avgStoreRating;
+          merch.reviewsCount = storeReviews.length;
+        }
+      }
+      if (mockDb.stores) {
+        const str = mockDb.stores.find((s) => s.id === storeId);
+        if (str) {
+          str.rating = avgStoreRating;
+          str.reviewsCount = storeReviews.length;
+        }
+      }
+    }
+
+    // Recalculate Rider aggregate rating
+    if (riderId && numRiderRating) {
+      const riderReviews = mockDb.reviews.filter((r) => r.riderId === riderId && r.riderRating);
+      if (riderReviews.length > 0) {
+        const avgRiderRating = Number(
+          (riderReviews.reduce((sum, r) => sum + Number(r.riderRating), 0) / riderReviews.length).toFixed(1)
+        );
+        if (mockDb.pendingRiders) {
+          const rRecord = mockDb.pendingRiders.find((r) => r.id === riderId || r.userId === riderId);
+          if (rRecord) {
+            rRecord.rating = avgRiderRating;
+            rRecord.tripsCount = (rRecord.tripsCount || 0) + 1;
+          }
+        }
+      }
+    }
+
+    // Emit review event
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('review:created', reviewPayload);
+    }
+
+    return res.status(201).json({
+      success: true,
+      message: 'Thank you! Your review has been submitted successfully.',
+      review: reviewPayload,
+      autoDisputeCreated,
+      disputeId,
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+}
+
+export async function getOrderReview(req, res) {
+  try {
+    const { id } = req.params;
+
+    let review = null;
+    if (isConnectedToMongo) {
+      try {
+        review = await Review.findOne({ orderId: id });
+      } catch (err) {
+        console.warn('Mongo getOrderReview error:', err.message);
+      }
+    }
+
+    if (!review && mockDb.reviews) {
+      review = mockDb.reviews.find((r) => r.orderId === id || r.id === id);
+    }
+
+    return res.json({
+      success: true,
+      review: review || null,
     });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });

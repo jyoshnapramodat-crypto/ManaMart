@@ -4,6 +4,9 @@ import {
   getMyOrders,
   getOrderById,
   updateOrderStatus,
+  cancelOrder,
+  submitOrderReview,
+  getOrderReview,
   createParcelOrder,
   bookReservation,
   bookService,
@@ -19,6 +22,9 @@ router.post('/create', createOrder);
 router.get('/my-orders', getMyOrders);
 router.get('/:id', getOrderById);
 router.put('/:id/status', updateOrderStatus);
+router.post('/:id/cancel', cancelOrder);
+router.post('/:id/review', submitOrderReview);
+router.get('/:id/review', getOrderReview);
 router.post('/:id/verify-delivery', verifyDeliveryOtp);
 
 // Parcel delivery & reservations
