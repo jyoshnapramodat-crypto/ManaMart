@@ -15,6 +15,9 @@ import {
   X,
   Phone,
   Radio,
+  Battery,
+  Wallet,
+  MapPin,
 } from 'lucide-react';
 
 export default function RiderPortalLayout({ children }) {
@@ -25,8 +28,20 @@ export default function RiderPortalLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
   const [activeTrip, setActiveTrip] = useState(null);
+  const [cashInHand, setCashInHand] = useState(850);
+  const [batteryLevel, setBatteryLevel] = useState(94);
 
   useEffect(() => {
+    // Read device battery if available in browser
+    if (typeof navigator !== 'undefined' && 'getBattery' in navigator) {
+      navigator.getBattery().then((battery) => {
+        setBatteryLevel(Math.round(battery.level * 100));
+        battery.addEventListener('levelchange', () => {
+          setBatteryLevel(Math.round(battery.level * 100));
+        });
+      }).catch(() => {});
+    }
+
     async function loadRiderInfo() {
       try {
         const res = await api.get('/riders/profile');
@@ -34,6 +49,9 @@ export default function RiderPortalLayout({ children }) {
           setIsOnline(Boolean(res.data.rider?.isOnline));
           if (res.data.activeOrder) {
             setActiveTrip(res.data.activeOrder);
+          }
+          if (res.data.cashInHand !== undefined) {
+            setCashInHand(res.data.cashInHand);
           }
         }
       } catch (err) {
@@ -116,6 +134,30 @@ export default function RiderPortalLayout({ children }) {
           <span>{isOnline ? 'Online' : 'Go Offline'}</span>
         </button>
       </header>
+
+      {/* Rider Telemetry & Quick-Access Cash-in-Hand Ledger Sub-Bar */}
+      <div className="bg-[#033B2D] text-white px-3 sm:px-4 py-1.5 flex items-center justify-between text-[11px] border-b border-emerald-900/60 font-medium">
+        <div className="flex items-center space-x-3">
+          <span className="flex items-center space-x-1 text-emerald-300 font-bold">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span>GPS Active</span>
+          </span>
+          <span className="text-emerald-700">|</span>
+          <span className="flex items-center space-x-1 text-slate-300">
+            <Battery className="w-3.5 h-3.5 text-emerald-400" />
+            <span>{batteryLevel}% Battery</span>
+          </span>
+        </div>
+
+        <NavLink
+          to="/rider/earnings"
+          className="flex items-center space-x-1 px-2.5 py-0.5 rounded-full bg-emerald-900/80 hover:bg-[#FF6B00] text-emerald-200 hover:text-white transition-all text-[10px] font-black uppercase tracking-wider"
+          title="Quick-access Cash-in-Hand ledger"
+        >
+          <Wallet className="w-3 h-3 text-[#FF6B00]" />
+          <span>COD Cash: ₹{cashInHand}</span>
+        </NavLink>
+      </div>
 
       {/* Sidebar Navigation */}
       <aside

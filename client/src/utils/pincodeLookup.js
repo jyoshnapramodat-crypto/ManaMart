@@ -164,3 +164,4 @@ export async function identifyPlaceByPincode(pincode) {
 }
 
 export default identifyPlaceByPincode;
+

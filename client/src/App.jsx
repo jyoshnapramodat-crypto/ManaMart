@@ -60,10 +60,6 @@ import AdminDisputesView from './pages/admin/AdminDisputesView';
 import AdminTeamView from './pages/admin/AdminTeamView';
 import AdminAcceptInviteView from './pages/admin/AdminAcceptInviteView';
 
-// Development Utilities (Conditionally rendered in development mode only)
-import QuickRoleSwitcher from './components/QuickRoleSwitcher';
-import DevMailboxDrawer from './components/DevMailboxDrawer';
-
 function AppLayout() {
   const location = useLocation();
   const path = location.pathname;
@@ -157,11 +153,13 @@ function AppLayout() {
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
           {/* Dedicated Merchant Registration & Status */}
+          <Route path="/merchant/onboard" element={<MerchantOnboardingPage />} />
           <Route path="/merchant/register" element={<MerchantOnboardingPage />} />
           <Route path="/merchant/apply" element={<MerchantOnboardingPage />} />
           <Route path="/merchant/status" element={<MerchantStatusPage />} />
 
           {/* Dedicated Rider Registration & Status */}
+          <Route path="/rider/onboard" element={<RiderOnboardingPage />} />
           <Route path="/rider/register" element={<RiderOnboardingPage />} />
           <Route path="/rider/apply" element={<RiderOnboardingPage />} />
           <Route path="/rider/status" element={<RiderStatusPage />} />
@@ -315,14 +313,6 @@ function AppLayout() {
           <CartDrawer />
           <LocationModal />
           {!isLanding && <BottomNav />}
-        </>
-      )}
-
-      {/* Development Utilities: Rendered strictly when NODE_ENV === 'development' */}
-      {Boolean(import.meta.env.DEV) && (
-        <>
-          <QuickRoleSwitcher />
-          <DevMailboxDrawer />
         </>
       )}
     </div>
