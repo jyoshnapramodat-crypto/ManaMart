@@ -444,12 +444,12 @@ export default function LoginPage() {
                 <Link
                   to={
                     selectedRole === 'merchant'
-                      ? '/merchant/register'
+                      ? '/register?role=merchant'
                       : selectedRole === 'rider'
-                      ? '/rider/register'
-                      : '/register'
+                      ? '/register?role=rider'
+                      : '/register?role=customer'
                   }
-                  className="flex items-center space-x-1.5 text-xs sm:text-sm font-bold text-slate-500 hover:text-slate-800 transition-colors pb-3"
+                  className="flex items-center space-x-1.5 text-xs sm:text-sm font-bold text-slate-500 hover:text-slate-800 transition-colors pb-3 cursor-pointer"
                 >
                   <User className="w-4 h-4" />
                   <span>+ Create Account</span>
