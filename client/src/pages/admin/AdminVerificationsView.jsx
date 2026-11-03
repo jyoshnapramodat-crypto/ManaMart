@@ -441,56 +441,135 @@ export default function AdminVerificationsView() {
                 </button>
               </div>
 
-              {/* Inspection Viewport with Zoom & Rotation */}
-              <div className="flex-1 bg-slate-950/90 overflow-auto p-6 flex items-center justify-center relative min-h-[360px]">
-                {/* Visual Stamp Overlay if approved or rejected */}
-                {successStamp && (
-                  <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
-                    <div
-                      className={`px-8 py-3 rounded-2xl border-4 font-black text-2xl tracking-widest uppercase transform -rotate-12 shadow-2xl animate-bounce ${
-                        successStamp === 'APPROVED'
-                          ? 'border-emerald-500 bg-emerald-950/80 text-emerald-400'
-                          : 'border-red-500 bg-red-950/80 text-red-400'
-                      }`}
-                    >
-                      STAMP: {successStamp}
+              {/* Split Pane Body: Document Viewport on Left, Verification Checklist & Actions on Right */}
+              <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 overflow-hidden min-h-[420px]">
+                {/* Left Pane: Inspection Viewport with Zoom & Rotation (7 cols) */}
+                <div className="lg:col-span-7 bg-slate-950/90 overflow-auto p-6 flex items-center justify-center relative min-h-[320px]">
+                  {/* Visual Stamp Overlay if approved or rejected */}
+                  {successStamp && (
+                    <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
+                      <div
+                        className={`px-8 py-3 rounded-2xl border-4 font-black text-2xl tracking-widest uppercase transform -rotate-12 shadow-2xl animate-bounce ${
+                          successStamp === 'APPROVED'
+                            ? 'border-emerald-500 bg-emerald-950/80 text-emerald-400'
+                            : 'border-red-500 bg-red-950/80 text-red-400'
+                        }`}
+                      >
+                        STAMP: {successStamp}
+                      </div>
+                    </div>
+                  )}
+
+                  <div
+                    className="transition-transform duration-150 ease-out origin-center"
+                    style={{
+                      transform: `scale(${zoomLevel}) rotate(${rotation}deg)`,
+                    }}
+                  >
+                    {inspectDoc.doc?.fileUrl?.endsWith('.pdf') ? (
+                      <div className="bg-white p-8 rounded-2xl shadow-xl text-center space-y-3 max-w-sm">
+                        <FileText className="w-12 h-12 text-purple-600 mx-auto" />
+                        <p className="font-bold text-sm text-slate-800">PDF Document Attached</p>
+                        <a
+                          href={inspectDoc.doc.fileUrl.startsWith('http') ? inspectDoc.doc.fileUrl : `${api.defaults.baseURL || ''}${inspectDoc.doc.fileUrl}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1.5 px-4 py-2 bg-purple-700 text-white rounded-xl text-xs font-bold"
+                        >
+                          <span>Open PDF in Secure Tab</span>
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </a>
+                      </div>
+                    ) : (
+                      <img
+                        src={
+                          inspectDoc.doc?.fileUrl
+                            ? inspectDoc.doc.fileUrl.startsWith('http')
+                              ? inspectDoc.doc.fileUrl
+                              : `${api.defaults.baseURL || ''}${inspectDoc.doc.fileUrl}`
+                            : '/logo.png'
+                        }
+                        alt="Compliance document preview"
+                        className="max-h-[460px] max-w-full rounded-xl object-contain shadow-2xl border border-slate-700 bg-white"
+                      />
+                    )}
+                  </div>
+                </div>
+
+                {/* Right Pane: Applicant Info, Verification Checklist & Stamps (5 cols) */}
+                <div className="lg:col-span-5 bg-white p-5 flex flex-col justify-between overflow-y-auto border-t lg:border-t-0 lg:border-l border-slate-200 space-y-4">
+                  <div className="space-y-4">
+                    <div>
+                      <span className="text-[10px] font-black uppercase tracking-wider text-purple-700 bg-purple-50 px-2 py-0.5 rounded-full border border-purple-200">
+                        {inspectDoc.entityType.toUpperCase()} APPLICANT DETAILS
+                      </span>
+                      <h4 className="font-black text-base text-slate-900 mt-1">
+                        {inspectDoc.entity?.businessName || inspectDoc.entity?.name}
+                      </h4>
+                      <p className="text-xs text-slate-500">
+                        Phone: <strong className="text-slate-700">{inspectDoc.entity?.phone || '+91 98480-12345'}</strong> • {inspectDoc.entity?.storeAddress || inspectDoc.entity?.vehicleType || 'Local Partner'}
+                      </p>
+                    </div>
+
+                    {/* Document Meta Info */}
+                    <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 text-xs space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-slate-500 font-semibold">Document Type:</span>
+                        <span className="font-black text-slate-800">{inspectDoc.doc?.docType || 'Government ID / Cert'}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-500 font-semibold">Registration #:</span>
+                        <span className="font-mono font-bold text-purple-700">
+                          {inspectDoc.entity?.fssaiNumber || inspectDoc.entity?.drivingLicense || inspectDoc.entity?.panNumber || '22019003001842'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-500 font-semibold">Verification Node:</span>
+                        <span className="font-bold text-emerald-800">Govt Public Portal Sync</span>
+                      </div>
+                    </div>
+
+                    {/* Audit Checklist */}
+                    <div className="space-y-2">
+                      <span className="text-xs font-black text-slate-700 block">Compliance Audit Checklist:</span>
+                      <div className="space-y-1.5 text-xs text-slate-600">
+                        <div className="flex items-center space-x-2">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                          <span>Official seal and government watermark clearly visible</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                          <span>Name and registered entity match bank account details</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                          <span>License expiration date verified valid through 2026</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                )}
 
-                <div
-                  className="transition-transform duration-150 ease-out origin-center"
-                  style={{
-                    transform: `scale(${zoomLevel}) rotate(${rotation}deg)`,
-                  }}
-                >
-                  {inspectDoc.doc?.fileUrl?.endsWith('.pdf') ? (
-                    <div className="bg-white p-8 rounded-2xl shadow-xl text-center space-y-3 max-w-sm">
-                      <FileText className="w-12 h-12 text-purple-600 mx-auto" />
-                      <p className="font-bold text-sm text-slate-800">PDF Document Attached</p>
-                      <a
-                        href={inspectDoc.doc.fileUrl.startsWith('http') ? inspectDoc.doc.fileUrl : `${api.defaults.baseURL || ''}${inspectDoc.doc.fileUrl}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-purple-700 text-white rounded-xl text-xs font-bold"
-                      >
-                        <span>Open PDF in Secure Tab</span>
-                        <ExternalLink className="w-3.5 h-3.5" />
-                      </a>
-                    </div>
-                  ) : (
-                    <img
-                      src={
-                        inspectDoc.doc?.fileUrl
-                          ? inspectDoc.doc.fileUrl.startsWith('http')
-                            ? inspectDoc.doc.fileUrl
-                            : `${api.defaults.baseURL || ''}${inspectDoc.doc.fileUrl}`
-                          : '/logo.png'
-                      }
-                      alt="Compliance document preview"
-                      className="max-h-[500px] max-w-full rounded-xl object-contain shadow-2xl border border-slate-700 bg-white"
-                    />
-                  )}
+                  {/* Right Pane Action Stamps */}
+                  <div className="pt-3 border-t border-slate-100 space-y-2">
+                    <button
+                      type="button"
+                      onClick={handleStampApprove}
+                      disabled={actionInProgress}
+                      className="w-full py-3 rounded-2xl bg-[#064E3B] hover:bg-[#033B2D] text-white text-xs font-black shadow-md flex items-center justify-center space-x-2 cursor-pointer transition-all active:scale-98 disabled:opacity-50"
+                    >
+                      <CheckCircle2 className="w-4 h-4 text-emerald-300" />
+                      <span>Approve & Grant Marketplace Access</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setShowRejectPrompt(true)}
+                      disabled={actionInProgress}
+                      className="w-full py-2.5 rounded-2xl border border-red-200 text-red-700 hover:bg-red-50 text-xs font-bold transition-all cursor-pointer"
+                    >
+                      Reject with Reason
+                    </button>
+                  </div>
                 </div>
               </div>
 

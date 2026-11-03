@@ -15,6 +15,7 @@ export default function MerchantOrdersView() {
   const [orders, setOrders] = useState([]);
   const [filter, setFilter] = useState('all');
   const [loading, setLoading] = useState(true);
+  const [selectedOrderId, setSelectedOrderId] = useState(null);
 
   // Cancellation Modal State
   const [cancelModalOrder, setCancelModalOrder] = useState(null);
@@ -30,7 +31,11 @@ export default function MerchantOrdersView() {
     try {
       const res = await api.get('/merchants/orders');
       if (res.data?.success) {
-        setOrders(res.data.orders || []);
+        const orderList = res.data.orders || [];
+        setOrders(orderList);
+        if (orderList.length > 0 && !selectedOrderId) {
+          setSelectedOrderId(orderList[0].id);
+        }
       }
     } catch (err) {
       console.error('Error fetching orders:', err);
@@ -120,99 +125,221 @@ export default function MerchantOrdersView() {
             No orders match the selected filter.
           </div>
         ) : (
-          <div className="space-y-3.5">
-            {filteredOrders.map((order) => (
-              <div
-                key={order.id}
-                className="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-xs space-y-3.5"
-              >
-                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                  <div>
-                    <span className="font-extrabold text-sm text-slate-900">Order #{order.id}</span>
-                    <p className="text-[11px] text-slate-400">
-                      Received at {new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • {new Date(order.createdAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <span className="font-black text-base text-slate-900">₹{order.totalAmount}</span>
-                    <p className="text-[10px] text-slate-500 uppercase">{order.paymentMethod || 'COD'}</p>
-                  </div>
-                </div>
-
-                {/* Items */}
-                <div className="text-xs space-y-1.5 text-slate-700 bg-slate-50/70 p-3 rounded-2xl">
-                  {order.items?.map((item, idx) => (
-                    <div key={idx} className="flex justify-between font-medium">
-                      <span>{item.quantity}x {item.name}</span>
-                      <span className="font-mono text-slate-900 font-bold">₹{item.price * item.quantity}</span>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Status & Action */}
-                <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
-                  <span className={`px-2.5 py-1 rounded-full font-bold uppercase tracking-wider text-[10px] ${
-                    order.orderStatus?.toLowerCase() === 'delivered' ? 'bg-emerald-100 text-emerald-800' :
-                    ['new', 'received', 'pending'].includes(order.orderStatus?.toLowerCase()) ? 'bg-amber-100 text-amber-800' :
-                    order.orderStatus?.toLowerCase() === 'preparing' ? 'bg-orange-100 text-orange-800' :
-                    order.orderStatus?.toLowerCase() === 'ready_for_pickup' ? 'bg-blue-100 text-blue-800' :
-                    order.orderStatus?.toLowerCase() === 'handed_over' ? 'bg-purple-100 text-purple-800' :
-                    'bg-slate-100 text-slate-800'
-                  }`}>
-                    Status: {order.orderStatus?.replace('_', ' ')}
-                  </span>
-
-                  <div className="flex items-center gap-2">
-                    {['new', 'received', 'pending'].includes(order.orderStatus?.toLowerCase()) && (
-                      <button
-                        onClick={() => handleUpdateStatus(order.id, 'PREPARING')}
-                        className="px-3.5 py-1.5 bg-[#064E3B] hover:bg-[#033B2D] text-white rounded-xl font-bold cursor-pointer flex items-center gap-1 shadow-xs"
-                      >
-                        <ChefHat className="w-3.5 h-3.5" />
-                        <span>Accept & Cook</span>
-                      </button>
-                    )}
-                    {order.orderStatus?.toUpperCase() === 'PREPARING' && (
-                      <button
-                        onClick={() => handleUpdateStatus(order.id, 'READY_FOR_PICKUP')}
-                        className="px-3.5 py-1.5 bg-[#FF6B00] hover:bg-[#e05e00] text-white rounded-xl font-bold cursor-pointer flex items-center gap-1 shadow-xs"
-                      >
-                        <Truck className="w-3.5 h-3.5" />
-                        <span>Mark Ready for Pickup</span>
-                      </button>
-                    )}
-                    {order.orderStatus?.toUpperCase() === 'READY_FOR_PICKUP' && (
-                      <button
-                        onClick={() => handleUpdateStatus(order.id, 'HANDED_OVER')}
-                        className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold cursor-pointer flex items-center gap-1 shadow-xs"
-                      >
-                        <Truck className="w-3.5 h-3.5" />
-                        <span>Hand Over to Courier</span>
-                      </button>
-                    )}
-                    {order.orderStatus?.toUpperCase() === 'HANDED_OVER' && (
-                      <span className="text-purple-700 font-bold text-xs bg-purple-50 px-2.5 py-1 rounded-xl">
-                        In Transit • Awaiting Courier OTP Hand-off
-                      </span>
-                    )}
-
-                    {!['delivered', 'cancelled', 'handed_over'].includes(order.orderStatus?.toLowerCase()) && (
-                      <button
-                        onClick={() => {
-                          setMerchantReason('Out of stock');
-                          setCancelModalOrder(order);
-                        }}
-                        className="px-2.5 py-1.5 text-red-600 hover:bg-red-50 rounded-xl font-bold text-xs cursor-pointer border border-red-200 transition-colors flex items-center gap-1"
-                        title="Cancel Order"
-                      >
-                        <XCircle className="w-3.5 h-3.5" />
-                        <span>Cancel</span>
-                      </button>
-                    )}
-                  </div>
-                </div>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            {/* Left Column: Order List / KOT Tickets */}
+            <div className="lg:col-span-5 space-y-3.5">
+              <div className="flex items-center justify-between text-xs font-bold text-slate-500 px-1">
+                <span>Active Tickets ({filteredOrders.length})</span>
+                <span className="hidden lg:inline text-emerald-800">Select to inspect details</span>
               </div>
-            ))}
+              {filteredOrders.map((order) => {
+                const isSelected = selectedOrderId === order.id;
+                return (
+                  <div
+                    key={order.id}
+                    onClick={() => setSelectedOrderId(order.id)}
+                    className={`bg-white rounded-3xl p-5 border transition-all cursor-pointer shadow-xs space-y-3 ${
+                      isSelected
+                        ? 'border-[#064E3B] ring-2 ring-emerald-500/20 shadow-md'
+                        : 'border-slate-200/80 hover:border-slate-300'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+                      <div>
+                        <span className="font-extrabold text-sm text-slate-900">Order #{order.id}</span>
+                        <p className="text-[11px] text-slate-400">
+                          {new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <span className="font-black text-sm text-slate-900">₹{order.totalAmount}</span>
+                        <p className="text-[10px] text-slate-500 uppercase">{order.paymentMethod || 'COD'}</p>
+                      </div>
+                    </div>
+
+                    {/* Summary snippet */}
+                    <div className="text-xs text-slate-600">
+                      <span className="font-semibold">{order.items?.length || 1} items: </span>
+                      <span className="text-slate-500">
+                        {order.items?.map((it) => `${it.quantity}x ${it.name}`).join(', ')}
+                      </span>
+                    </div>
+
+                    {/* Status & Quick Mobile Buttons */}
+                    <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+                      <span className={`px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider text-[10px] ${
+                        order.orderStatus?.toLowerCase() === 'delivered' ? 'bg-emerald-100 text-emerald-800' :
+                        ['new', 'received', 'pending'].includes(order.orderStatus?.toLowerCase()) ? 'bg-amber-100 text-amber-800' :
+                        order.orderStatus?.toLowerCase() === 'preparing' ? 'bg-orange-100 text-orange-800' :
+                        order.orderStatus?.toLowerCase() === 'ready_for_pickup' ? 'bg-blue-100 text-blue-800' :
+                        order.orderStatus?.toLowerCase() === 'handed_over' ? 'bg-purple-100 text-purple-800' :
+                        'bg-slate-100 text-slate-800'
+                      }`}>
+                        {order.orderStatus?.replace('_', ' ')}
+                      </span>
+
+                      {/* Quick action buttons on mobile */}
+                      <div className="flex lg:hidden items-center gap-1.5">
+                        {['new', 'received', 'pending'].includes(order.orderStatus?.toLowerCase()) && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleUpdateStatus(order.id, 'PREPARING');
+                            }}
+                            className="px-2.5 py-1 bg-[#064E3B] text-white rounded-lg font-bold text-[11px]"
+                          >
+                            Accept
+                          </button>
+                        )}
+                        {order.orderStatus?.toUpperCase() === 'PREPARING' && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleUpdateStatus(order.id, 'READY_FOR_PICKUP');
+                            }}
+                            className="px-2.5 py-1 bg-[#FF6B00] text-white rounded-lg font-bold text-[11px]"
+                          >
+                            Ready
+                          </button>
+                        )}
+                        {order.orderStatus?.toUpperCase() === 'READY_FOR_PICKUP' && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleUpdateStatus(order.id, 'HANDED_OVER');
+                            }}
+                            className="px-2.5 py-1 bg-blue-600 text-white rounded-lg font-bold text-[11px]"
+                          >
+                            Dispatch
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Right Column: Active Order Breakdown on Desktop (7 cols on lg) */}
+            <div className="hidden lg:block lg:col-span-7 bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm sticky top-20 space-y-5">
+              {(() => {
+                const active = filteredOrders.find((o) => o.id === selectedOrderId) || filteredOrders[0];
+                if (!active) {
+                  return (
+                    <div className="py-12 text-center text-slate-400 text-xs">
+                      Select an order from the left to view detailed kitchen ticket.
+                    </div>
+                  );
+                }
+
+                return (
+                  <>
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+                      <div>
+                        <div className="flex items-center space-x-2">
+                          <span className="font-black text-lg text-slate-900">Order #{active.id}</span>
+                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-emerald-100 text-emerald-800">
+                            {active.orderStatus?.replace('_', ' ')}
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-400 mt-0.5">
+                          Placed at {new Date(active.createdAt).toLocaleTimeString()} • Customer: <strong className="text-slate-700">{active.customerName || 'Local Resident'}</strong>
+                        </p>
+                      </div>
+
+                      <div className="text-right">
+                        <span className="font-black text-xl text-slate-900">₹{active.totalAmount}</span>
+                        <p className="text-xs text-slate-500 font-bold uppercase">{active.paymentMethod || 'COD'}</p>
+                      </div>
+                    </div>
+
+                    {/* Detailed Items Table */}
+                    <div className="space-y-2">
+                      <span className="text-xs font-black uppercase tracking-wider text-slate-500">
+                        Kitchen Recipe / Items List
+                      </span>
+                      <div className="rounded-2xl border border-slate-100 divide-y divide-slate-100 bg-slate-50/50 overflow-hidden text-xs">
+                        {active.items?.map((item, idx) => (
+                          <div key={idx} className="p-3 flex justify-between items-center">
+                            <div>
+                              <span className="font-extrabold text-slate-900">{item.quantity}x {item.name}</span>
+                              {item.notes && <p className="text-[11px] text-amber-700 mt-0.5 font-medium">Note: {item.notes}</p>}
+                            </div>
+                            <span className="font-mono font-bold text-slate-800">₹{item.price * item.quantity}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Customer Drop Address */}
+                    <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 text-xs space-y-1">
+                      <span className="font-extrabold text-slate-700 block">Delivery Destination</span>
+                      <p className="text-slate-600">
+                        {active.deliveryAddress?.street || 'Local Neighborhood Street'}, {active.deliveryAddress?.locality || 'Narakoduru'}
+                      </p>
+                    </div>
+
+                    {/* Desktop Kitchen Actions */}
+                    <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        {['new', 'received', 'pending'].includes(active.orderStatus?.toLowerCase()) && (
+                          <button
+                            type="button"
+                            onClick={() => handleUpdateStatus(active.id, 'PREPARING')}
+                            className="px-4 py-2.5 bg-[#064E3B] hover:bg-[#033B2D] text-white rounded-xl font-black text-xs cursor-pointer flex items-center gap-1.5 shadow-xs"
+                          >
+                            <ChefHat className="w-4 h-4" />
+                            <span>Accept & Cook</span>
+                          </button>
+                        )}
+                        {active.orderStatus?.toUpperCase() === 'PREPARING' && (
+                          <button
+                            type="button"
+                            onClick={() => handleUpdateStatus(active.id, 'READY_FOR_PICKUP')}
+                            className="px-4 py-2.5 bg-[#FF6B00] hover:bg-[#e05e00] text-white rounded-xl font-black text-xs cursor-pointer flex items-center gap-1.5 shadow-xs"
+                          >
+                            <Truck className="w-4 h-4" />
+                            <span>Mark Ready for Pickup</span>
+                          </button>
+                        )}
+                        {active.orderStatus?.toUpperCase() === 'READY_FOR_PICKUP' && (
+                          <button
+                            type="button"
+                            onClick={() => handleUpdateStatus(active.id, 'HANDED_OVER')}
+                            className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-black text-xs cursor-pointer flex items-center gap-1.5 shadow-xs"
+                          >
+                            <Truck className="w-4 h-4" />
+                            <span>Hand Over to Courier</span>
+                          </button>
+                        )}
+                        {active.orderStatus?.toUpperCase() === 'HANDED_OVER' && (
+                          <span className="text-purple-700 font-bold text-xs bg-purple-50 px-3 py-1.5 rounded-xl border border-purple-100">
+                            In Transit • Awaiting Courier OTP Hand-off
+                          </span>
+                        )}
+                      </div>
+
+                      {!['delivered', 'cancelled', 'handed_over'].includes(active.orderStatus?.toLowerCase()) && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setMerchantReason('Out of stock');
+                            setCancelModalOrder(active);
+                          }}
+                          className="px-3 py-2 text-red-600 hover:bg-red-50 rounded-xl font-bold text-xs cursor-pointer border border-red-200 transition-colors flex items-center gap-1"
+                        >
+                          <XCircle className="w-4 h-4" />
+                          <span>Cancel Order</span>
+                        </button>
+                      )}
+                    </div>
+                  </>
+                );
+              })()}
+            </div>
           </div>
         )}
 

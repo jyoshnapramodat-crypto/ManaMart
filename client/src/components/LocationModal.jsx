@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useLocation } from '../context/LocationContext';
+import { identifyPlaceByPincode } from '../utils/pincodeLookup';
 import {
   MapPin,
   Navigation,
@@ -58,9 +59,20 @@ export default function LocationModal() {
   if (!isModalOpen) return null;
 
   // Handle Autocomplete Search
-  const handleSearchSubmit = (e) => {
+  const handleSearchSubmit = async (e) => {
     e.preventDefault();
     if (!searchQuery.trim()) return;
+
+    // Check if query is or contains a 6-digit pincode
+    const cleanPin = searchQuery.trim().replace(/\D/g, '');
+    if (cleanPin.length === 6) {
+      const pinResult = await identifyPlaceByPincode(cleanPin);
+      if (pinResult && pinResult.found) {
+        selectCityAndLocality(pinResult.city, pinResult.locality, { lat: 17.4480, lng: 78.3910 });
+        setIsModalOpen(false);
+        return;
+      }
+    }
 
     const check = checkServiceability(searchQuery);
     if (check.serviceable) {
@@ -69,6 +81,18 @@ export default function LocationModal() {
     } else {
       setUnserviceableQuery(searchQuery);
       setActiveTab('unserviceable');
+    }
+  };
+
+  const handleNewPincodeChange = async (val) => {
+    const clean = val.replace(/\D/g, '').slice(0, 6);
+    setNewPincode(clean);
+    if (clean.length === 6) {
+      const res = await identifyPlaceByPincode(clean);
+      if (res && res.found) {
+        setNewLocality(res.locality);
+        setNewCity(res.city);
+      }
     }
   };
 
@@ -508,10 +532,11 @@ export default function LocationModal() {
                   <input
                     type="text"
                     required
+                    maxLength={6}
                     value={newPincode}
-                    onChange={(e) => setNewPincode(e.target.value)}
+                    onChange={(e) => handleNewPincodeChange(e.target.value)}
                     placeholder="500081"
-                    className="w-full text-xs px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:border-orange-500"
+                    className="w-full text-xs px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:border-orange-500 font-mono font-bold"
                   />
                 </div>
                 <div>

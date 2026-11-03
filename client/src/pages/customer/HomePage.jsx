@@ -320,13 +320,13 @@ export default function HomePage() {
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[1, 2, 3, 4, 5, 6].map((n) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
               <div
                 key={n}
                 className="bg-surface-container-lowest rounded-xl p-3.5 border border-outline-variant/20 animate-pulse space-y-3"
               >
-                <div className="h-36 bg-surface-container rounded-lg"></div>
+                <div className="aspect-[4/3] bg-surface-container rounded-lg"></div>
                 <div className="h-4 bg-surface-container rounded w-3/4"></div>
                 <div className="h-3 bg-surface-container rounded w-1/2"></div>
               </div>
@@ -350,16 +350,16 @@ export default function HomePage() {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {filteredMerchants.map((merchant) => (
               <div
                 key={merchant.id}
                 onClick={() => navigate(`/store/${merchant.id}`)}
-                className="group bg-surface-container-lowest rounded-xl overflow-hidden border border-outline-variant/30 shadow-xs hover:shadow-md transition-all duration-200 cursor-pointer flex flex-col justify-between"
+                className="group bg-surface-container-lowest rounded-2xl overflow-hidden border border-outline-variant/30 shadow-xs hover:shadow-md transition-all duration-200 cursor-pointer flex flex-col justify-between"
               >
                 <div>
-                  {/* Banner Image */}
-                  <div className="relative h-40 overflow-hidden bg-surface-container">
+                  {/* Banner Image with responsive aspect ratio */}
+                  <div className="relative aspect-[4/3] sm:aspect-video overflow-hidden bg-surface-container">
                     <img
                       src={merchant.bannerImage}
                       alt={merchant.businessName}

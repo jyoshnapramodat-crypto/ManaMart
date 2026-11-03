@@ -77,34 +77,43 @@ export default function RiderPortalLayout({ children }) {
         />
       )}
 
-      {/* Mobile-First Header with Online/Offline Switch */}
-      <header className="sticky top-0 z-30 bg-[#064E3B] text-white px-4 py-3 flex items-center justify-between shadow-md">
-        <div className="flex items-center space-x-2.5">
+      {/* Mobile-First Header with Rider Avatar, Name, and Prominent Online/Offline Switch */}
+      <header className="sticky top-0 z-30 bg-[#064E3B] text-white px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between shadow-md">
+        <div className="flex items-center space-x-2 sm:space-x-3">
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
             className="lg:hidden p-1.5 rounded-xl bg-emerald-900/60 text-white"
           >
             {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
+          
+          {/* Rider Avatar & Name */}
           <div className="flex items-center space-x-2">
-            <div className="w-7 h-7 rounded-lg bg-[#FF6B00] flex items-center justify-center text-white">
-              <Bike className="w-4 h-4" />
+            <div className="w-8 h-8 rounded-full bg-[#FF6B00] text-white flex items-center justify-center font-black text-xs shadow-xs">
+              {user?.name?.charAt(0)?.toUpperCase() || 'R'}
             </div>
-            <span className="font-black text-sm tracking-tight">Delivery Hero Console</span>
+            <div className="hidden xs:block sm:block">
+              <span className="font-black text-xs text-white block leading-tight truncate max-w-[110px] sm:max-w-[160px]">
+                {user?.name || 'Rider Hero'}
+              </span>
+              <span className="text-[9px] text-emerald-300 font-semibold uppercase tracking-wider block">
+                ManaMart Fleet
+              </span>
+            </div>
           </div>
         </div>
 
-        {/* Online/Offline Toggle */}
+        {/* Prominent Online/Offline Toggle */}
         <button
           onClick={handleToggleOnline}
-          className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-black transition-all cursor-pointer shadow-xs ${
+          className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-black transition-all cursor-pointer shadow-sm ${
             isOnline
-              ? 'bg-emerald-500 hover:bg-emerald-400 text-white animate-pulse'
+              ? 'bg-emerald-500 hover:bg-emerald-400 text-white shadow-emerald-500/20'
               : 'bg-red-500 hover:bg-red-400 text-white'
           }`}
         >
           {isOnline ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
-          <span>{isOnline ? 'DUTY ONLINE' : 'OFFLINE'}</span>
+          <span>{isOnline ? 'Online' : 'Go Offline'}</span>
         </button>
       </header>
 

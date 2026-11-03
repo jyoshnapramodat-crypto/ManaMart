@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Logo from '../../components/Logo';
+import { identifyPlaceByPincode } from '../../utils/pincodeLookup';
 import {
   User,
   Store,
@@ -58,11 +59,50 @@ export default function SignupPage() {
 
   // Dynamic Fields
   const [pincode, setPincode] = useState('500081');
-  const [locality, setLocality] = useState('Madhapur / Hitech City (Hyderabad)');
+  const [locality, setLocality] = useState('Madhapur / Hitech City');
+  const [identifiedPlace, setIdentifiedPlace] = useState({
+    locality: 'Madhapur / Hitech City',
+    city: 'Hyderabad',
+    district: 'Rangareddy',
+    state: 'Telangana',
+    placeName: 'Madhapur / Hitech City, Hyderabad',
+  });
+  const [isIdentifyingPin, setIsIdentifyingPin] = useState(false);
   const [storeName, setStoreName] = useState('');
   const [storeCategory, setStoreCategory] = useState('Kirana & Staples (General Store)');
   const [vehicleType, setVehicleType] = useState('Motorcycle / Scooter (Petrol)');
   const [licenseNumber, setLicenseNumber] = useState('');
+
+  // Handle Automatic Place Identification on Pincode Change
+  const handlePincodeChange = async (newPin) => {
+    const clean = newPin.replace(/\D/g, '').slice(0, 6);
+    setPincode(clean);
+
+    if (clean.length === 6) {
+      setIsIdentifyingPin(true);
+      const res = await identifyPlaceByPincode(clean);
+      setIsIdentifyingPin(false);
+      if (res && res.found) {
+        setIdentifiedPlace(res);
+        setLocality(res.locality);
+      }
+    } else {
+      setIdentifiedPlace(null);
+    }
+  };
+
+  const selectQuickPincode = async (quickPin, quickLocality) => {
+    setPincode(quickPin);
+    setIsIdentifyingPin(true);
+    const res = await identifyPlaceByPincode(quickPin);
+    setIsIdentifyingPin(false);
+    if (res && res.found) {
+      setIdentifiedPlace(res);
+      setLocality(res.locality || quickLocality);
+    } else {
+      setLocality(quickLocality);
+    }
+  };
 
   // Referral State
   const [showReferral, setShowReferral] = useState(false);
@@ -659,34 +699,88 @@ export default function SignupPage() {
 
                 {/* Customer Dynamic Fields */}
                 {role === 'customer' && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                        Delivery Pincode *
-                      </label>
-                      <input
-                        type="text"
-                        maxLength={6}
-                        value={pincode}
-                        onChange={(e) => setPincode(e.target.value)}
-                        className="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:border-[#064E3B] outline-none"
-                      />
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="block text-[11px] font-bold text-slate-700">
+                            Delivery Pincode *
+                          </label>
+                          {isIdentifyingPin && (
+                            <span className="text-[10px] text-[#064E3B] font-bold animate-pulse">
+                              Identifying place...
+                            </span>
+                          )}
+                        </div>
+                        <div className="relative">
+                          <input
+                            type="text"
+                            maxLength={6}
+                            value={pincode}
+                            onChange={(e) => handlePincodeChange(e.target.value)}
+                            placeholder="e.g. 500081"
+                            className="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs font-mono font-bold focus:border-[#064E3B] outline-none"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                          Auto-Identified Locality / Mandal *
+                        </label>
+                        <input
+                          type="text"
+                          value={locality}
+                          onChange={(e) => setLocality(e.target.value)}
+                          placeholder="Locality auto-filled from pincode"
+                          className="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:border-[#064E3B] outline-none"
+                        />
+                      </div>
                     </div>
-                    <div>
-                      <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                        Locality / Mandal *
-                      </label>
-                      <select
-                        value={locality}
-                        onChange={(e) => setLocality(e.target.value)}
-                        className="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:border-[#064E3B] outline-none cursor-pointer"
-                      >
-                        <option>Madhapur / Hitech City (Hyderabad)</option>
-                        <option>Kukatpally Housing Board</option>
-                        <option>Dilsukhnagar / Kothapet</option>
-                        <option>Banjara Hills, Rd 12</option>
-                        <option>Gachibowli Financial Dist</option>
-                      </select>
+
+                    {/* Automatic Place Identification Live Badge */}
+                    {identifiedPlace && (
+                      <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-900 flex items-center justify-between gap-2 animate-in fade-in">
+                        <div className="flex items-center gap-1.5 font-bold">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                          <span>
+                            Identified: {identifiedPlace.locality}, {identifiedPlace.city} ({identifiedPlace.state})
+                          </span>
+                        </div>
+                        <span className="text-[10px] uppercase font-bold tracking-wider text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-md">
+                          Verified Postal Zone
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Quick Pincode Pills for Instant 1-Click Identification */}
+                    <div className="space-y-1">
+                      <span className="text-[10px] text-slate-500 font-bold block">
+                        Quick neighborhood pincodes (Click to auto-identify):
+                      </span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {[
+                          { pin: '500081', name: 'Madhapur' },
+                          { pin: '500032', name: 'Gachibowli' },
+                          { pin: '500072', name: 'KPHB' },
+                          { pin: '500034', name: 'Banjara Hills' },
+                          { pin: '500060', name: 'Dilsukhnagar' },
+                          { pin: '522212', name: 'Narakoduru' },
+                        ].map((item) => (
+                          <button
+                            key={item.pin}
+                            type="button"
+                            onClick={() => selectQuickPincode(item.pin, item.name)}
+                            className={`text-[11px] px-2.5 py-1 rounded-lg font-semibold border transition-all cursor-pointer ${
+                              pincode === item.pin
+                                ? 'bg-[#064E3B] text-white border-[#064E3B]'
+                                : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300'
+                            }`}
+                          >
+                            {item.name} ({item.pin})
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 )}

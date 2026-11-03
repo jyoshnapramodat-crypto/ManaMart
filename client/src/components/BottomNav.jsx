@@ -6,8 +6,9 @@ import { useCart } from '../context/CartContext';
 import {
   Home,
   Search,
-  Sparkles,
+  UtensilsCrossed,
   ShoppingBag,
+  ShoppingCart,
   User,
   Store,
   Bike,
@@ -17,7 +18,7 @@ import {
 export default function BottomNav() {
   const { t } = useTranslation();
   const { role, isLoggedIn } = useAuth();
-  const { totalItemCount } = useCart();
+  const { totalItemCount, setIsCartOpen } = useCart();
 
   // If role is Merchant, show merchant bottom tabs
   if (role === 'merchant') {
@@ -28,7 +29,7 @@ export default function BottomNav() {
             to="/merchant"
             className={({ isActive }) =>
               `flex flex-col items-center py-1.5 px-3 rounded-2xl transition-all ${
-                isActive ? 'text-orange-600 font-bold' : 'text-slate-500 hover:text-slate-900 font-medium'
+                isActive ? 'text-[#FF6B00] font-bold' : 'text-slate-500 hover:text-slate-900 font-medium'
               }`
             }
           >
@@ -37,18 +38,18 @@ export default function BottomNav() {
           </NavLink>
 
           <NavLink
-            to="/merchant#orders"
+            to="/merchant/orders"
             className="flex flex-col items-center py-1.5 px-3 rounded-2xl text-slate-500 hover:text-slate-900 font-medium"
           >
             <ShoppingBag className="w-5 h-5 mb-0.5" />
-            <span className="text-[10px]">Orders</span>
+            <span className="text-[10px]">KOT Orders</span>
           </NavLink>
 
           <NavLink
             to="/profile"
             className={({ isActive }) =>
               `flex flex-col items-center py-1.5 px-3 rounded-2xl transition-all ${
-                isActive ? 'text-orange-600 font-bold' : 'text-slate-500 hover:text-slate-900 font-medium'
+                isActive ? 'text-[#FF6B00] font-bold' : 'text-slate-500 hover:text-slate-900 font-medium'
               }`
             }
           >
@@ -66,22 +67,34 @@ export default function BottomNav() {
       <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/80 px-2 py-1 md:hidden shadow-lg">
         <div className="flex items-center justify-around max-w-md mx-auto">
           <NavLink
-            to="/rider"
+            to="/rider/dashboard"
             className={({ isActive }) =>
               `flex flex-col items-center py-1.5 px-3 rounded-2xl transition-all ${
-                isActive ? 'text-orange-600 font-bold' : 'text-slate-500 hover:text-slate-900 font-medium'
+                isActive ? 'text-[#FF6B00] font-bold' : 'text-slate-500 hover:text-slate-900 font-medium'
               }`
             }
           >
             <Bike className="w-5 h-5 mb-0.5" />
-            <span className="text-[10px]">Deliveries</span>
+            <span className="text-[10px]">Tasks</span>
+          </NavLink>
+
+          <NavLink
+            to="/rider/active-trip"
+            className={({ isActive }) =>
+              `flex flex-col items-center py-1.5 px-3 rounded-2xl transition-all ${
+                isActive ? 'text-[#FF6B00] font-bold' : 'text-slate-500 hover:text-slate-900 font-medium'
+              }`
+            }
+          >
+            <Bike className="w-5 h-5 mb-0.5" />
+            <span className="text-[10px]">Active Trip</span>
           </NavLink>
 
           <NavLink
             to="/profile"
             className={({ isActive }) =>
               `flex flex-col items-center py-1.5 px-3 rounded-2xl transition-all ${
-                isActive ? 'text-orange-600 font-bold' : 'text-slate-500 hover:text-slate-900 font-medium'
+                isActive ? 'text-[#FF6B00] font-bold' : 'text-slate-500 hover:text-slate-900 font-medium'
               }`
             }
           >
@@ -93,16 +106,16 @@ export default function BottomNav() {
     );
   }
 
-  // Customer Bottom Navigation (Module 17: Home, Explore, Following, Orders, Profile)
+  // Customer Mobile Bottom Navigation: [Home, Explore, Dine-In, Orders, Cart]
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/80 px-2 py-1 md:hidden shadow-lg">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/90 px-1 py-1 md:hidden shadow-lg">
       <div className="flex items-center justify-around max-w-md mx-auto">
         {/* 1. Home */}
         <NavLink
           to="/app"
           className={({ isActive }) =>
-            `flex flex-col items-center py-1 px-2.5 rounded-2xl transition-all ${
-              isActive ? 'text-orange-600 font-bold' : 'text-slate-500 hover:text-slate-900 font-medium'
+            `flex flex-col items-center py-1 px-2 rounded-2xl transition-all ${
+              isActive ? 'text-[#064E3B] font-black' : 'text-slate-500 hover:text-slate-900 font-semibold'
             }`
           }
         >
@@ -114,8 +127,8 @@ export default function BottomNav() {
         <NavLink
           to="/search"
           className={({ isActive }) =>
-            `flex flex-col items-center py-1 px-2.5 rounded-2xl transition-all ${
-              isActive ? 'text-orange-600 font-bold' : 'text-slate-500 hover:text-slate-900 font-medium'
+            `flex flex-col items-center py-1 px-2 rounded-2xl transition-all ${
+              isActive ? 'text-[#064E3B] font-black' : 'text-slate-500 hover:text-slate-900 font-semibold'
             }`
           }
         >
@@ -123,52 +136,50 @@ export default function BottomNav() {
           <span className="text-[10px]">Explore</span>
         </NavLink>
 
-        {/* 3. Following / Feed */}
+        {/* 3. Dine-In Table Bookings */}
         <NavLink
-          to="/feed"
+          to="/reservations"
           className={({ isActive }) =>
-            `flex flex-col items-center py-1 px-2.5 rounded-2xl transition-all ${
-              isActive ? 'text-orange-600 font-bold' : 'text-slate-500 hover:text-slate-900 font-medium'
+            `flex flex-col items-center py-1 px-2 rounded-2xl transition-all ${
+              isActive ? 'text-[#FF6B00] font-black' : 'text-slate-500 hover:text-slate-900 font-semibold'
             }`
           }
         >
-          <Sparkles className="w-5 h-5 mb-0.5" />
-          <span className="text-[10px]">Following</span>
+          <UtensilsCrossed className="w-5 h-5 mb-0.5" />
+          <span className="text-[10px]">Dine-In</span>
         </NavLink>
 
-        {/* 4. Orders with Cart Count */}
+        {/* 4. Orders */}
         <NavLink
           to="/orders"
           className={({ isActive }) =>
-            `flex flex-col items-center py-1 px-2.5 rounded-2xl transition-all relative ${
-              isActive ? 'text-orange-600 font-bold' : 'text-slate-500 hover:text-slate-900 font-medium'
+            `flex flex-col items-center py-1 px-2 rounded-2xl transition-all relative ${
+              isActive ? 'text-[#064E3B] font-black' : 'text-slate-500 hover:text-slate-900 font-semibold'
             }`
           }
         >
+          <ShoppingBag className="w-5 h-5 mb-0.5" />
+          <span className="text-[10px]">{t('nav.orders') || 'Orders'}</span>
+        </NavLink>
+
+        {/* 5. Cart */}
+        <button
+          type="button"
+          onClick={() => setIsCartOpen(true)}
+          className="flex flex-col items-center py-1 px-2 rounded-2xl text-slate-500 hover:text-slate-900 font-semibold transition-all relative cursor-pointer"
+        >
           <div className="relative">
-            <ShoppingBag className="w-5 h-5 mb-0.5" />
+            <ShoppingCart className="w-5 h-5 mb-0.5 text-[#FF6B00]" />
             {totalItemCount > 0 && (
-              <span className="absolute -top-1 -right-2 bg-orange-600 text-white font-black text-[9px] w-4 h-4 rounded-full flex items-center justify-center">
+              <span className="absolute -top-1.5 -right-2 bg-[#FF6B00] text-white font-black text-[9px] w-4 h-4 rounded-full flex items-center justify-center border border-white">
                 {totalItemCount}
               </span>
             )}
           </div>
-          <span className="text-[10px]">{t('nav.orders') || 'Orders'}</span>
-        </NavLink>
-
-        {/* 5. Profile */}
-        <NavLink
-          to="/profile"
-          className={({ isActive }) =>
-            `flex flex-col items-center py-1 px-2.5 rounded-2xl transition-all ${
-              isActive ? 'text-orange-600 font-bold' : 'text-slate-500 hover:text-slate-900 font-medium'
-            }`
-          }
-        >
-          <User className="w-5 h-5 mb-0.5" />
-          <span className="text-[10px]">Profile</span>
-        </NavLink>
+          <span className="text-[10px]">Cart</span>
+        </button>
       </div>
     </nav>
   );
 }
+

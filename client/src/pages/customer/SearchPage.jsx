@@ -195,7 +195,7 @@ export default function SearchPage() {
   const hasResults = matchingStores.length > 0 || matchingProducts.length > 0;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6 space-y-6 pb-24">
+    <div className="max-w-6xl mx-auto px-4 py-6 space-y-6 pb-24">
       {/* Top Search Bar with Voice UI */}
       <div className="space-y-3">
         <form onSubmit={handleSearchSubmit} className="relative flex items-center">
@@ -437,14 +437,14 @@ export default function SearchPage() {
                 </h3>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {matchingStores.map((store) => (
                   <Link
                     key={store.id}
                     to={`/store/${store.id}`}
                     className="p-3.5 rounded-2xl bg-white border border-slate-200 hover:border-orange-400 hover:shadow-md transition-all flex items-center space-x-3 group"
                   >
-                    <div className="w-14 h-14 rounded-xl bg-slate-100 overflow-hidden flex-shrink-0">
+                    <div className="w-14 h-14 rounded-xl bg-slate-100 overflow-hidden flex-shrink-0 aspect-square">
                       {store.image ? (
                         <img src={store.image} alt={store.businessName} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                       ) : (
@@ -494,7 +494,7 @@ export default function SearchPage() {
                 </h3>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {matchingProducts.map((prod) => {
                   const inCart = cartItems.some((ci) => ci.id === prod.id);
 

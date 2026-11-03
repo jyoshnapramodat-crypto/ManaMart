@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import RiderPortalLayout from '../../components/rider/RiderPortalLayout';
@@ -22,15 +22,46 @@ export default function RiderActiveTripView() {
   const [activeOrder, setActiveOrder] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // OTP Form State
-  const [otpInput, setOtpInput] = useState('');
+  // OTP Form State (4-Cell PIN with auto-focus)
+  const [pinCells, setPinCells] = useState(['', '', '', '']);
   const [otpError, setOtpError] = useState(null);
   const [verifying, setVerifying] = useState(false);
   const [deliveredSuccess, setDeliveredSuccess] = useState(false);
+  const pinInputRefs = useRef([]);
 
   useEffect(() => {
     fetchActiveTrip();
   }, []);
+
+  const handlePinCellChange = (index, value) => {
+    const char = value.slice(-1);
+    const updated = [...pinCells];
+
+    // Handle full 4-digit paste
+    if (value.length > 1) {
+      const pasteDigits = value.replace(/\D/g, '').slice(0, 4).split('');
+      for (let i = 0; i < 4; i++) {
+        updated[i] = pasteDigits[i] || '';
+      }
+      setPinCells(updated);
+      const nextFocus = Math.min(pasteDigits.length, 3);
+      pinInputRefs.current[nextFocus]?.focus();
+      return;
+    }
+
+    updated[index] = char.replace(/\D/g, '');
+    setPinCells(updated);
+
+    if (char && index < 3) {
+      pinInputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handlePinKeyDown = (index, e) => {
+    if (e.key === 'Backspace' && !pinCells[index] && index > 0) {
+      pinInputRefs.current[index - 1]?.focus();
+    }
+  };
 
   const fetchActiveTrip = async () => {
     setLoading(true);
@@ -69,10 +100,17 @@ export default function RiderActiveTripView() {
 
     const orderTargetId = activeOrder.id || activeOrder.orderId;
 
+    const enteredCode = pinCells.join('');
+    if (enteredCode.length < 4) {
+      setOtpError('Please enter all 4 digits of customer hand-off code.');
+      setVerifying(false);
+      return;
+    }
+
     try {
       // Strict OTP hand-off via backend API endpoint /api/orders/:id/verify-delivery (no manual bypass)
       const res = await api.post(`/orders/${orderTargetId}/verify-delivery`, {
-        otp: otpInput.trim(),
+        otp: enteredCode,
         taskId: activeOrder.id,
       });
 
@@ -250,34 +288,47 @@ export default function RiderActiveTripView() {
                 </div>
               )}
 
-              <form onSubmit={handleVerifyOtp} className="space-y-3">
-                <label className="block text-[11px] font-bold text-slate-600">
+              <form onSubmit={handleVerifyOtp} className="space-y-4">
+                <label className="block text-xs font-bold text-slate-700">
                   Ask customer for their 4-Digit Delivery Code:
                 </label>
-                <input
-                  type="text"
-                  required
-                  maxLength={4}
-                  value={otpInput}
-                  onChange={(e) => setOtpInput(e.target.value.replace(/\D/g, ''))}
-                  placeholder="• • • •"
-                  className="w-full text-center tracking-[0.5em] text-3xl font-black font-mono py-3 rounded-2xl border-2 border-slate-300 focus:border-[#FF6B00] outline-none bg-slate-50 focus:bg-white transition-all"
-                />
+                
+                {/* 4-Cell Large PIN Field with auto-focus */}
+                <div className="flex items-center justify-center gap-3 py-1">
+                  {pinCells.map((val, idx) => (
+                    <input
+                      key={idx}
+                      ref={(el) => (pinInputRefs.current[idx] = el)}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={1}
+                      autoFocus={idx === 0}
+                      value={val}
+                      onChange={(e) => handlePinCellChange(idx, e.target.value)}
+                      onKeyDown={(e) => handlePinKeyDown(idx, e)}
+                      placeholder="•"
+                      className="w-14 h-16 sm:w-16 sm:h-18 text-center text-3xl font-black font-mono rounded-2xl border-2 border-slate-300 focus:border-[#FF6B00] focus:ring-4 focus:ring-orange-100 outline-none bg-slate-50 focus:bg-white transition-all shadow-xs"
+                    />
+                  ))}
+                </div>
 
-                <button
-                  type="submit"
-                  disabled={verifying || otpInput.length < 4}
-                  className="w-full py-3.5 bg-[#FF6B00] hover:bg-[#e05e00] text-white rounded-2xl font-bold text-sm shadow-md transition-all flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer active:scale-98"
-                >
-                  {verifying ? (
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <>
-                      <span>Verify OTP & Complete Delivery</span>
-                      <CheckCircle2 className="w-4 h-4" />
-                    </>
-                  )}
-                </button>
+                {/* Sticky Thumb-Zone Action Button at Viewport Bottom for Mobile */}
+                <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/95 backdrop-blur-md border-t border-slate-200 z-40 sm:relative sm:p-0 sm:border-0 sm:bg-transparent">
+                  <button
+                    type="submit"
+                    disabled={verifying || pinCells.join('').length < 4}
+                    className="w-full py-4 sm:py-3.5 bg-[#FF6B00] hover:bg-[#e05e00] text-white rounded-2xl font-black text-sm sm:text-base shadow-lg transition-all flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer active:scale-98"
+                  >
+                    {verifying ? (
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <>
+                        <span>Verify & Complete Order</span>
+                        <CheckCircle2 className="w-5 h-5" />
+                      </>
+                    )}
+                  </button>
+                </div>
               </form>
             </div>
           </div>
