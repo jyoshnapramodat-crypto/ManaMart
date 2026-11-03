@@ -75,3 +75,69 @@
 .animate-soft-pulse {
   animation: pulseSoft 3s ease-in-out infinite;
 }
+
+/* ============================================================================== */
+/* DARK THEME SYSTEM-WIDE REFINEMENTS                                             */
+/* ============================================================================== */
+html.dark {
+  color-scheme: dark;
+}
+
+html.dark body {
+  background-color: #12100e !important;
+  color: #f7f0e5 !important;
+}
+
+html.dark .bg-surface,
+html.dark .bg-\[\#FFF8ED\],
+html.dark .bg-\[\#F8FAF9\],
+html.dark .bg-\[\#FDFBF7\] {
+  background-color: #12100e !important;
+}
+
+html.dark .bg-white,
+html.dark .bg-surface-container-lowest {
+  background-color: #1c1915 !important;
+  color: #f7f0e5 !important;
+}
+
+html.dark .bg-surface-container,
+html.dark .bg-slate-50,
+html.dark .bg-slate-100 {
+  background-color: #24201b !important;
+}
+
+html.dark .border-slate-200,
+html.dark .border-slate-100,
+html.dark .border-slate-200\/80,
+html.dark .border-outline-variant\/30,
+html.dark .border-outline-variant\/20,
+html.dark .border-amber-900\/10 {
+  border-color: #332d26 !important;
+}
+
+html.dark .text-slate-900,
+html.dark .text-slate-800,
+html.dark .text-on-surface {
+  color: #fdfbf7 !important;
+}
+
+html.dark .text-slate-700,
+html.dark .text-slate-600,
+html.dark .text-slate-500,
+html.dark .text-on-surface-variant {
+  color: #b5ada2 !important;
+}
+
+html.dark input,
+html.dark textarea,
+html.dark select {
+  background-color: #1c1915 !important;
+  color: #fdfbf7 !important;
+  border-color: #38322a !important;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #70685e !important;
+}

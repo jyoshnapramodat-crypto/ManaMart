@@ -4,19 +4,18 @@ export let isConnectedToMongo = false;
 export let isMockModeActive = false;
 
 export async function connectDB() {
-  const uri = process.env.MONGODB_URI;
+  const uri = process.env.MONGODB_ATLAS_URI || process.env.MONGODB_URI;
   const isProduction = process.env.NODE_ENV === 'production';
   const explicitMockAllowed = process.env.USE_MOCK_DB === 'true';
 
-  if (!uri && isProduction) {
-    console.error('❌ CRITICAL CONFIGURATION ERROR: MONGODB_URI is required in production environment.');
-    console.error('Please configure your MongoDB Atlas connection string in your production environment variables.');
-    isConnectedToMongo = false;
-    isMockModeActive = false;
-    throw new Error('MONGODB_URI must be set in production mode.');
-  }
-
   const connectionUri = uri || 'mongodb://127.0.0.1:27017/localloop_manamart';
+  const isAtlas = connectionUri.startsWith('mongodb+srv://');
+
+  if (isAtlas) {
+    console.log(`🌐 MongoDB Atlas cluster target detected.`);
+  } else {
+    console.log(`💻 Local MongoDB Compass target detected: ${connectionUri}`);
+  }
 
   try {
     console.log(`🔄 Attempting database connection to: ${connectionUri.includes('@') ? connectionUri.split('@')[1] : connectionUri}`);
@@ -24,13 +23,13 @@ export async function connectDB() {
     await mongoose.connect(connectionUri, {
       maxPoolSize: 10,
       minPoolSize: 2,
-      serverSelectionTimeoutMS: 3000,
+      serverSelectionTimeoutMS: 3500,
       socketTimeoutMS: 45000,
     });
 
     isConnectedToMongo = true;
     isMockModeActive = false;
-    console.log(`✅ MongoDB Atlas / Server connected successfully [Database: ${mongoose.connection.name}]`);
+    console.log(`✅ ${isAtlas ? 'MongoDB Atlas' : 'MongoDB Compass / Local'} connected successfully [Database: ${mongoose.connection.name}]`);
 
     // Setup lifecycle event listeners
     mongoose.connection.on('error', (err) => {

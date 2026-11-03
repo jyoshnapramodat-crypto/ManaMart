@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-route
 import { AuthProvider } from './context/AuthContext';
 import { LocationProvider } from './context/LocationContext';
 import { CartProvider } from './context/CartContext';
+import { ThemeProvider } from './context/ThemeContext';
 
 import Navbar from './components/Navbar';
 import BottomNav from './components/BottomNav';
@@ -322,13 +323,15 @@ function AppLayout() {
 export default function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <LocationProvider>
-          <CartProvider>
-            <AppLayout />
-          </CartProvider>
-        </LocationProvider>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <LocationProvider>
+            <CartProvider>
+              <AppLayout />
+            </CartProvider>
+          </LocationProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </BrowserRouter>
   );
 }

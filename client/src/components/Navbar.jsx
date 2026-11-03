@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useLocation } from '../context/LocationContext';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { socket } from '../services/socket';
 import api from '../services/api';
 import Logo from './Logo';
@@ -34,10 +35,13 @@ import {
   Volume2,
   LifeBuoy,
   Settings,
+  Sun,
+  Moon,
 } from 'lucide-react';
 
 export default function Navbar() {
   const { t, i18n } = useTranslation();
+  const { isDark, toggleTheme } = useTheme();
   const { currentCity, selectedLocality, setIsModalOpen } = useLocation();
   const { totalItemCount, total, setIsCartOpen } = useCart();
   const { user, isLoggedIn, logout, role } = useAuth();
@@ -244,6 +248,20 @@ export default function Navbar() {
               >
                 <Globe className="w-3.5 h-3.5 text-secondary-container" />
                 <span>{i18n.language === 'en' ? 'తెలుగు' : 'English'}</span>
+              </button>
+
+              {/* Light / Dark Mode Toggle Pill */}
+              <button
+                type="button"
+                onClick={toggleTheme}
+                className="flex items-center justify-center p-2 rounded-xl border border-outline-variant/30 hover:border-[#FF6B00] text-xs font-bold text-on-surface bg-surface-container hover:bg-surface-container-high transition-all cursor-pointer shadow-2xs"
+                title={isDark ? 'Switch to Warm Cream Light Mode' : 'Switch to Dark Mode'}
+              >
+                {isDark ? (
+                  <Sun className="w-4 h-4 text-amber-400 animate-in spin-in-180 duration-200" />
+                ) : (
+                  <Moon className="w-4 h-4 text-slate-700 animate-in spin-in-180 duration-200" />
+                )}
               </button>
 
               {/* Real-Time Notification Bell Dropdown */}

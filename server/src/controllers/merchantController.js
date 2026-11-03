@@ -518,27 +518,36 @@ export async function createPost(req, res) {
     }
 
     const storeId = store.storeId || store.id;
-    const { caption, type = 'general', tag = 'daily_special', discountCode, images = [], isDraft = false } = req.body;
+    const { caption, content, title, type = 'general', tag = 'daily_special', discountCode, images = [], imageUrl, isDraft = false } = req.body;
+    const finalCaption = (caption || content || (title ? `${title}: ${content || ''}` : '') || '').trim();
+    const finalImages = Array.isArray(images) && images.length > 0 ? images : (imageUrl ? [imageUrl] : []);
 
-    if (!caption || !caption.trim()) {
-      return res.status(400).json({ success: false, message: 'Post caption is required.' });
+    if (!finalCaption) {
+      return res.status(400).json({ success: false, message: 'Post caption or headline is required.' });
     }
 
     const newPost = {
+      id: `post-${uuidv4().slice(0, 8)}`,
       postId: `post-${uuidv4().slice(0, 8)}`,
       merchantId: storeId,
       storeId,
       storeName: store.businessName,
+      merchantName: store.businessName,
       storeLogo: store.logo,
-      storeLocality: store.address?.locality || 'Local',
-      storeCity: store.address?.city || 'Town',
-      caption: caption.trim(),
-      images,
+      merchantLogo: store.logo,
+      storeLocality: store.address?.locality || 'Madhapur',
+      storeCity: store.address?.city || 'Hyderabad',
+      title: title || finalCaption.slice(0, 50),
+      caption: finalCaption,
+      content: finalCaption,
+      images: finalImages,
+      imageUrl: finalImages[0] || 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=800&auto=format&fit=crop&q=80',
       type,
       tag: tag || type,
       discountCode: discountCode ? discountCode.trim().toUpperCase() : '',
       likes: [],
       likesCount: 0,
+      createdAt: new Date().toISOString(),
       isDraft: Boolean(isDraft),
     };
 

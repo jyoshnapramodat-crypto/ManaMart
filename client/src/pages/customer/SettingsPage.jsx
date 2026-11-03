@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 import {
   Globe,
   Moon,
@@ -26,12 +27,13 @@ export default function SettingsPage() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { theme, setTheme } = useTheme();
 
   // Language State
   const currentLang = i18n.language || 'en';
 
   // Theme Mode State
-  const [themeMode, setThemeMode] = useState(() => localStorage.getItem('manamart_theme') || 'light');
+  const themeMode = theme;
 
   // Accessibility State
   const [highContrast, setHighContrast] = useState(() => localStorage.getItem('manamart_high_contrast') === 'true');
@@ -60,8 +62,7 @@ export default function SettingsPage() {
   };
 
   const handleThemeToggle = (mode) => {
-    setThemeMode(mode);
-    localStorage.setItem('manamart_theme', mode);
+    setTheme(mode);
   };
 
   const handleToggleAccessibility = (key, val, setter) => {
