@@ -34,7 +34,7 @@ export default function RiderEarningsView() {
 
   return (
     <RiderPortalLayout>
-      <div className="space-y-6">
+      <div className="p-4 sm:p-6 md:p-8 space-y-6 max-w-7xl mx-auto w-full animate-in fade-in duration-300">
         <div>
           <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
             Delivery Hero Earnings & Payouts

@@ -30,5 +30,6 @@ router.post('/tasks/:taskId/accept', acceptTask);
 router.put('/tasks/:taskId/progress', updateProgress);
 router.post('/tasks/:taskId/verify-otp', verifyDeliveryOtp);
 router.get('/history', getDeliveryHistory);
+router.get('/tasks/history', getDeliveryHistory);
 
 export default router;

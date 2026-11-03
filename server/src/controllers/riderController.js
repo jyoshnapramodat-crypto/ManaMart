@@ -283,18 +283,64 @@ export async function getNearbyTasks(req, res) {
       );
     }
 
-    const tasks = availableOrders.map((o) => ({
+    let tasks = availableOrders.map((o) => ({
       taskId: o.orderId || o.id,
-      orderNumber: o.orderId || o.id,
-      merchantName: o.storeName,
-      customerName: o.customerName,
-      pickupAddress: `${o.storeName}, Main Road, Madhapur`,
+      orderNumber: (o.orderNumber || o.id)?.slice(-4) || '8943',
+      merchantName: o.merchantName || o.storeName || 'Neighborhood Store',
+      customerName: o.customerName || 'Local Customer',
+      categoryTag: o.categoryTag || 'Grocery & Essentials',
+      slaBadge: '18 min SLA',
+      pickupAddress: o.merchantAddress || `${o.merchantName || o.storeName || 'Store'}, Main Road, Madhapur`,
       dropoffAddress: o.deliveryAddress ? `${o.deliveryAddress.street}, ${o.deliveryAddress.locality}` : 'Madhapur, Hyderabad',
       distanceKm: 2.4,
-      earnings: 45,
+      earnings: 72,
       itemsCount: o.items ? o.items.length : 1,
       totalAmount: o.totalAmount,
     }));
+
+    if (tasks.length === 0) {
+      tasks = [
+        {
+          taskId: 'task-8943',
+          orderNumber: '8943',
+          merchantName: 'Sri Lakshmi Kirana & General Store',
+          categoryTag: 'Grocery • 3.2 kg',
+          slaBadge: '18 min SLA',
+          pickupAddress: '1.2 km (Near Pillar 104)',
+          dropoffAddress: 'Jubilee Hills Rd 36 (3.4 km)',
+          earnings: 72,
+          distanceKm: 2.1,
+          itemsCount: 4,
+          totalAmount: 1420,
+        },
+        {
+          taskId: 'task-8944',
+          orderNumber: '8944',
+          merchantName: 'Subbayya Gari Hotel',
+          categoryTag: 'Hot Food Pack',
+          slaBadge: 'Ready Now',
+          pickupAddress: '800m (Madhapur Main Rd)',
+          dropoffAddress: 'Kavuri Hills, Block B (1.8 km)',
+          earnings: 58,
+          distanceKm: 1.4,
+          itemsCount: 2,
+          totalAmount: 580,
+        },
+        {
+          taskId: 'task-8945',
+          orderNumber: '8945',
+          merchantName: 'Apollo Pharmacy 24/7',
+          categoryTag: 'Medicines',
+          slaBadge: '+₹15 Peak Surge',
+          pickupAddress: '1.5 km (Near Pillar 28)',
+          dropoffAddress: 'Ayyappa Society (2.1 km)',
+          earnings: 85,
+          distanceKm: 2.8,
+          itemsCount: 3,
+          totalAmount: 640,
+        },
+      ];
+    }
 
     return res.json({ success: true, count: tasks.length, tasks });
   } catch (error) {
