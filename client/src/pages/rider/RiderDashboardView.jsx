@@ -35,7 +35,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 
-export default function RiderDashboardView() {
+function RiderDashboardContent() {
   const navigate = useNavigate();
   const {
     isOnline,
@@ -825,5 +825,13 @@ export default function RiderDashboardView() {
         </div>
       </section>
     </div>
+  );
+}
+
+export default function RiderDashboardView() {
+  return (
+    <RiderPortalLayout>
+      <RiderDashboardContent />
+    </RiderPortalLayout>
   );
 }

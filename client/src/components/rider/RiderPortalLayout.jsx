@@ -1,4 +1,4 @@
-import React, { useState, useEffect, createContext, useContext } from 'react';
+import React, { useState, useEffect, createContext, useContext, useMemo } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
@@ -27,20 +27,11 @@ import {
   Coins,
 } from 'lucide-react';
 
-const RiderPortalContext = createContext(null);
-
-export function useRiderPortal() {
-  return useContext(RiderPortalContext);
-}
-
-export default function RiderPortalLayout({ children }) {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { user, logout } = useAuth();
-
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isOnline, setIsOnline] = useState(true);
-  const [activeTrip, setActiveTrip] = useState({
+const defaultRiderContext = {
+  isOnline: true,
+  setIsOnline: () => {},
+  handleToggleOnline: () => {},
+  activeTrip: {
     id: 'MM-8942',
     orderNumber: '8942',
     title: 'Kirana Grocery Basket',
@@ -62,7 +53,44 @@ export default function RiderPortalLayout({ children }) {
       lat: 17.4520,
       lng: 78.3880,
     },
-  });
+  },
+  setActiveTrip: () => {},
+  riderProfile: {
+    name: 'Suresh Varma',
+    rating: 4.9,
+    heroId: 'MM-84920',
+    hub: 'Madhapur Hub Cluster',
+    vehicleTag: 'EV-04',
+    todayEarnings: 840,
+    cashInHand: 620,
+    completedTrips: 6,
+    totalRatings: 142,
+    batteryPercent: 86,
+    batteryKm: 68,
+  },
+  setRiderProfile: () => {},
+  openSosModal: () => {},
+  openRemitModal: () => {},
+  openSupportModal: () => {},
+  openBatteryModal: () => {},
+  openSurgeModal: () => {},
+};
+
+const RiderPortalContext = createContext(defaultRiderContext);
+
+export function useRiderPortal() {
+  const ctx = useContext(RiderPortalContext);
+  return ctx || defaultRiderContext;
+}
+
+export default function RiderPortalLayout({ children }) {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { user, logout } = useAuth();
+
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isOnline, setIsOnline] = useState(true);
+  const [activeTrip, setActiveTrip] = useState(defaultRiderContext.activeTrip);
 
   const [riderProfile, setRiderProfile] = useState({
     name: user?.name || 'Suresh Varma',
@@ -86,30 +114,43 @@ export default function RiderPortalLayout({ children }) {
   const [showSurgeModal, setShowSurgeModal] = useState(false);
 
   useEffect(() => {
-    // Read hardware battery if browser allows
+    let batteryObj = null;
+    let onLevelChange = null;
+
     if (typeof navigator !== 'undefined' && 'getBattery' in navigator) {
       navigator.getBattery().then((battery) => {
+        batteryObj = battery;
         const pct = Math.round(battery.level * 100);
         setRiderProfile((prev) => ({
           ...prev,
           batteryPercent: pct,
           batteryKm: Math.round(pct * 0.8),
         }));
-        battery.addEventListener('levelchange', () => {
+        onLevelChange = () => {
           const newPct = Math.round(battery.level * 100);
           setRiderProfile((prev) => ({
             ...prev,
             batteryPercent: newPct,
             batteryKm: Math.round(newPct * 0.8),
           }));
-        });
+        };
+        battery.addEventListener('levelchange', onLevelChange);
       }).catch(() => {});
     }
 
+    return () => {
+      if (batteryObj && onLevelChange) {
+        batteryObj.removeEventListener('levelchange', onLevelChange);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
     async function loadRiderInfo() {
       try {
         const res = await api.get('/riders/profile');
-        if (res.data?.success) {
+        if (isMounted && res.data?.success) {
           if (res.data.rider) {
             setIsOnline(Boolean(res.data.rider.isOnline));
             setRiderProfile((prev) => ({
@@ -136,7 +177,8 @@ export default function RiderPortalLayout({ children }) {
       }
     }
     loadRiderInfo();
-  }, [location.pathname]);
+    return () => { isMounted = false; };
+  }, []);
 
   const handleToggleOnline = async () => {
     const nextState = !isOnline;
@@ -153,7 +195,7 @@ export default function RiderPortalLayout({ children }) {
     navigate('/login');
   };
 
-  const contextValue = {
+  const contextValue = useMemo(() => ({
     isOnline,
     setIsOnline,
     handleToggleOnline,
@@ -166,7 +208,7 @@ export default function RiderPortalLayout({ children }) {
     openSupportModal: () => setShowSupportModal(true),
     openBatteryModal: () => setShowBatteryModal(true),
     openSurgeModal: () => setShowSurgeModal(true),
-  };
+  }), [isOnline, activeTrip, riderProfile]);
 
   return (
     <RiderPortalContext.Provider value={contextValue}>

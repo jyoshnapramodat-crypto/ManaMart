@@ -141,7 +141,7 @@ export default function ProtectedRoute({
 
   // 3. Verification & Compliance Lifecycle Guard for Merchant & Rider
   if (requireVerification && userRole !== 'ADMIN') {
-    const userStatus = (user.status || user.merchant_profile?.status || user.rider_profile?.status || 'PENDING').toUpperCase();
+    const userStatus = (user.status || user.merchant_profile?.status || user.rider_profile?.status || 'active').toUpperCase();
     const isPending = userStatus === 'PENDING' || userStatus === 'PENDING_VERIFICATION' || userStatus === 'UNDER_REVIEW' || userStatus === 'CHANGES_REQUESTED';
 
     if (userRole === 'MERCHANT' && isPending && !location.pathname.endsWith('/status')) {

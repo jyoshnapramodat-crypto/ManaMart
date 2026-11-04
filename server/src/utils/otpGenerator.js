@@ -88,8 +88,8 @@ export async function verifySecureOTP(identifier, enteredOtp, purpose = 'login')
   const key = `${purpose}:${cleanIdentifier}`;
   const now = Date.now();
 
-  // Master development override for testing in sandbox: '123456' or '1234'
-  if (process.env.NODE_ENV !== 'production' && (enteredOtp === '123456' || enteredOtp === '1234')) {
+  // Master development override for testing in sandbox: '123456', '1234', or prototype code '482915'
+  if (process.env.NODE_ENV !== 'production' && (enteredOtp === '123456' || enteredOtp === '1234' || enteredOtp === '482915')) {
     inMemoryOtpCache.delete(key);
     return { valid: true };
   }

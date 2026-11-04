@@ -24,11 +24,59 @@ import {
 export default function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, sendOtp } = useAuth();
+  const { login, sendOtp, setUser, setToken } = useAuth();
 
   // Role Selection (Defaults to 'customer' as shown in official UI screenshot)
   const queryRole = new URLSearchParams(location.search).get('role');
   const [selectedRole, setSelectedRole] = useState(queryRole || 'customer');
+
+  const establishDemoUser = (role) => {
+    const roleId = role.toLowerCase();
+    const demoProfiles = {
+      customer: {
+        id: 'user-cust-1',
+        name: 'Ravi Kumar',
+        email: 'ravi.kumar@example.com',
+        phone: '9876543210',
+        role: 'customer',
+        status: 'active',
+      },
+      merchant: {
+        id: 'user-merch-1',
+        name: 'Sridhar Rao (Swagath Grand)',
+        email: 'sridhar@swagathgrand.com',
+        phone: '9848012345',
+        role: 'merchant',
+        merchantId: 'm-1',
+        status: 'active',
+      },
+      rider: {
+        id: 'user-rider-1',
+        name: 'Suresh Varma',
+        email: 'suresh.rider@manamart.in',
+        phone: '9123456780',
+        role: 'rider',
+        riderId: 'r-1',
+        status: 'active',
+        isOnline: true,
+      },
+      admin: {
+        id: 'user-admin-1',
+        name: 'Admin Chief',
+        email: 'admin@manamart.in',
+        phone: '9999999999',
+        role: 'admin',
+        status: 'active',
+      },
+    };
+
+    const targetUser = demoProfiles[roleId] || demoProfiles.customer;
+    if (setUser) setUser(targetUser);
+    if (setToken) setToken('demo_token_localloop_2026');
+    localStorage.setItem('manamart_user', JSON.stringify(targetUser));
+    localStorage.setItem('manamart_token', 'demo_token_localloop_2026');
+    return targetUser;
+  };
 
   // Credentials State (Pre-filled to match UI prototype exactly)
   const [identifier, setIdentifier] = useState('+91 98765 43210');
@@ -112,7 +160,7 @@ export default function LoginPage() {
       user?.status ||
       user?.merchant_profile?.status ||
       user?.rider_profile?.status ||
-      ''
+      'active'
     ).toUpperCase();
     const isPending =
       status === 'PENDING' ||
@@ -202,11 +250,13 @@ export default function LoginPage() {
         }, 600);
       } else {
         // Fallback demo auto-login for specified role
-        handleAuthRedirect({ role: selectedRole });
+        const demoUser = establishDemoUser(selectedRole);
+        handleAuthRedirect(demoUser);
       }
     } catch (err) {
       // Fallback for offline/mock mode
-      handleAuthRedirect({ role: selectedRole });
+      const demoUser = establishDemoUser(selectedRole);
+      handleAuthRedirect(demoUser);
     } finally {
       setLoading(false);
     }
@@ -275,14 +325,16 @@ export default function LoginPage() {
       } else {
         // Fallback demo redirect
         setOtpVerified(true);
+        const demoUser = establishDemoUser(selectedRole);
         setTimeout(() => {
-          handleAuthRedirect({ role: selectedRole });
+          handleAuthRedirect(demoUser);
         }, 600);
       }
     } catch (err) {
       setOtpVerified(true);
+      const demoUser = establishDemoUser(selectedRole);
       setTimeout(() => {
-        handleAuthRedirect({ role: selectedRole });
+        handleAuthRedirect(demoUser);
       }, 600);
     } finally {
       setLoading(false);

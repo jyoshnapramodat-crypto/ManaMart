@@ -6,10 +6,13 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import apiRouter from './routes/index.js';
 
-dotenv.config();
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Load environment variables from cwd, project root, and server/.env
+dotenv.config();
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 const app = express();
 

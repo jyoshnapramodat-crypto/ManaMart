@@ -148,10 +148,7 @@ export default function MerchantDashboardView() {
         !acknowledgedOrders.has(o.id || o.orderId)
     );
 
-    if (hasUnacknowledgedNewOrder) {
-      soundService.startOrderRingtoneLoop();
-      setIsRingtonePlaying(true);
-    } else {
+    if (!hasUnacknowledgedNewOrder) {
       soundService.stopOrderRingtoneLoop();
       setIsRingtonePlaying(false);
     }
@@ -162,6 +159,16 @@ export default function MerchantDashboardView() {
     soundService.stopOrderRingtoneLoop();
     setIsRingtonePlaying(false);
     handleUpdateStatus(orderId, 'PREPARING');
+  };
+
+  const handleToggleRingtone = () => {
+    if (isRingtonePlaying) {
+      soundService.stopOrderRingtoneLoop();
+      setIsRingtonePlaying(false);
+    } else {
+      soundService.startOrderRingtoneLoop();
+      setIsRingtonePlaying(true);
+    }
   };
 
   const handleMuteRingtone = () => {
@@ -259,11 +266,11 @@ export default function MerchantDashboardView() {
                 <span>Acknowledge & Cook</span>
               </button>
               <button
-                onClick={handleMuteRingtone}
+                onClick={handleToggleRingtone}
                 className="p-2.5 bg-black/30 hover:bg-black/50 text-white rounded-2xl transition-all cursor-pointer"
-                title="Mute Ringtone"
+                title={isRingtonePlaying ? 'Mute Alert Audio' : 'Play Kitchen Alert Audio'}
               >
-                {isRingtonePlaying ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                {isRingtonePlaying ? <VolumeX className="w-4 h-4 text-amber-200" /> : <Volume2 className="w-4 h-4 text-white" />}
               </button>
             </div>
           </div>

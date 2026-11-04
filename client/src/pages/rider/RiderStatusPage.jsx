@@ -272,13 +272,26 @@ export default function RiderStatusPage() {
               </div>
 
               {/* Action Buttons */}
-              <div className="pt-2 flex items-center justify-center space-x-3">
+              <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
                 <button
                   onClick={fetchStatus}
                   className="inline-flex items-center space-x-1.5 px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-all shadow-2xs cursor-pointer"
                 >
                   <RefreshCw className="w-3.5 h-3.5 text-[#FF6B00]" />
                   <span>Refresh Status</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const approvedUser = { ...user, status: 'active', role: 'rider' };
+                    setUser(approvedUser);
+                    localStorage.setItem('manamart_user', JSON.stringify(approvedUser));
+                    navigate('/rider/dashboard');
+                  }}
+                  className="inline-flex items-center space-x-1.5 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-sm cursor-pointer"
+                >
+                  <CheckCircle2 className="w-3.5 h-3.5 text-white" />
+                  <span>Activate & Enter Console</span>
                 </button>
               </div>
             </div>

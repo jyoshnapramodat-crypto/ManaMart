@@ -173,6 +173,7 @@ export function AuthProvider({ children }) {
         quickSwitchRole,
         logout,
         setUser,
+        setToken,
       }}
     >
       {children}

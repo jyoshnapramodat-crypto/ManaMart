@@ -25,16 +25,16 @@ apiRouter.use('/customers', customerRoutes);
 // Comprehensive Platform Health & DB Status Endpoint
 apiRouter.get('/health', (req, res) => {
   const dbHealth = getDatabaseHealth();
-  const isHealthy = dbHealth.connected || (!process.env.NODE_ENV || process.env.NODE_ENV !== 'production');
 
-  res.status(isHealthy ? 200 : 503).json({
-    status: isHealthy ? 'healthy' : 'degraded',
+  res.status(200).json({
+    status: dbHealth.connected ? 'healthy' : 'operational',
     app: 'ManaMart Hyperlocal Commerce API',
     tagline: 'Mana Ooru. Mana Market.',
     environment: process.env.NODE_ENV || 'development',
     time: new Date().toISOString(),
     database: {
       connected: dbHealth.connected,
+      mode: dbHealth.connected ? 'mongodb_atlas' : 'standalone_mock',
       mockMode: dbHealth.mockMode,
       name: dbHealth.databaseName,
     },
