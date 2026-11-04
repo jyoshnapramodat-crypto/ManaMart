@@ -3,10 +3,10 @@
 
 [![Live Demo on Render](https://img.shields.io/badge/Demo-Live_on_Render-00c853?style=for-the-badge&logo=render&logoColor=white)](https://manamart-o409.onrender.com)
 [![GitHub stars](https://img.shields.io/github/stars/jyoshnapramodat-crypto/ManaMart?style=for-the-badge&color=fe6b00)](https://github.com/jyoshnapramodat-crypto/ManaMart)
-[![React](https://img.shields.io/badge/React-18-blue.svg?style=flat-square)](https://react.dev/)
+[![React](https://img.shields.io/badge/React-18.2-blue.svg?style=flat-square)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-5.4-purple.svg?style=flat-square)](https://vitejs.dev/)
 [![Node](https://img.shields.io/badge/Node-v20+-green.svg?style=flat-square)](https://nodejs.org/)
-[![MongoDB](https://img.shields.io/badge/MongoDB-8.2-green.svg?style=flat-square)](https://www.mongodb.com/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas_&_Compass-green.svg?style=flat-square)](https://www.mongodb.com/)
 [![TailwindCSS](https://img.shields.io/badge/TailwindCSS-v3.4-teal.svg?style=flat-square)](https://tailwindcss.com/)
 [![Socket.IO](https://img.shields.io/badge/Socket.IO-Real--Time-black.svg?style=flat-square)](https://socket.io/)
 [![Languages](https://img.shields.io/badge/Languages-English%20%7C%20%E0%B0%A4%E0%B1%86%E0%B0%B2%E0%B1%81%E0%B0%97%E0%B1%81-red.svg?style=flat-square)](#)
@@ -14,269 +14,334 @@
 ---
 
 ## 🌐 Live Production Application
-🚀 **ManaMart is live in production! Visit the live deployment:**  
+🚀 **ManaMart is deployed and live in production:**  
 👉 **[https://manamart-o409.onrender.com](https://manamart-o409.onrender.com)**
 
 > [!TIP]
-> **Zero-Friction Demo Testing**: You can explore every capability (Customer, Restaurant Owner, Delivery Rider, or Platform Admin) instantly using the **Quick Role Switcher** or the **1-Click Demo Buttons** on the Sign-In page without having to register or verify external credentials.
+> **Unified Access**: Explore every user context (Customer, Merchant Kitchen, Delivery Partner, or Platform Administrator) seamlessly via the **Unified Identity Portal** at `/login` with pre-filled test profiles and instant 6-digit OTP verification.
 
 ---
 
-## 📸 Application Screenshots & Visual Tour
+## 📸 Application Architecture & Visual Tour
 
-| 🌟 **Marketplace Overview & Clean Two-Tier Header** | 🚀 **ManaMart Brand Portal & Splash Experience** |
+| 🌟 **Customer Marketplace & Smart Search** | 🛵 **Delivery Hero (Rider) Command Console** |
 | :---: | :---: |
-| ![Marketplace Overview](./docs/screenshots/marketplace-overview.png) | ![Launch Portal](./docs/screenshots/launch-portal.png) |
-| *Spacious search bar, Telugu/English switcher, category filters & local stories* | *2-second welcoming splash screen with instant town & locality discovery* |
+| ![Marketplace Overview](./docs/screenshots/marketplace-overview.png) | ![Rider Command Console](./docs/screenshots/order-tracking.png) |
+| *Bilingual search, category grids, flash offers, stories & cart drawer* | *Duty toggle (Online/Offline), active trip card, telemetry & dispatch tasks* |
 
-| 🗺️ **Live GPS Radar & Turn-by-Turn Order Tracking** | 🍽️ **Restaurant Menu & Dish Customizations** |
+| 🍳 **Merchant Hub & Kitchen KOT Stream** | 🔐 **Unified Login & Live OTP Security Gate** |
 | :---: | :---: |
-| ![Live GPS Radar Tracking](./docs/screenshots/order-tracking.png) | ![Store Catalog & Menu](./docs/screenshots/store-catalog.png) |
-| *Vector road Bezier routing, animated sonar radar, speedometer & delivery OTP* | *Authentic regional Telugu dishes, portion sizes, spice meters & add-to-cart* |
-
-| 🏪 **Hyperlocal Store Discovery Grid** | 🔔 **Real-Time Notification Center & Audio Soundboard** |
-| :---: | :---: |
-| ![Customer Store Discovery](./docs/screenshots/customer-discovery.png) | ![Notifications & Audio Soundboard](./docs/screenshots/notifications-center.png) |
-| *Verified neighborhood kirana, restaurants, bakeries & pharmacies with FSSAI badges* | *WebSocket live alerts from followed shops with Web Audio API synthesizer* |
-
-| 📱 **Mobile-First Responsive Experience** |
-| :---: |
-| ![Mobile App Design](./docs/screenshots/mobile-app-design.jpg) |
-| *High-speed responsive PWA layout designed specifically for Indian tier-2/3 smartphones* |
+| ![Merchant Kitchen Hub](./docs/screenshots/store-catalog.png) | ![Unified Identity Portal](./docs/screenshots/launch-portal.png) |
+| *Live incoming order stream, prep timers, acoustic alert toggle & settlements* | *4-Role selector deck, pre-filled OTP node (`482915`), and session gateway* |
 
 ---
 
-## 🌟 Executive Vision
+## 🌟 Executive Vision & Hyperlocal Ecosystem
 
-**ManaMart** (powered by the **LocalLoop** platform) is a production-grade, mobile-first hyperlocal commerce and delivery platform specifically architected to empower neighborhood shops, restaurants, kirana stores, pharmacies, bakeries, and local services in Indian towns and tier-2/3 cities.
+**ManaMart** (powered by the **LocalLoop** platform) is an enterprise-grade, mobile-first hyperlocal community commerce and multi-vendor delivery platform engineered to connect neighborhood shops, authentic regional kitchens, kirana grocers, pharmacies, bakeries, and delivery riders across Indian towns and metropolitan clusters (Hyderabad, Madhapur, Gachibowli, Guntur, Vijayawada, Vizag).
 
-Combining the best paradigms of modern hyperlocal apps:
-- **Swiggy & Zomato**: Food discovery, appetizing menus, dish customizations, and **BookMyShow-style restaurant table reservations**.
-- **Blinkit & Instamart**: Express 15-minute essentials, multi-store smart cart, and stock substitution preferences.
-- **Rapido**: Independent delivery partner assignment, turn-by-turn route tracking, and **Live GPS Radar map**.
-- **Instagram & YouTube**: Store updates, merchant story rings, flash discounts, new arrival feeds, and subscription channels.
-- **Vernacular AI**: Bilingual voice ordering in **Telugu (తెలుగు)** and **Indian English** with zero-latency speech recognition and entity extraction.
-
----
-
-## 🚀 Key Feature Highlights
-
-### 1. 🍽️ Dine-In Table Reservations & Fake Mailbox System
-- **Interactive Table & Seating Selector**: Choose from AC Fine Dining Halls, Rooftop Sky Lounges, or Private Royal Cabins with visual table layouts (`T-01` to `T-08`).
-- **Simulated Email & OTP Verification Gateway**: Secure 6-digit numeric OTP with 5-minute expiry timestamp.
-- **Dev Fake Mailbox Drawer**: Global floating development mailbox that intercepts incoming emails in real-time, displays formatted email bodies, and offers **1-Click OTP Auto-Fill**.
-- **Digital QR Entry Pass**: Confirmed bookings generate a branded digital entry ticket with a scannable QR pass, party size, and table assignment.
-- **Smart Auth Guard**: Unauthenticated guests clicking "Book Restaurant" are guided to sign in with an informative banner; 1-click test login returns them directly to their booking flow.
-
-### 2. 🗺️ Live Interactive GPS Map & Rider Radar
-- **Turn-by-Turn Bezier Routing**: Vector road route visualization with animated cubic bezier curves connecting the merchant, live rider, and customer doorstep.
-- **Sonar Radar & Moving Scooter Pin**: Real-time scooter icon with animated sonar radar rings.
-- **Live Telemetry Dashboard**: Real-time speedometer (`28 km/h`), distance meter (`420m remaining`), and ETA countdown.
-- **Dual Layer Toggle**: One-click switch between **Dark Vector Street Mode** and **High-Res Satellite View**, with fullscreen capability and direct rider phone dialing.
-
-### 3. 🎙️ Vernacular Voice AI Ordering (Telugu + English)
-- **Bilingual Web Speech Recognition**: High-accuracy natural speech understanding in Telugu (`te-IN`) and Indian English (`en-IN`).
-- **NLU Entity Extraction**: Understands spoken quantities and items (e.g., *"రెండు ప్యాకెట్లు బియ్యం"*, *"హండీ చికెన్ దమ్ బిర్యానీ"*, *"2 bags Sona Masoori Rice"*, *"1 strip Dolo 650"*).
-- **Audio Waveform Visualizer & Web Audio Chimes**: Live pulsing waveform visualizer backed by zero-external-file Web Audio API synthesizer.
-- **1-Tap Test Prompts**: Test voice ordering immediately in quiet rooms or on devices without physical microphones by tapping sample Telugu/English phrases.
-- **Direct Cart Injection**: Automatically adds parsed items with quantity into `useCart()` and opens the checkout drawer.
-
-### 4. 📊 Merchant Bulk CSV/Excel Catalog Importer
-- **1-Click Template Generator**: Download `ManaMart_Catalog_Template.csv` pre-populated with Telugu dish names, categories, MRP, selling price, and stock counts.
-- **Live Catalog Export**: Merchants can backup or export their entire live menu to CSV.
-- **Drag-and-Drop Parser & Validation**: Real-time row parser with margin analysis, veg/non-veg status, and batch insertion directly into the merchant dashboard inventory.
-
-### 5. 🧭 Clean Two-Tier Desktop Navigation Architecture
-- **Tier 1 (Main Header)**: Spacious, uncrowded search bar with 500px+ width, location selector, vernacular voice mic trigger, language toggle, notifications, and auth/cart buttons.
-- **Tier 2 (Services Ribbon)**: Clean secondary utility strip directly beneath the search bar featuring quick links to *Dine-In Booking*, *Updates & Feed*, *Monthly Auto-Lists*, *Parcel Courier*, and *Local Services*.
-
-### 6. 🔊 Native Web Audio Synthesizer (Zero External Audio Files)
-- Uses the browser's native **Web Audio API** oscillators to generate acoustic notifications:
-  - 🔔 *Order Chime*: Dual harmonic chime for order placed/received.
-  - 🛵 *Rider Chirp*: High-frequency ping for courier pickup/arrival.
-  - 🎉 *Deal Ding*: Resonant bell for applied coupons and discounts.
-
-### 7. 🗄️ MongoDB Integration & Resilient In-Memory Fallback
-- Production Mongoose schemas for `User`, `Store`, `Product`, `Reservation`, and `Order` with GeoJSON `2dsphere` spatial indexing.
-- Comprehensive database seeder (`npm run seed --prefix server`) pre-populating verified stores (Swagath Grand, Annapurna Supermarket, Niloufer Cafe, Apollo Pharmacy) with Telugu labels.
-- Resilient in-memory fallback allowing the entire system to run seamlessly even when MongoDB is offline.
+### The Four Isolated User Portals:
+1. **Customer Marketplace (`/`, `/app`, `/search`, `/store/:id`)**:
+   - Location-aware storefront discovery (0–10 km radius using Haversine spherical geometry).
+   - Multi-category cart with transparent pricing, taxes, packaging, and distance delivery fees.
+   - Live turn-by-turn order tracking with animated GPS radar and delivery OTP.
+   - Dine-in table reservations with digital QR entry passes and celebratory confetti.
+2. **Merchant Hub (`/merchant/*`)**:
+   - Live Kitchen Order Ticket (KOT) stream with 1-click status transitions (`PREPARING`, `READY_FOR_PICKUP`).
+   - Acoustic kitchen order chime with opt-in volume controls to prevent CPU audio node congestion.
+   - Story publisher with live customer preview modal for broadcasting specials and discounts.
+   - Bulk CSV/Excel catalog importer with live validation and error checking.
+   - Financial ledger tracking daily GMV, commissions, TDS deductions, and instant UPI payouts.
+3. **Delivery Hero (Rider) Console (`/rider/*`)**:
+   - Dedicated mobile-first telemetry shell with real-time GPS beacon (`1.2m accuracy`), hardware battery reader (`86% (68 km)`), and COD cash-in-hand counter (`₹620`).
+   - Dual-state operational console:
+     - **Online Duty**: Live trip card (`#MM-8942`, Express 15m SLA), dispatch task queue (`Sri Lakshmi Kirana`, `Subbayya Gari Hotel`, `Apollo Pharmacy`), daily streak targets, and surge heatmap radar (`+₹20/order`).
+     - **Offline Duty**: Shift paused safety checklist (battery, bag, cash verification) and muted queue preview.
+     - Sticky thumb-zone 4-cell delivery hand-off OTP verification input (`/rider/active-trip`).
+     - Emergency SOS modal with one-tap 112/100 police dialer and breakdown assistance.
+     - Scannable Remittance Hub QR modal for depositing cash-in-hand at local hubs.
+4. **Admin Governance Center (`/admin/*`)**:
+   - City-level GMV, total transaction volume, active rider counts, and commission metrics.
+   - Two-column compliance verification pipelines for pending Merchant FSSAI/PAN and Rider Driving Licenses.
+   - Automated dispute triage routing low-rating customer reviews ($\le 2$ stars) directly to arbitration.
+   - Secure non-public administrative team onboarding with expiring signed JWT invitation links.
 
 ---
 
-## 🛠️ Technology Stack
+## 🧠 Autonomous AI Agents & Intelligent Systems
 
-| Layer | Technologies |
-|---|---|
-| **Frontend** | React 18, Vite 5.4, Tailwind CSS v3.4, Lucide Icons, Canvas Confetti, Web Speech API, Web Audio API, Axios, React Router DOM v6, React-i18next (English & Telugu) |
-| **Backend** | Node.js, Express.js, RESTful API (`/api/v1`), Socket.IO (WebSocket real-time engine), JWT Authentication (Access + Refresh tokens), Node-Cron, UUID, Morgan |
-| **Database** | MongoDB 8.2 / Mongoose ODM with GeoJSON `2dsphere` indexing + Hybrid in-memory store fallback |
-| **Payments** | Razorpay checkout flow (UPI, Cards, Net Banking, COD) with backend verification handshakes |
-| **Simulated Services** | In-Memory / LocalStorage Fake Mailbox with OTP auto-fill & notification listener |
+```mermaid
+flowchart TD
+    User([Customer / User]) -->|Natural Language Search| Scout[1. ManaAI Hyperlocal GPS Scout]
+    User -->|Telugu / English Speech| Voice[2. Vernacular Voice AI Assistant]
+    
+    Merchant([Merchant Kitchen]) -->|Catalog Uploads| Importer[3. Smart Catalog AI Importer]
+    Merchant -->|Order Placement Event| AudioAgent[4. Acoustic Dispatch Synthesizer]
+    
+    System([Platform Engine]) -->|Daily Cron Job| Scheduler[5. Autonomous Recurring Order Cron Agent]
+    System -->|Driver Telemetry| GeoAgent[6. Haversine Geo-Spatial Dispatch Engine]
+```
 
----
+### 1. ManaAI Hyperlocal GPS Scout (`ManaAIScout.jsx`)
+* Reads live browser geolocation coordinates and resolves reverse-geocoded neighborhood names.
+* Parses natural language customer intent (e.g., *"craving biryani for dinner"*, *"emergency fever medicine"*, *"monthly grocery staples"*).
+* Evaluates nearby stores against delivery SLA, distance radius, and FSSAI hygiene ratings, generating real-time contextual explanations.
 
-## 👥 User Roles & 1-Click Test Accounts
+### 2. Vernacular Voice AI Assistant (`VernacularVoiceModal.jsx`)
+* Real-time bilingual speech recognition in **Telugu (`te-IN`)** and **Indian English (`en-IN`)**.
+* NLU entity extractor detecting item quantities and regional Telugu dish names (e.g., *"రెండు ప్యాకెట్లు పాలు"*, *"హండీ చికెన్ దమ్ బిర్యానీ"*).
+* Directly parses speech input and injects items into the customer shopping cart.
 
-ManaMart includes a **Quick Role Switcher Toolbar** and **1-Click Test Accounts** on the login page so you can test every workflow without using personal information:
+### 3. Autonomous Recurring Order Cron Agent (`recurringScheduler.js`)
+* Background automated subscription agent powered by `node-cron`.
+* Evaluates active customer recurring baskets (daily milk, fresh bread, monthly ration) and auto-generates orders at scheduled intervals without requiring manual checkout.
 
-1. **Customer (`ravi.kumar@example.com` / `password123`)**:
-   - Hyperlocal GPS locality selector (Indiranagar, Madhapur, Jubilee Hills, Narakoduru, etc.).
-   - Multi-store shopping cart with transparent delivery fee breakdown and substitution policies.
-   - Dine-in table reservations with digital QR entry passes.
-   - Real-time order tracking with live turn-by-turn GPS radar and 4-digit Delivery OTP.
-   - English & Telugu language toggle.
+### 4. Acoustic Dispatch Synthesizer (`soundService.js`)
+* Synthesizes mathematical dual-tone audio frequencies directly in the browser via the **Web Audio API** (C5 523Hz + E5 659Hz marimba chords, 740Hz rider chirps).
+* Eliminates heavy MP3/WAV audio assets and cuts through loud kitchen environments.
 
-2. **Merchant (`sridhar@swagathgrand.com` / `password123`)**:
-   - Store command center with live status toggle (Accepting Orders vs. Closed).
-   - Menu & inventory management with instant stock toggles and **Bulk CSV/Excel Importer**.
-   - Live incoming order queue (Accept -> Kitchen Preparing -> Ready for Rider).
-   - Dine-in reservations management and table status tracking.
-   - Social updates publisher: broadcast specials and coupon codes to followers.
-
-3. **Delivery Partner / Rider (`suresh.rider@manamart.in` / `password123`)**:
-   - Online / Offline availability switch.
-   - Real-time delivery radar showing nearby orders, per-km trip earnings, and counter-offer options.
-   - Turn-by-turn pickup and drop-off instructions with map navigation.
-   - Mandatory Customer Delivery OTP verification before marking completed.
-   - Daily earnings wallet with completed trip logs.
-
-4. **Administrator (`admin@manamart.in` / `password123`)**:
-   - Platform GMV, total orders, commission revenue, and active merchant counters.
-   - Merchant Verification Queue: inspect submitted FSSAI certificates, GSTIN, and trade licenses.
-   - Rider Credential Queue: validate driving licenses and vehicle insurance.
-   - Platform Orders supervisor with 1-click customer dispute refund processing.
+### 5. Haversine Geo-Spatial Dispatch Engine (`haversine.js`)
+* High-precision spherical distance routing between customer coordinates, merchant locations, and active delivery partners.
+* Dynamically computes delivery fee tiers and ETA countdowns (15 min SLA for $<1.5\text{ km}$, 25 min for $<4\text{ km}$).
 
 ---
 
-## 🚀 Getting Started
+## 🔄 Robust Order State Machine & Cancellation Engine
+
+```mermaid
+flowchart LR
+    PLACED[PLACED] -->|Merchant Accepts| ACCEPTED[ACCEPTED]
+    ACCEPTED -->|Kitchen Starts Cooking| PREPARING[PREPARING]
+    PREPARING -->|Packed & Bagged| READY[READY_FOR_PICKUP]
+    READY -->|Rider Dispatches| OUT[OUT_FOR_DELIVERY]
+    OUT -->|4-Digit Hand-off OTP Verified| DELIVERED[DELIVERED]
+    
+    PLACED -->|1-Click Full Refund| CANCELLED[CANCELLED]
+    ACCEPTED -->|Food Waste Policy Warning| CANCELLED
+    PREPARING -->|Merchant Penalty Review| CANCELLED
+```
+
+### Cancellation Policies:
+* **`PLACED`**: Customer or Merchant can cancel with 1-click for an instant 100% refund.
+* **`PREPARING` and beyond**: Cancellation warning displayed explaining food waste compensation policy; merchant is compensated for prepared items.
+* **`OUT_FOR_DELIVERY`**: Customer cancellation is locked on client; triggers direct "Report Issue / Call Support" arbitration workflow.
+* **Real-Time Synchronization**: All cancellations and transitions broadcast instantly to Merchant, Rider, and Customer via Socket.IO rooms.
+
+### Two-Tier Post-Delivery Review Flow:
+Once an order reaches **`DELIVERED`**, the customer view unlocks a split 2-tier review modal:
+1. **Store & Product Quality**: 1–5 stars, tag chips (*"Fresh"*, *"Well Packaged"*, *"Wrong Item"*), and textual review.
+2. **Delivery Partner Experience**: 1–5 stars, delivery behavior feedback, and optional UPI rider tip.
+3. **Auto-Dispute Triage**: Any rating $\le 2$ stars automatically dispatches an escalation ticket to `/admin/disputes`.
+
+---
+
+## 🔐 Authentication, Route Guards & Security Hardening
+
+* **Strict Role Barriers (`ProtectedRoute.jsx`)**: Non-customer portals strictly reject unauthorized cross-role access. Unauthenticated users are redirected to `/login`, while unauthorized roles are redirected to their designated dashboard.
+* **Unified Identity Portal (`LoginPage.jsx`)**: Clean 4-role selection deck, pre-filled demonstration accounts, live password visibility toggling, and 6-digit live OTP security node (`482915`).
+* **Non-Public Admin Architecture**:
+  - NO public admin registration URL exists.
+  - Initial Super Admin is seeded via backend CLI:
+    ```bash
+    npm run create-admin -- --email admin@manamart.in --password StrongPassword123! --name "Admin Chief"
+    ```
+  - Subsequent admins can only register via expiring signed JWT invite links generated in `/admin/team` and accepted at `/admin/accept-invite?token=...`.
+
+---
+
+## ☁️ Cloud Deployment Resilience & MongoDB Atlas Connectivity
+
+The backend database connector ([`server/src/config/db.js`](file:///c:/Users/jyosh/ManaMart/server/src/config/db.js)) is engineered for cloud hosting environments (Render, Railway, Heroku, Docker):
+
+1. **Immediate Port Binding**: `server.listen(PORT)` starts synchronously before database checks, preventing cloud hosting health-check timeouts and container restart loops.
+2. **Cloud Detection**: Inspects `process.env.RENDER`, `process.env.NODE_ENV`, and checks multiple environment variable names (`MONGODB_URI`, `MONGODB_ATLAS_URI`, `MONGO_URL`, `DATABASE_URL`).
+3. **Safe Hybrid Standalone Fallback**: If running on Render before an Atlas URI is configured, or if credentials fail authentication, the server **never crashes**. It automatically enables the in-memory fallback store, logs clear setup instructions, and keeps the service **100% online**.
+4. **Resilient Health Check (`/api/health`)**: Always returns HTTP `200 OK` with database status metadata so cloud load balancers recognize the deployment as healthy.
+
+---
+
+## 🛠️ Technology Stack Breakdown
+
+| Category | Technologies & Frameworks |
+| :--- | :--- |
+| **Frontend Framework** | **React 18.2** (Single Page Application, Vite 5.4 build toolchain) |
+| **Styling & Design** | **Tailwind CSS v3.4**, **PostCSS**, **Lucide React** (iconography), **Framer Motion** |
+| **State & Localization** | React Context API (`AuthContext`, `CartContext`, `LocationContext`, `ThemeContext`), **i18next** (English & Telugu bilingual dictionary) |
+| **Backend Framework** | **Node.js** (v18–v24, ES Modules), **Express.js v4**, RESTful API architecture |
+| **Databases** | **MongoDB Atlas** (Cloud ReplicaSet) + **Mongoose ODM v8** with GeoJSON `2dsphere` spatial indexing + In-memory standalone store |
+| **Real-Time WebSockets** | **Socket.IO** (bi-directional events for order status, kitchen alerts, and live rider GPS coordinates) |
+| **Audio Synthesizer** | **Web Audio API** (native hardware-free dual-tone oscillators) |
+| **Security & Auth** | **JWT** (`jsonwebtoken`), **bcryptjs**, OTP Security Node, signed administrative invitation tokens |
+| **Scheduled Tasks** | **node-cron** (automated recurring shopping list engine) |
+
+---
+
+## 📂 Project Directory Structure
+
+```text
+ManaMart/
+├── client/
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── admin/AdminPortalLayout.jsx         # Isolated Admin Governance Shell
+│   │   │   ├── merchant/MerchantPortalLayout.jsx   # Isolated Merchant Shell & Kitchen Bell
+│   │   │   ├── rider/RiderPortalLayout.jsx         # Isolated Delivery Hero Shell & Telemetry
+│   │   │   ├── Navbar.jsx                          # Customer Header (Desktop)
+│   │   │   ├── BottomNav.jsx                       # Customer 5-Tab Dock (Mobile)
+│   │   │   ├── CartDrawer.jsx                      # Slide-out Cart with Multi-Item Stepper
+│   │   │   ├── LiveGpsRadarMap.jsx                 # Vector Bezier Turn-by-Turn GPS Map
+│   │   │   ├── ManaAIScout.jsx                     # AI Hyperlocal GPS Neighborhood Scout
+│   │   │   ├── TableReservationModal.jsx           # Dine-In Booking with Table Selector
+│   │   │   ├── VernacularVoiceModal.jsx            # Bilingual Telugu/English Voice Ordering
+│   │   │   ├── MerchantBulkImporterModal.jsx       # CSV/Excel Catalog Batch Ingestor
+│   │   │   └── ProtectedRoute.jsx                  # Strict Role & Compliance Route Barrier
+│   │   ├── context/
+│   │   │   ├── AuthContext.jsx                     # Sessions, Profiles & OTP State
+│   │   │   ├── CartContext.jsx                     # Multi-Store Cart & Checkout Staging
+│   │   │   ├── LocationContext.jsx                 # GPS Tracking & Neighborhood Selection
+│   │   │   └── ThemeContext.jsx                    # Dark / Light Theme Switching
+│   │   ├── locales/
+│   │   │   ├── en.json                             # English Language Dictionary
+│   │   │   ├── te.json                             # Telugu (తెలుగు) Language Dictionary
+│   │   │   └── i18n.js                             # i18next Configuration
+│   │   ├── pages/
+│   │   │   ├── auth/LoginPage.jsx                  # Unified 4-Role Identity & OTP Portal
+│   │   │   ├── auth/SignupPage.jsx                 # Customer Registration Form
+│   │   │   ├── customer/HomePage.jsx               # Hyperlocal Showcase & Category Grids
+│   │   │   ├── customer/MerchantDetailsPage.jsx    # Store Catalog, Add-to-Cart & Reviews
+│   │   │   ├── customer/OrderTrackingPage.jsx      # Order State Machine & Review Card
+│   │   │   ├── customer/RecurringListsPage.jsx     # Automated Monthly Subscription Builder
+│   │   │   ├── merchant/MerchantDashboardView.jsx  # Live KOT Kitchen Stream & Story Publisher
+│   │   │   ├── merchant/MerchantMenuView.jsx       # Catalog Management & Stock Toggles
+│   │   │   ├── merchant/MerchantFinanceView.jsx    # GMV Ledger & Settlement Requests
+│   │   │   ├── rider/RiderDashboardView.jsx        # Online/Offline Console & Dispatch Queue
+│   │   │   ├── rider/RiderActiveTripView.jsx       # Navigation Trigger & 4-Cell Delivery OTP
+│   │   │   ├── rider/RiderEarningsView.jsx         # Daily Earnings & UPI Payout Summary
+│   │   │   ├── admin/AdminVerificationsView.jsx    # Merchant FSSAI & Rider License Auditing
+│   │   │   ├── admin/AdminDisputesView.jsx         # Review Arbitration Queue (<= 2 stars)
+│   │   │   └── admin/AdminTeamView.jsx             # Admin Management & Signed JWT Invites
+│   │   ├── services/
+│   │   │   ├── api.js                              # Axios HTTP Client with Interceptors
+│   │   │   ├── socket.js                           # Socket.IO Client Singleton
+│   │   │   └── soundService.js                     # Web Audio API Synthesizer Engine
+│   │   ├── utils/pincodeLookup.js                  # Instant Pincode & Locality Dictionary
+│   │   ├── App.jsx                                 # Master Router & Portal Decoupling
+│   │   ├── index.css                               # Tailwind Directives & Radar Keyframes
+│   │   └── main.jsx                                # React 18 Entrypoint
+│   ├── tailwind.config.js                          # Forest Jade & Saffron Color System
+│   └── vite.config.js                              # Vite Bundler Configuration
+├── server/
+│   ├── src/
+│   │   ├── config/
+│   │   │   ├── db.js                               # Resilient MongoDB Atlas / Compass Connector
+│   │   │   └── jwt.js                              # Signed Token Generation & Verification
+│   │   ├── controllers/
+│   │   │   ├── authController.js                   # Login, OTP Dispatch & Profile Routing
+│   │   │   ├── orderController.js                  # State Machine, Cancellation & Review Logic
+│   │   │   ├── merchantController.js               # KOT Stream, Menu CRUD & Story Posts
+│   │   │   ├── riderController.js                  # Duty Toggle, Delivery Assignment & OTP
+│   │   │   ├── adminController.js                  # KYC Approval Pipelines & Dispute Triage
+│   │   │   └── discoveryController.js              # Haversine Proximity Store Discovery
+│   │   ├── models/
+│   │   │   ├── Order.js                            # Order, Items, Refund & Review Schema
+│   │   │   ├── Store.js                            # Merchant Business & FSSAI Profile Schema
+│   │   │   ├── User.js                             # Multi-Role User Profile Schema
+│   │   │   ├── Product.js                          # Catalog Item & Category Schema
+│   │   │   └── Review.js                           # Two-Tier Store & Rider Rating Schema
+│   │   ├── routes/                                 # Modular Express Routers (/api/v1/...)
+│   │   ├── sockets/socketHandler.js                # Real-time WebSocket Event Dispatcher
+│   │   ├── jobs/recurringScheduler.js              # Cron Subscription Shopping Agent
+│   │   ├── utils/
+│   │   │   ├── haversine.js                        # Spherical Distance Geo Calculations
+│   │   │   ├── otpGenerator.js                     # Secure 6-Digit Verification Code Generator
+│   │   │   ├── mockDbStore.js                      # High-Fidelity In-Memory Fallback Dataset
+│   │   │   └── seedData.js                         # Database Seeder for Regional Stores
+│   │   └── app.js                                  # Express Middleware & Static Dist Server
+│   ├── server.js                                   # HTTP & Socket.IO Listener Entrypoint
+│   └── .env                                        # Environment Variables
+├── scripts/create-admin.js                         # CLI Script for Secure Admin Seeding
+├── server.js                                       # Root Entrypoint for Render / Cloud Deploys
+└── package.json                                    # Monorepo Build & Start Scripts
+```
+
+---
+
+## 🚀 Quick Start & Local Setup
 
 ### Prerequisites
-- Node.js v18+ (tested on Node v20 / v24)
-- npm v9+
-- *(Optional)* Local MongoDB instance running on `127.0.0.1:27017`
+* **Node.js** v18+ (tested on Node v20 / v24)
+* **npm** v9+
+* *(Optional)* MongoDB Atlas account or local MongoDB Compass instance
 
 ### 1. Clone & Install Dependencies
 ```bash
 git clone https://github.com/jyoshnapramodat-crypto/ManaMart.git
 cd ManaMart
 
-# Install root, backend, and frontend dependencies in one command
+# Install root, backend, and frontend packages in a single command
 npm run install:all
 ```
 
 ### 2. Environment Configuration
-The project is pre-configured with zero-friction development defaults. You can review or adjust settings in `server/.env`:
+Create or configure `server/.env` (or pass environment variables directly in your cloud dashboard):
 ```env
 PORT=5050
 NODE_ENV=development
 CLIENT_URL=http://localhost:5173
-MONGODB_URI=mongodb://127.0.0.1:27017/localloop_manamart
+
+# MongoDB Atlas (mongodb+srv://) or local MongoDB Compass
+MONGODB_URI=mongodb+srv://<username>:<password>@cluster0.xxxxx.mongodb.net/localloop_manamart?retryWrites=true&w=majority
+
+# JWT Authentication
 JWT_SECRET=super_secret_jwt_key_localloop_2026_dev
+JWT_EXPIRES_IN=7d
+REFRESH_TOKEN_SECRET=super_secret_refresh_jwt_key_localloop_2026_dev
+REFRESH_TOKEN_EXPIRES_IN=30d
 ```
 
-### 3. Seed MongoDB Sample Data (Optional)
-If you have a local MongoDB daemon running, seed verified sample stores, Telugu products, reservations, and orders:
+### 3. Seed Demonstration Data (Optional)
 ```bash
 npm run seed --prefix server
 ```
 
 ### 4. Run Development Servers
-Start both the Express backend API and Vite frontend concurrently:
 ```bash
+# Starts Express REST API + Socket.IO and Vite React frontend concurrently
 npm run dev
 ```
 
-- **Frontend Application**: `http://localhost:5173`
-- **Backend REST API**: `http://localhost:5050/api/v1`
-- **Socket.IO Engine**: `http://localhost:5050`
-
-Alternatively, run each service in separate terminals:
-```bash
-# Terminal 1: Backend
-npm run server
-
-# Terminal 2: Frontend
-npm run client
-```
+* **Frontend Application**: `http://localhost:5173`
+* **Backend REST API**: `http://localhost:5050/api/v1`
+* **Health Check & DB Status**: `http://localhost:5050/api/health`
 
 ### 5. Production Build
 ```bash
 npm run build
+npm start
 ```
 
 ---
 
-## 🧪 Testing Workflows Step-by-Step
+## 🧪 Testing Multi-Role Workflows
 
-1. **Vernacular Voice Ordering**:
-   - Tap the **Mic icon** on the search bar (in the top navbar or on `/search`).
-   - Switch language between **Telugu (తెలుగు)** and **English (India)**.
-   - Speak naturally (e.g., *"రెండు చికెన్ దమ్ బిర్యానీ"*) or click any **1-Tap Test Prompt**.
-   - Watch the AI recognize the dish and quantity, play a synthesized chime, and add it directly to your cart.
+Visit `/login` and test each tailored experience directly:
 
-2. **Dine-In Table Reservation & Dev Fake Mailbox**:
-   - Click **Book Restaurant Table** on the secondary ribbon or homepage.
-   - *(If not logged in, you'll be smoothly prompted to sign in via 1-click test customer).*
-   - Select restaurant, date, slot, party size (1–10), and table booth (`T-04`).
-   - Submit guest info -> A 6-digit OTP is generated.
-   - Open the **Dev Fake Mailbox** drawer at the bottom-right of the screen.
-   - Click **"Auto-Fill OTP"** -> Confirm reservation.
-   - Enjoy the confetti celebration and view your digital entry QR pass under *My Dine-In Passes*.
-
-3. **Live GPS Radar Order Tracking**:
-   - Place an order from *Swagath Grand Authentic Kitchen*.
-   - On the order tracking screen (`/orders/:id`), view the **Live Turn-by-Turn GPS Radar**.
-   - Toggle between **Dark Street** and **Satellite** views, inspect the live speedometer (`28 km/h`), and track the moving scooter pin.
-
-4. **Merchant Bulk CSV/Excel Catalog Importer**:
-   - Switch role to **Restaurant Owner** via the top toolbar or login page.
-   - Go to the **Menu & Inventory** tab and click **"Bulk Import CSV / Excel"**.
-   - Click **"Download Sample Template"** to get `ManaMart_Catalog_Template.csv`.
-   - Upload the CSV to see real-time table validation and batch-insert items into your catalog.
+1. **Customer Experience**:
+   - Select **Customer** $\rightarrow$ Click **Confirm & Enter Dashboard** (or use OTP `482915`).
+   - Try the **ManaAI GPS Scout** or **Telugu Voice Ordering** (*"రెండు బిర్యానీలు"*).
+   - Reserve a restaurant table or place an order to test live GPS radar tracking and cancellation refunds.
+2. **Merchant Kitchen Experience**:
+   - Select **Merchant / Shop** $\rightarrow$ Click **Confirm & Enter Dashboard**.
+   - Manage incoming orders on the live KOT board, test the acoustic kitchen alert, and publish a new story post with live customer preview.
+3. **Delivery Hero Experience**:
+   - Select **Delivery Partner** $\rightarrow$ Click **Confirm & Enter Dashboard**.
+   - Toggle **Online / Offline Duty**, inspect vehicle battery telemetry (`86%`), view nearby dispatch tasks, and complete the active trip via 4-cell PIN OTP verification.
+4. **Administrator Experience**:
+   - Select **Administrator** $\rightarrow$ Enter governance console.
+   - Audit submitted merchant FSSAI certificates, review rider driving licenses, triage dispute complaints ($\le 2$ stars), and generate expiring signed admin invite links.
 
 ---
 
-## 📂 Project Directory Structure
-
-```
-ManaMart/
-├── client/
-│   ├── src/
-│   │   ├── components/       # Navbar, BottomNav, LiveGpsRadarMap, TableReservationModal,
-│   │   │                     # VernacularVoiceModal, MerchantBulkImporterModal, DevMailboxDrawer
-│   │   ├── context/          # AuthContext, LocationContext, CartContext
-│   │   ├── locales/          # English (en.json) & Telugu (te.json) translations
-│   │   ├── pages/
-│   │   │   ├── auth/         # LoginPage (with 1-click test accounts), SignupPage
-│   │   │   ├── customer/     # HomePage, SearchPage, ReservationsPage, OrderTrackingPage,
-│   │   │   │                 # SocialFeedPage, RecurringListsPage, NotificationCenterPage
-│   │   │   ├── merchant/     # MerchantDashboardPage (Orders, Menu, Bulk CSV, Reservations)
-│   │   │   ├── rider/        # RiderDashboardPage (Radar, Tasks, OTP Verify, Wallet)
-│   │   │   └── admin/        # AdminDashboardPage (GMV, Verification Queues, Orders)
-│   │   ├── services/         # api.js, socket.js (HMR singleton), soundService.js, notificationService.js
-│   │   ├── App.jsx           # Protected routes, providers & layout
-│   │   └── main.jsx          # Entrypoint
-│   ├── tailwind.config.js    # Forest Jade & Saffron Marigold design system
-│   └── vite.config.js        # Vite config & API/Socket proxying
-├── server/
-│   ├── src/
-│   │   ├── config/           # Database (MongoDB) & JWT configuration
-│   │   ├── controllers/      # Auth, Discovery, Order, Follow, Recurring, Merchant, Rider, Admin
-│   │   ├── models/           # Mongoose schemas: Store, Product, Reservation, Order, User
-│   │   ├── routes/           # RESTful modular routers (/api/v1/...)
-│   │   ├── sockets/          # Socket.IO event handlers
-│   │   ├── jobs/             # Recurring monthly shopping scheduler
-│   │   └── utils/            # seedData.js, mockDbStore.js, sound & OTP utilities
-│   └── server.js             # HTTP & Socket.IO server startup
-├── docs/
-│   ├── architecture.md       # High-level architecture documentation
-│   ├── database-design.md    # MongoDB collections & Mongoose schemas
-│   └── api-documentation.md  # Detailed RESTful endpoint specification
-└── package.json
-```
-
----
-
-## 🇮🇳 Telugu Regional Tagline
+## 🇮🇳 Regional Identity & Tagline
 > **మన ఊరు. మన మార్కెట్. మీ పరిసరాలు, మీ ఇంటికే.**  
 > *Mana Ooru. Mana Market. Your Entire Neighborhood, Delivered.*
